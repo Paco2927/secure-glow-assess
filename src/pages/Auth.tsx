@@ -13,8 +13,11 @@ import { z } from "zod";
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Correo electrónico inválido" }),
   password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
-  name: z.string().trim().min(2, { message: "El nombre debe tener al menos 2 caracteres" }).optional(),
-  dni: z.string().trim().optional(),
+  name: z.string().trim().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
+  dni: z.string().trim()
+    .min(7, { message: "El DNI debe tener al menos 7 dígitos" })
+    .max(10, { message: "El DNI no puede tener más de 10 caracteres" })
+    .regex(/^\d+$/, { message: "El DNI debe contener solo números" }),
 });
 
 const Auth = () => {
@@ -97,26 +100,26 @@ const Auth = () => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            name: validatedData.name || "",
-            dni: signupData.dni || "",
+            name: validatedData.name,
+            dni: validatedData.dni,
           },
         },
       });
 
       if (error) {
+        let errorMessage = error.message;
+        
         if (error.message.includes("User already registered")) {
-          toast({
-            title: "Usuario existente",
-            description: "Este correo ya está registrado. Intenta iniciar sesión.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
+          errorMessage = "Este correo ya está registrado. Intenta iniciar sesión.";
+        } else if (error.message.includes("duplicate key") || error.message.includes("profiles_dni_unique")) {
+          errorMessage = "Este DNI ya está registrado. Por favor, use otro DNI o inicie sesión.";
         }
+        
+        toast({
+          title: "Error al registrarse",
+          description: errorMessage,
+          variant: "destructive",
+        });
         return;
       }
 
@@ -210,14 +213,16 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-dni">DNI</Label>
+                    <Label htmlFor="signup-dni">DNI *</Label>
                     <Input
                       id="signup-dni"
                       type="text"
                       placeholder="12345678"
                       value={signupData.dni}
                       onChange={(e) => setSignupData({ ...signupData, dni: e.target.value })}
+                      required
                     />
+                    <p className="text-xs text-muted-foreground">Solo números, 7-10 dígitos</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Correo Electrónico</Label>
