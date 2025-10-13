@@ -87,7 +87,7 @@ const Dashboard = () => {
         </div>
         <div className="relative container mx-auto px-4 py-20 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Evalúa tu Madurez d <span className="text-primary">Ciberseguridad</span>
+            Evalúa tu Madurez de <span className="text-primary">Ciberseguridad</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Realiza evaluaciones completas basadas en los estándares ISO 27001 y NIST Cybersecurity Framework
