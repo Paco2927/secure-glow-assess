@@ -14,7 +14,263 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assessment_results: {
+        Row: {
+          assessment_id: string | null
+          control_id: string | null
+          evidence: string | null
+          id: string
+          improvement_action: string | null
+          maturity_level_id: string | null
+        }
+        Insert: {
+          assessment_id?: string | null
+          control_id?: string | null
+          evidence?: string | null
+          id?: string
+          improvement_action?: string | null
+          maturity_level_id?: string | null
+        }
+        Update: {
+          assessment_id?: string | null
+          control_id?: string | null
+          evidence?: string | null
+          id?: string
+          improvement_action?: string | null
+          maturity_level_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_results_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_control_id_fkey"
+            columns: ["control_id"]
+            isOneToOne: false
+            referencedRelation: "controls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_maturity_level_id_fkey"
+            columns: ["maturity_level_id"]
+            isOneToOne: false
+            referencedRelation: "maturity_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessments: {
+        Row: {
+          assessment_date: string | null
+          assessor_name: string | null
+          comments: string | null
+          id: string
+          organization_id: string | null
+          standard: string
+          user_id: string
+        }
+        Insert: {
+          assessment_date?: string | null
+          assessor_name?: string | null
+          comments?: string | null
+          id?: string
+          organization_id?: string | null
+          standard: string
+          user_id: string
+        }
+        Update: {
+          assessment_date?: string | null
+          assessor_name?: string | null
+          comments?: string | null
+          id?: string
+          organization_id?: string | null
+          standard?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      controls: {
+        Row: {
+          code: string
+          description: string | null
+          domain_id: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          domain_id?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          domain_id?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "controls_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domains: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+          standard: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name: string
+          standard: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+          standard?: string
+        }
+        Relationships: []
+      }
+      improvement_plans: {
+        Row: {
+          action_description: string
+          control_id: string | null
+          id: string
+          organization_id: string | null
+          responsible: string | null
+          status: Database["public"]["Enums"]["plan_status"] | null
+          target_date: string | null
+        }
+        Insert: {
+          action_description: string
+          control_id?: string | null
+          id?: string
+          organization_id?: string | null
+          responsible?: string | null
+          status?: Database["public"]["Enums"]["plan_status"] | null
+          target_date?: string | null
+        }
+        Update: {
+          action_description?: string
+          control_id?: string | null
+          id?: string
+          organization_id?: string | null
+          responsible?: string | null
+          status?: Database["public"]["Enums"]["plan_status"] | null
+          target_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "improvement_plans_control_id_fkey"
+            columns: ["control_id"]
+            isOneToOne: false
+            referencedRelation: "controls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "improvement_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maturity_levels: {
+        Row: {
+          description: string | null
+          id: string
+          level: number
+          name: Database["public"]["Enums"]["maturity_level_name"]
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          level: number
+          name: Database["public"]["Enums"]["maturity_level_name"]
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          level?: number
+          name?: Database["public"]["Enums"]["maturity_level_name"]
+        }
+        Relationships: []
+      }
+      organizations: {
+        Row: {
+          contact_email: string | null
+          country: string | null
+          created_at: string | null
+          id: string
+          name: string
+          sector: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          sector?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          sector?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          dni: string | null
+          email: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          dni?: string | null
+          email: string
+          id: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          dni?: string | null
+          email?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +279,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      maturity_level_name:
+        | "Inicial"
+        | "Repetible"
+        | "Definido"
+        | "Gestionado"
+        | "Optimizado"
+      plan_status: "Pendiente" | "En Progreso" | "Completado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +412,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      maturity_level_name: [
+        "Inicial",
+        "Repetible",
+        "Definido",
+        "Gestionado",
+        "Optimizado",
+      ],
+      plan_status: ["Pendiente", "En Progreso", "Completado"],
+    },
   },
 } as const
