@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Shield } from "lucide-react";
 
 const dniSchema = z.object({
   dni: z.string().trim()
@@ -18,39 +19,55 @@ const dniSchema = z.object({
 const CompleteProfile = () => {
   const [dni, setDni] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is logged in
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+    checkProfile();
+  }, []);
+
+  const checkProfile = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("dni")
+      .eq("id", session.user.id)
+      .single();
+
+    // If user already has DNI, redirect to dashboard
+    if (profile?.dni) {
+      navigate("/");
+      return;
+    }
+
+    setChecking(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Validate DNI
       const validatedData = dniSchema.parse({ dni });
-
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("No user found");
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/auth");
+        return;
       }
 
-      // Update profile with DNI
       const { error } = await supabase
         .from("profiles")
         .update({ dni: validatedData.dni })
-        .eq("id", user.id);
+        .eq("id", session.user.id);
 
       if (error) {
         if (error.message.includes("duplicate key") || error.message.includes("profiles_dni_unique")) {
@@ -71,7 +88,7 @@ const CompleteProfile = () => {
 
       toast({
         title: "¡Perfil completado!",
-        description: "Tu DNI ha sido registrado exitosamente.",
+        description: "Tu perfil ha sido actualizado exitosamente.",
       });
 
       navigate("/");
@@ -82,26 +99,34 @@ const CompleteProfile = () => {
           description: error.errors[0].message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Error",
-          description: "Ocurrió un error al actualizar el perfil",
-          variant: "destructive",
-        });
       }
     } finally {
       setLoading(false);
     }
   };
 
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Verificando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Completa tu Perfil
-          </CardTitle>
-          <CardDescription className="text-center">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl">Completa tu perfil</CardTitle>
+          <CardDescription>
             Para continuar, necesitamos que ingreses tu DNI
           </CardDescription>
         </CardHeader>
@@ -118,12 +143,10 @@ const CompleteProfile = () => {
                 required
                 disabled={loading}
               />
-              <p className="text-xs text-muted-foreground">
-                Solo números, 7-10 dígitos
-              </p>
+              <p className="text-xs text-muted-foreground">Solo números, 7-10 dígitos</p>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Guardando..." : "Guardar DNI"}
+              {loading ? "Guardando..." : "Continuar"}
             </Button>
           </form>
         </CardContent>
