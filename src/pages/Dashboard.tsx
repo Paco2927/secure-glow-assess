@@ -14,9 +14,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -24,27 +22,25 @@ const Dashboard = () => {
       setUser(session.user);
 
       // Fetch user profile
-      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
-
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+      
       setProfile(profileData);
-
-      // Check if user needs to complete profile (no DNI)
-      if (profileData && !profileData.dni) {
-        navigate("/complete-profile");
-        return;
-      }
     };
 
     checkUser();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/auth");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_OUT") {
+          navigate("/auth");
+        }
+        setUser(session?.user ?? null);
       }
-      setUser(session?.user ?? null);
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -105,16 +101,15 @@ const Dashboard = () => {
       <section className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {/* ISO 27001 Card */}
-          <Card
-            className="shadow-medium hover:shadow-strong transition-smooth hover:scale-105 cursor-pointer gradient-card"
-            onClick={() => navigate("/assessment/iso27001")}
-          >
+          <Card className="shadow-medium hover:shadow-strong transition-smooth hover:scale-105 cursor-pointer gradient-card" onClick={() => navigate("/assessment/iso27001")}>
             <CardHeader>
               <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <FileCheck className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-2xl">ISO 27001</CardTitle>
-              <CardDescription className="text-base">Evaluación de Seguridad de la Información</CardDescription>
+              <CardDescription className="text-base">
+                Evaluación de Seguridad de la Información
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
@@ -141,16 +136,15 @@ const Dashboard = () => {
           </Card>
 
           {/* NIST Card */}
-          <Card
-            className="shadow-medium hover:shadow-strong transition-smooth hover:scale-105 cursor-pointer gradient-card"
-            onClick={() => navigate("/assessment/nist")}
-          >
+          <Card className="shadow-medium hover:shadow-strong transition-smooth hover:scale-105 cursor-pointer gradient-card" onClick={() => navigate("/assessment/nist")}>
             <CardHeader>
               <div className="w-16 h-16 rounded-lg bg-secondary/20 flex items-center justify-center mb-4">
                 <BarChart3 className="w-8 h-8 text-secondary" />
               </div>
               <CardTitle className="text-2xl">NIST CSF</CardTitle>
-              <CardDescription className="text-base">Cybersecurity Framework</CardDescription>
+              <CardDescription className="text-base">
+                Cybersecurity Framework
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
