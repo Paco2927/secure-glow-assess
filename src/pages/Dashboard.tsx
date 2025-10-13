@@ -27,6 +27,12 @@ const Dashboard = () => {
       const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
 
       setProfile(profileData);
+
+      // Check if user needs to complete profile (no DNI)
+      if (profileData && !profileData.dni) {
+        navigate("/complete-profile");
+        return;
+      }
     };
 
     checkUser();

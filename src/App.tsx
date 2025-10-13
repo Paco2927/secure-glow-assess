@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
+import CompleteProfile from "./pages/CompleteProfile";
 import AssessmentISO from "./pages/AssessmentISO";
 import AssessmentNIST from "./pages/AssessmentNIST";
 import NotFound from "./pages/NotFound";
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/assessment/iso27001" element={<AssessmentISO />} />
           <Route path="/assessment/nist" element={<AssessmentNIST />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
