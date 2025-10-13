@@ -26,7 +26,9 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
         navigate("/");
       }
@@ -40,7 +42,7 @@ const Auth = () => {
 
     try {
       const validatedData = authSchema.parse(loginData);
-      
+
       const { error } = await supabase.auth.signInWithPassword({
         email: validatedData.email,
         password: validatedData.password,
@@ -155,9 +157,7 @@ const Auth = () => {
               <Lock className="w-5 h-5 text-primary" />
               Acceso al Sistema
             </CardTitle>
-            <CardDescription>
-              Inicia sesión o crea una cuenta para comenzar tus evaluaciones
-            </CardDescription>
+            <CardDescription>Inicia sesión o crea una cuenta para comenzar tus evaluaciones</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
@@ -210,7 +210,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-dni">DNI (Opcional)</Label>
+                    <Label htmlFor="signup-dni">DNI</Label>
                     <Input
                       id="signup-dni"
                       type="text"
