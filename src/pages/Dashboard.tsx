@@ -11,6 +11,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -29,6 +30,13 @@ const Dashboard = () => {
         .single();
       
       setProfile(profileData);
+
+      // Check admin status
+      const { data: adminCheck } = await supabase.rpc('has_role', {
+        _user_id: session.user.id,
+        _role: 'admin'
+      });
+      setIsAdmin(adminCheck || false);
     };
 
     checkUser();
@@ -75,6 +83,12 @@ const Dashboard = () => {
               <p className="text-sm font-medium">{profile?.name || user.email}</p>
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
+            {isAdmin && (
+              <Button variant="secondary" size="sm" onClick={() => navigate("/admin")}>
+                <Shield className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            )}
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
             </Button>
