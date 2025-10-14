@@ -3,9 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Calendar } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Assessment {
   id: string;
@@ -25,6 +35,8 @@ const Reportes = () => {
   const [user, setUser] = useState<any>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [assessmentToDelete, setAssessmentToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -121,6 +133,53 @@ const Reportes = () => {
     if (score <= 50) return "Crítico";
     if (score <= 75) return "Mejorable";
     return "Bueno";
+  };
+
+  const handleDeleteClick = (assessmentId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAssessmentToDelete(assessmentId);
+    setDeleteDialogOpen(true);
+  };
+
+  const deleteAssessment = async () => {
+    if (!assessmentToDelete) return;
+
+    try {
+      // First delete assessment results
+      const { error: resultsError } = await supabase
+        .from("assessment_results")
+        .delete()
+        .eq("assessment_id", assessmentToDelete);
+
+      if (resultsError) throw resultsError;
+
+      // Then delete the assessment
+      const { error: assessmentError } = await supabase
+        .from("assessments")
+        .delete()
+        .eq("id", assessmentToDelete);
+
+      if (assessmentError) throw assessmentError;
+
+      toast({
+        title: "Evaluación eliminada",
+        description: "La evaluación ha sido eliminada exitosamente",
+      });
+
+      // Refresh the list
+      if (user) {
+        loadAssessments(user.id);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setAssessmentToDelete(null);
+    }
   };
 
   if (loading) {
@@ -239,9 +298,19 @@ const Reportes = () => {
                     <CardContent>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</p>
-                        <Button variant="outline" size="sm">
-                          Ver Detalles
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            Ver Detalles
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => handleDeleteClick(assessment.id, e)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -251,6 +320,23 @@ const Reportes = () => {
           )}
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar evaluación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente la evaluación y todos sus resultados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteAssessment} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
