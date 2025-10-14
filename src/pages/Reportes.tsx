@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Calendar, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Calendar } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
 
@@ -94,45 +94,6 @@ const Reportes = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  // FUNCIÓN PARA ELIMINAR REPORTES
-  const handleDeleteAssessment = async (assessmentId: string) => {
-    if (!confirm("¿Estás seguro de eliminar este reporte? Esta acción no se puede deshacer.")) {
-      return;
-    }
-
-    try {
-      // Primero eliminar los resultados asociados (si existen)
-      const { error: resultsError } = await supabase
-        .from("assessment_results")
-        .delete()
-        .eq("assessment_id", assessmentId);
-
-      if (resultsError) throw resultsError;
-
-      // Luego eliminar la evaluación
-      const { error } = await supabase.from("assessments").delete().eq("id", assessmentId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Reporte eliminado",
-        description: "El reporte se ha eliminado correctamente",
-      });
-
-      // Recargar la lista de evaluaciones
-      if (user) {
-        loadAssessments(user.id);
-      }
-    } catch (error: any) {
-      console.error("Error deleting assessment:", error);
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar el reporte",
-        variant: "destructive",
-      });
     }
   };
 
@@ -239,7 +200,11 @@ const Reportes = () => {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold">Evaluaciones Realizadas</h2>
                 {assessments.map((assessment) => (
-                  <Card key={assessment.id} className="shadow-medium hover:shadow-lg transition-shadow">
+                  <Card
+                    key={assessment.id}
+                    className="shadow-medium hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => viewResults(assessment.id)}
+                  >
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -274,22 +239,9 @@ const Reportes = () => {
                     <CardContent>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</p>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => viewResults(assessment.id)}>
-                            Ver Detalles
-                          </Button>
-                          {/* BOTÓN PARA ELIMINAR REPORTE */}
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevenir que se active el click del card
-                              handleDeleteAssessment(assessment.id);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <Button variant="outline" size="sm">
+                          Ver Detalles
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
