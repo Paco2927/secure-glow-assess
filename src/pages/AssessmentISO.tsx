@@ -122,7 +122,7 @@ const AssessmentISO = () => {
         description: "Tu evaluación ISO 27001 se ha guardado exitosamente.",
       });
 
-      navigate("/results");
+      navigate("/reportes");
     } catch (error: any) {
       toast({
         title: "Error al guardar",

@@ -122,7 +122,7 @@ const AssessmentNIST = () => {
         description: "Tu evaluación NIST CSF se ha guardado exitosamente.",
       });
 
-      navigate("/results");
+      navigate("/reportes");
     } catch (error: any) {
       toast({
         title: "Error al guardar",

@@ -9,6 +9,7 @@ import AssessmentISO from "./pages/AssessmentISO";
 import AssessmentNIST from "./pages/AssessmentNIST";
 import Admin from "./pages/Admin";
 import Results from "./pages/Results";
+import Reportes from "./pages/Reportes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ const App = () => (
           <Route path="/assessment/nist" element={<AssessmentNIST />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/results" element={<Results />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/reportes" element={<Reportes />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
