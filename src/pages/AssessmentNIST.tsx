@@ -8,10 +8,15 @@ import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-interface Domain {
+interface Control {
   id: string;
   name: string;
   description: string;
+  code: string;
+  domain_id: string;
+  domains: {
+    name: string;
+  };
 }
 
 interface MaturityLevel {
@@ -24,7 +29,7 @@ interface MaturityLevel {
 const AssessmentNIST = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
-  const [domains, setDomains] = useState<Domain[]>([]);
+  const [controls, setControls] = useState<Control[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<Record<string, string>>({});
   const [evidences, setEvidences] = useState<Record<string, string>>({});
@@ -41,13 +46,20 @@ const AssessmentNIST = () => {
     };
 
     const loadData = async () => {
-      // Load NIST domains
-      const { data: domainsData } = await supabase
-        .from("domains")
-        .select("*")
-        .eq("standard", "NIST");
+      // Load NIST controls with their domains
+      const { data: controlsData } = await supabase
+        .from("controls")
+        .select(`
+          *,
+          domains!inner (
+            name,
+            standard
+          )
+        `)
+        .eq("domains.standard", "NIST")
+        .order("code");
       
-      if (domainsData) setDomains(domainsData);
+      if (controlsData) setControls(controlsData);
 
       // Load maturity levels
       const { data: levelsData } = await supabase
@@ -108,7 +120,7 @@ const AssessmentNIST = () => {
         description: "Tu evaluación NIST CSF se ha guardado exitosamente.",
       });
 
-      navigate("/");
+      navigate("/results");
     } catch (error: any) {
       toast({
         title: "Error al guardar",
@@ -155,16 +167,15 @@ const AssessmentNIST = () => {
             <CardHeader>
               <CardTitle>Instrucciones</CardTitle>
               <CardDescription>
-                Evalúa cada función del NIST Cybersecurity Framework según el nivel de madurez de tu organización
+                Evalúa cada control según la frecuencia de aplicación en tu organización
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-2">
                 {maturityLevels.map((level) => (
                   <div key={level.id} className="flex gap-2">
-                    <span className="font-semibold text-secondary">Nivel {level.level}:</span>
-                    <span className="font-medium">{level.name}</span>
-                    <span className="text-muted-foreground">- {level.description}</span>
+                    <span className="font-semibold text-secondary">{level.name}:</span>
+                    <span className="text-muted-foreground">{level.description}</span>
                   </div>
                 ))}
               </div>
@@ -172,42 +183,49 @@ const AssessmentNIST = () => {
           </Card>
 
           <div className="space-y-6">
-            {domains.map((domain) => (
-              <Card key={domain.id} className="shadow-medium">
+            {controls.map((control) => (
+              <Card key={control.id} className="shadow-medium">
                 <CardHeader>
-                  <CardTitle>{domain.name}</CardTitle>
-                  <CardDescription>{domain.description}</CardDescription>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{control.code} - {control.name}</CardTitle>
+                      <CardDescription className="mt-1">{control.description}</CardDescription>
+                    </div>
+                    <span className="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-md whitespace-nowrap">
+                      {control.domains.name}
+                    </span>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="mb-3 block">Nivel de Madurez</Label>
-                    <div className="grid grid-cols-5 gap-2">
+                    <Label className="mb-3 block">Frecuencia de Aplicación</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                       {maturityLevels.map((level) => (
                         <Button
                           key={level.id}
-                          variant={selectedLevels[domain.id] === level.id ? "secondary" : "outline"}
-                          className="w-full"
+                          variant={selectedLevels[control.id] === level.id ? "secondary" : "outline"}
+                          className="w-full text-xs sm:text-sm"
                           onClick={() =>
-                            setSelectedLevels({ ...selectedLevels, [domain.id]: level.id })
+                            setSelectedLevels({ ...selectedLevels, [control.id]: level.id })
                           }
                         >
-                          {level.level}
+                          {level.name}
                         </Button>
                       ))}
                     </div>
                   </div>
 
-                  {selectedLevels[domain.id] && (
+                  {selectedLevels[control.id] && (
                     <div>
-                      <Label htmlFor={`evidence-${domain.id}`}>
+                      <Label htmlFor={`evidence-${control.id}`}>
                         Evidencia / Comentarios (Opcional)
                       </Label>
                       <Textarea
-                        id={`evidence-${domain.id}`}
-                        placeholder="Describe las evidencias o comentarios sobre esta función..."
-                        value={evidences[domain.id] || ""}
+                        id={`evidence-${control.id}`}
+                        placeholder="Describe las evidencias o comentarios sobre este control..."
+                        value={evidences[control.id] || ""}
                         onChange={(e) =>
-                          setEvidences({ ...evidences, [domain.id]: e.target.value })
+                          setEvidences({ ...evidences, [control.id]: e.target.value })
                         }
                         className="mt-2"
                       />
