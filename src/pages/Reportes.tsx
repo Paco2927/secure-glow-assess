@@ -62,7 +62,15 @@ const Reportes = () => {
 
           let averageScore = 0;
           if (results && results.length > 0) {
-            const total = results.reduce((sum: number, r: any) => sum + r.maturity_levels.level, 0);
+            // Mapear niveles 1-5 a porcentajes 0-100
+            const scoreMap: { [key: number]: number } = {
+              1: 0,    // Nunca = 0%
+              2: 25,   // Casi nunca = 25%
+              3: 50,   // Ocasionalmente = 50%
+              4: 75,   // Casi siempre = 75%
+              5: 100   // Siempre = 100%
+            };
+            const total = results.reduce((sum: number, r: any) => sum + scoreMap[r.maturity_levels.level], 0);
             averageScore = Math.round(total / results.length);
           }
 
