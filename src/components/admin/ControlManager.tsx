@@ -39,7 +39,7 @@ export const ControlManager = () => {
     code: "",
     name: "",
     description: "",
-    domain_id: ""
+    domain_id: "",
   });
 
   useEffect(() => {
@@ -49,15 +49,8 @@ export const ControlManager = () => {
   const fetchData = async () => {
     try {
       const [controlsRes, domainsRes] = await Promise.all([
-        supabase
-          .from('controls')
-          .select('*, domains(name, standard)')
-          .order('code'),
-        supabase
-          .from('domains')
-          .select('*')
-          .order('standard', { ascending: true })
-          .order('name', { ascending: true })
+        supabase.from("controls").select("*, domains(name, standard)").order("code"),
+        supabase.from("domains").select("*").order("standard", { ascending: true }).order("name", { ascending: true }),
       ]);
 
       if (controlsRes.error) throw controlsRes.error;
@@ -70,7 +63,7 @@ export const ControlManager = () => {
       toast({
         title: "Error",
         description: "No se pudieron cargar los controles",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -79,30 +72,25 @@ export const ControlManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingControl) {
-        const { error } = await supabase
-          .from('controls')
-          .update(formData)
-          .eq('id', editingControl.id);
+        const { error } = await supabase.from("controls").update(formData).eq("id", editingControl.id);
 
         if (error) throw error;
 
         toast({
           title: "Control actualizado",
-          description: "El control se ha actualizado correctamente"
+          description: "El control se ha actualizado correctamente",
         });
       } else {
-        const { error } = await supabase
-          .from('controls')
-          .insert(formData);
+        const { error } = await supabase.from("controls").insert(formData);
 
         if (error) throw error;
 
         toast({
           title: "Control creado",
-          description: "El control se ha creado correctamente"
+          description: "El control se ha creado correctamente",
         });
       }
 
@@ -115,7 +103,7 @@ export const ControlManager = () => {
       toast({
         title: "Error",
         description: error.message || "No se pudo guardar el control",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -126,7 +114,7 @@ export const ControlManager = () => {
       code: control.code,
       name: control.name,
       description: control.description,
-      domain_id: control.domain_id
+      domain_id: control.domain_id,
     });
     setIsDialogOpen(true);
   };
@@ -137,16 +125,13 @@ export const ControlManager = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('controls')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("controls").delete().eq("id", id);
 
       if (error) throw error;
 
       toast({
         title: "Control eliminado",
-        description: "El control se ha eliminado correctamente"
+        description: "El control se ha eliminado correctamente",
       });
 
       fetchData();
@@ -155,19 +140,19 @@ export const ControlManager = () => {
       toast({
         title: "Error",
         description: error.message || "No se pudo eliminar el control",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  const filteredControls = controls.filter(control => {
-    const matchesSearch = 
+  const filteredControls = controls.filter((control) => {
+    const matchesSearch =
       control.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       control.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       control.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesDomain = filterDomain === "all" || control.domain_id === filterDomain;
-    
+
     return matchesSearch && matchesDomain;
   });
 
@@ -181,19 +166,19 @@ export const ControlManager = () => {
         <h2 className="text-2xl font-semibold">Gestión de Controles</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => {
-              setEditingControl(null);
-              setFormData({ code: "", name: "", description: "", domain_id: "" });
-            }}>
+            <Button
+              onClick={() => {
+                setEditingControl(null);
+                setFormData({ code: "", name: "", description: "", domain_id: "" });
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Control
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>
-                {editingControl ? "Editar Control" : "Nuevo Control"}
-              </DialogTitle>
+              <DialogTitle>{editingControl ? "Editar Control" : "Nuevo Control"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -247,9 +232,7 @@ export const ControlManager = () => {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit">
-                  {editingControl ? "Actualizar" : "Crear"}
-                </Button>
+                <Button type="submit">{editingControl ? "Actualizar" : "Crear"}</Button>
               </div>
             </form>
           </DialogContent>
@@ -293,15 +276,16 @@ export const ControlManager = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="font-mono text-sm font-semibold">{control.code}</span>
                   <span className="text-sm font-medium">{control.name}</span>
-                  <span className="text-xs bg-muted px-2 py-1 rounded">
-                    {control.domains.name}
-                  </span>
+                  <span className="text-xs bg-muted px-2 py-1 rounded">{control.domains.name}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">{control.description}</p>
               </div>
               <div className="flex gap-2 ml-4">
                 <Button size="sm" variant="outline" onClick={() => handleEdit(control)}>
                   <Pencil className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(control.id)}>
+                  <Trash2 className="h-4 w-4" />
                 </Button>
                 <Button size="sm" variant="destructive" onClick={() => handleDelete(control.id)}>
                   <Trash2 className="h-4 w-4" />
