@@ -51,8 +51,7 @@ const Results = () => {
 
       assessmentData?.forEach((result: any) => {
         const domainName = result.controls.domains.name;
-        const level = result.maturity_levels.level;
-        const percentage = ((level - 1) / 4) * 100; // Convert level 1-5 to 0-100%
+        const percentage = result.maturity_levels.level; // Direct percentage (0, 25, 50, 75, 100)
 
         if (!domainScores[domainName]) {
           domainScores[domainName] = {

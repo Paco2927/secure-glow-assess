@@ -32,8 +32,10 @@ const AssessmentISO = () => {
   const [controls, setControls] = useState<Control[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<Record<string, string>>({});
-  const [evidences, setEvidences] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Check if all controls have been answered
+  const allControlsAnswered = controls.length > 0 && controls.every(control => selectedLevels[control.id]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -75,10 +77,10 @@ const AssessmentISO = () => {
   }, [navigate]);
 
   const handleSubmit = async () => {
-    if (Object.keys(selectedLevels).length === 0) {
+    if (!allControlsAnswered) {
       toast({
-        title: "Selecciona al menos un nivel",
-        description: "Debes evaluar al menos un dominio antes de guardar.",
+        title: "Completa todos los campos",
+        description: "Debes evaluar todos los controles antes de finalizar.",
         variant: "destructive",
       });
       return;
@@ -101,12 +103,12 @@ const AssessmentISO = () => {
 
       if (assessmentError) throw assessmentError;
 
-      // Save assessment results for each domain
-      const results = Object.entries(selectedLevels).map(([domainId, levelId]) => ({
+      // Save assessment results for each control
+      const results = Object.entries(selectedLevels).map(([controlId, levelId]) => ({
         assessment_id: assessment.id,
-        control_id: domainId,
+        control_id: controlId,
         maturity_level_id: levelId,
-        evidence: evidences[domainId] || "",
+        evidence: "",
       }));
 
       const { error: resultsError } = await supabase
@@ -152,9 +154,9 @@ const AssessmentISO = () => {
                 <p className="text-xs text-muted-foreground">Seguridad de la Información</p>
               </div>
             </div>
-            <Button onClick={handleSubmit} disabled={isSubmitting} variant="hero">
+            <Button onClick={handleSubmit} disabled={isSubmitting || !allControlsAnswered} variant="hero">
               <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Guardando..." : "Guardar Evaluación"}
+              {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
             </Button>
           </div>
         </div>
@@ -214,33 +216,27 @@ const AssessmentISO = () => {
                       ))}
                     </div>
                   </div>
-
-                  {selectedLevels[control.id] && (
-                    <div>
-                      <Label htmlFor={`evidence-${control.id}`}>
-                        Evidencia / Comentarios (Opcional)
-                      </Label>
-                      <Textarea
-                        id={`evidence-${control.id}`}
-                        placeholder="Describe las evidencias o comentarios sobre este control..."
-                        value={evidences[control.id] || ""}
-                        onChange={(e) =>
-                          setEvidences({ ...evidences, [control.id]: e.target.value })
-                        }
-                        className="mt-2"
-                      />
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          <div className="mt-8 flex justify-end">
-            <Button onClick={handleSubmit} disabled={isSubmitting} variant="hero" size="lg">
+          <div className="mt-8 flex justify-center">
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isSubmitting || !allControlsAnswered} 
+              variant="hero" 
+              size="lg"
+              className="min-w-[200px]"
+            >
               <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Guardando..." : "Guardar Evaluación"}
+              {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
             </Button>
+            {!allControlsAnswered && (
+              <p className="text-sm text-muted-foreground mt-2 text-center w-full absolute bottom-[-30px]">
+                Completa todos los controles para finalizar
+              </p>
+            )}
           </div>
         </div>
       </div>
