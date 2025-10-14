@@ -204,9 +204,9 @@ const Results = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+            <Button variant="outline" size="sm" onClick={() => navigate("/reportes")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver al Dashboard
+              Volver a reportes
             </Button>
             <h1 className="text-3xl font-bold">Resultados de la Evaluación</h1>
           </div>
