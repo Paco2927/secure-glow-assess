@@ -55,11 +55,11 @@ ALTER TABLE public.maturity_levels ALTER COLUMN name TYPE TEXT;
 
 -- Insert new maturity levels
 INSERT INTO public.maturity_levels (level, name, description) VALUES
-(5, 'Siempre', 'Se cumple el control el 100% del tiempo'),
-(4, 'Casi siempre', 'Se cumple el control el 75% del tiempo'),
-(3, 'Ocasionalmente', 'Se cumple el control el 50% del tiempo'),
-(2, 'Casi nunca', 'Se cumple el control el 25% del tiempo'),
-(1, 'Nunca', 'No se cumple el control (0%)');
+(5, 'Siempre', 'El control está completamente integrado en la cultura y los procesos, se aplica de manera sistemática y se mejora continuamente.'),
+(4, 'Casi siempre', 'El control está formalizado, es conocido y se aplica de manera consistente en la mayoría de los casos.'),
+(3, 'Ocasionalmente', 'El control se aplica de forma inconsistente, a menudo dependiendo de la persona o el proyecto.'),
+(2, 'Casi nunca', 'El control se aplica de manera aislada, reactiva y sin un proceso establecido.'),
+(1, 'Nunca', 'El control no existe o no se aplica.');
 
 -- Step 5: Insert new ISO 27001 domains
 INSERT INTO public.domains (name, description, standard) VALUES
