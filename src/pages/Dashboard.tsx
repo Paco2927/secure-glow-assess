@@ -98,7 +98,7 @@ const Dashboard = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <img
-            src="https://media.licdn.com/dms/image/v2/D4E0BAQGwBap1DiMZ5Q/company-logo_200_200/B4EZnEygeSHIAI-/0/1759943199733/techsecure_ai_logo?e=1763596800&v=beta&t=SeT_q8iZvKOcR4x2O52nFcnDe-A2K5jP_Yj7g3fHDjc"
+            src="https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"
             alt="Imagen a mostrar"
             width="400"
             height="300"
