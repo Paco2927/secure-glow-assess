@@ -69,7 +69,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <img src={techSecure_ai} alt="TechSecureIA" className="w-6 h-6" />
+              <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold">TechSecureIA</h1>
