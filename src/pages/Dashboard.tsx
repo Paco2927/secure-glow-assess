@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-security.jpg";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
+import IsoIcon from "@/assets/IsoIcon.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -126,7 +127,7 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
+                  <img src={IsoIcon} alt="IsoIcon" className="w-10 h-10" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">ISO 27001</h2>
