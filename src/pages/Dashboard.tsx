@@ -99,7 +99,7 @@ const Dashboard = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-          <img src={heroImage} alt="Cybersecurity" className="w-full h-full object-cover" />
+           <img id="imagenMostrada" src="https://via.placeholder.com/400x300" alt="Imagen a mostrar">
         </div>
         <div className="relative container mx-auto px-4 py-20 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
