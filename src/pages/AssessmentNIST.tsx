@@ -257,7 +257,7 @@ const AssessmentNIST = () => {
               {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
             </Button>
             {!allControlsAnswered && (
-              <p className="text-sm text-muted-foreground mt-2 text-center w-full absolute bottom-0">
+              <p className="text-sm text-muted-foreground mt-2 text-center w-full h-0">
                 Completa todos los controles para finalizar
               </p>
             )}
