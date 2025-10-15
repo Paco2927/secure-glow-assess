@@ -101,7 +101,7 @@ const Dashboard = () => {
             src="https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"
             alt="Imagen a mostrar"
             width="400"
-            height="300"
+            height="200"
           />
         </div>
         <div className="relative container mx-auto px-4 py-20 text-center">
