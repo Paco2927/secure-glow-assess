@@ -35,13 +35,16 @@ const AssessmentISO = () => {
   const [selectedLevels, setSelectedLevels] = useState<Record<string, string>>({});
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Check if all controls have been answered and organization selected
-  const allControlsAnswered = controls.length > 0 && controls.every(control => selectedLevels[control.id]) && selectedOrganization;
+  const allControlsAnswered =
+    controls.length > 0 && controls.every((control) => selectedLevels[control.id]) && selectedOrganization;
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -53,24 +56,23 @@ const AssessmentISO = () => {
       // Load ISO 27001 controls with their domains
       const { data: controlsData } = await supabase
         .from("controls")
-        .select(`
+        .select(
+          `
           *,
           domains!inner (
             name,
             standard
           )
-        `)
+        `,
+        )
         .eq("domains.standard", "ISO27001")
         .order("code");
-      
+
       if (controlsData) setControls(controlsData);
 
       // Load maturity levels
-      const { data: levelsData } = await supabase
-        .from("maturity_levels")
-        .select("*")
-        .order("level");
-      
+      const { data: levelsData } = await supabase.from("maturity_levels").select("*").order("level");
+
       if (levelsData) setMaturityLevels(levelsData);
     };
 
@@ -87,7 +89,7 @@ const AssessmentISO = () => {
       });
       return;
     }
-    
+
     if (!allControlsAnswered) {
       toast({
         title: "Completa todos los campos",
@@ -123,9 +125,7 @@ const AssessmentISO = () => {
         evidence: "",
       }));
 
-      const { error: resultsError } = await supabase
-        .from("assessment_results")
-        .insert(results);
+      const { error: resultsError } = await supabase.from("assessment_results").insert(results);
 
       if (resultsError) throw resultsError;
 
@@ -185,10 +185,7 @@ const AssessmentISO = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <OrganizationSelector
-                value={selectedOrganization}
-                onChange={setSelectedOrganization}
-              />
+              <OrganizationSelector value={selectedOrganization} onChange={setSelectedOrganization} />
             </CardContent>
           </Card>
 
@@ -217,7 +214,9 @@ const AssessmentISO = () => {
                 <CardHeader>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{control.code} - {control.name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {control.code} - {control.name}
+                      </CardTitle>
                       <CardDescription className="mt-1">{control.description}</CardDescription>
                     </div>
                     <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-md whitespace-nowrap">
@@ -234,9 +233,7 @@ const AssessmentISO = () => {
                           key={level.id}
                           variant={selectedLevels[control.id] === level.id ? "default" : "outline"}
                           className="w-full text-xs sm:text-sm"
-                          onClick={() =>
-                            setSelectedLevels({ ...selectedLevels, [control.id]: level.id })
-                          }
+                          onClick={() => setSelectedLevels({ ...selectedLevels, [control.id]: level.id })}
                         >
                           {level.name}
                         </Button>
@@ -249,10 +246,10 @@ const AssessmentISO = () => {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isSubmitting || !allControlsAnswered} 
-              variant="hero" 
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !allControlsAnswered}
+              variant="hero"
               size="lg"
               className="min-w-[200px]"
             >
@@ -260,7 +257,7 @@ const AssessmentISO = () => {
               {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
             </Button>
             {!allControlsAnswered && (
-              <p className="text-sm text-muted-foreground mt-2 text-center w-full absolute bottom-[-30px]">
+              <p className="text-sm text-muted-foreground mt-2 text-center w-full absolute bottom-[-20px]">
                 Completa todos los controles para finalizar
               </p>
             )}
