@@ -56,6 +56,11 @@ export const UserRoleManager = () => {
     }
   };
 
+  const getUserRole = (userId: string): 'admin' | 'moderator' | 'user' => {
+    const userRole = userRoles.find(role => role.user_id === userId);
+    return userRole?.role || 'user';
+  };
+
   const isModerator = (userId: string) => {
     return userRoles.some(role => role.user_id === userId && role.role === 'moderator');
   };
@@ -124,43 +129,53 @@ export const UserRoleManager = () => {
             </tr>
           </thead>
           <tbody>
-            {profiles.map((profile) => (
-              <tr key={profile.id} className="border-b last:border-0">
-                <td className="p-4">{profile.name}</td>
-                <td className="p-4">{profile.email}</td>
-                <td className="p-4">
-                  {isModerator(profile.id) ? (
-                    <span className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-                      <Shield className="h-4 w-4" />
-                      Moderador
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 bg-muted px-3 py-1 rounded-full text-sm">
-                      Usuario
-                    </span>
-                  )}
-                </td>
-                <td className="p-4">
-                  <Button
-                    variant={isModerator(profile.id) ? "destructive" : "default"}
-                    size="sm"
-                    onClick={() => toggleModeratorRole(profile.id)}
-                  >
-                    {isModerator(profile.id) ? (
-                      <>
-                        <ShieldOff className="h-4 w-4 mr-2" />
-                        Remover Moderador
-                      </>
+            {profiles.map((profile) => {
+              const role = getUserRole(profile.id);
+              return (
+                <tr key={profile.id} className="border-b last:border-0">
+                  <td className="p-4">{profile.name}</td>
+                  <td className="p-4">{profile.email}</td>
+                  <td className="p-4">
+                    {role === 'admin' ? (
+                      <span className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
+                        <Shield className="h-4 w-4" />
+                        Administrador
+                      </span>
+                    ) : role === 'moderator' ? (
+                      <span className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full text-sm">
+                        <Shield className="h-4 w-4" />
+                        Moderador
+                      </span>
                     ) : (
-                      <>
-                        <Shield className="h-4 w-4 mr-2" />
-                        Hacer Moderador
-                      </>
+                      <span className="inline-flex items-center gap-2 bg-muted px-3 py-1 rounded-full text-sm">
+                        Usuario
+                      </span>
                     )}
-                  </Button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="p-4">
+                    {role !== 'admin' && (
+                      <Button
+                        variant={isModerator(profile.id) ? "destructive" : "default"}
+                        size="sm"
+                        onClick={() => toggleModeratorRole(profile.id)}
+                      >
+                        {isModerator(profile.id) ? (
+                          <>
+                            <ShieldOff className="h-4 w-4 mr-2" />
+                            Remover Moderador
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="h-4 w-4 mr-2" />
+                            Hacer Moderador
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
