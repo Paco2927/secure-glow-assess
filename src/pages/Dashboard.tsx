@@ -142,7 +142,7 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <img src={NistIcon} alt="NistIcon" className="w-9 h-9" />
+                  <img src={NistIcon} alt="NistIcon" className="w-11 h-11" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">NIST CSF</h2>
