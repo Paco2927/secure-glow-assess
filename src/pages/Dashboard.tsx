@@ -127,7 +127,7 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center">
-                  <img src={IsoIcon} alt="IsoIcon" className="w-10 h-10" />
+                  <img src={IsoIcon} alt="IsoIcon" className="w-11 h-11" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">ISO 27001</h2>
