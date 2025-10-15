@@ -7,6 +7,7 @@ import { Shield, LogOut, ArrowRight, Users, FileText, Building2 } from "lucide-r
 import { toast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-security.jpg";
 import techSecureIcon from "@/assets/techsecure_ai.png";
+import NistIcon from "@/assets/NistShiel.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -141,7 +142,7 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-secondary" />
+                  <img src={NistIcon} alt="NistIcon" className="w-4.5 h-6" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">NIST CSF</h2>
