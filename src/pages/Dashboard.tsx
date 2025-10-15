@@ -3,8 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, LogOut, ArrowRight, Users, FileText, Building2 } from "lucide-react";
+import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import heroImage from "@/assets/hero-security.jpg";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
@@ -80,19 +89,45 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">{profile?.name || user.email}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-            </div>
             {isAdmin && (
               <Button variant="secondary" size="sm" onClick={() => navigate("/admin")}>
                 <Shield className="w-4 h-4 mr-2" />
                 Admin
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="w-4 h-4" />
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                    <AvatarFallback>
+                      {profile?.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{profile?.name || "Usuario"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Mi Perfil</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Cerrar Sesión</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>

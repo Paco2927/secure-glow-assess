@@ -12,7 +12,7 @@ interface Profile {
 
 interface UserRole {
   user_id: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'moderator' | 'user';
 }
 
 export const UserRoleManager = () => {
@@ -56,39 +56,39 @@ export const UserRoleManager = () => {
     }
   };
 
-  const isAdmin = (userId: string) => {
-    return userRoles.some(role => role.user_id === userId && role.role === 'admin');
+  const isModerator = (userId: string) => {
+    return userRoles.some(role => role.user_id === userId && role.role === 'moderator');
   };
 
-  const toggleAdminRole = async (userId: string) => {
+  const toggleModeratorRole = async (userId: string) => {
     try {
-      const currentlyAdmin = isAdmin(userId);
+      const currentlyModerator = isModerator(userId);
 
-      if (currentlyAdmin) {
-        // Remove admin role
+      if (currentlyModerator) {
+        // Remove moderator role
         const { error } = await supabase
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
-          .eq('role', 'admin');
+          .eq('role', 'moderator');
 
         if (error) throw error;
 
         toast({
           title: "Rol actualizado",
-          description: "Se han removido los permisos de administrador"
+          description: "Se han removido los permisos de moderador"
         });
       } else {
-        // Add admin role
+        // Add moderator role
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: userId, role: 'admin' });
+          .insert({ user_id: userId, role: 'moderator' });
 
         if (error) throw error;
 
         toast({
           title: "Rol actualizado",
-          description: "Se han otorgado permisos de administrador"
+          description: "Se han otorgado permisos de moderador"
         });
       }
 
@@ -129,10 +129,10 @@ export const UserRoleManager = () => {
                 <td className="p-4">{profile.name}</td>
                 <td className="p-4">{profile.email}</td>
                 <td className="p-4">
-                  {isAdmin(profile.id) ? (
+                  {isModerator(profile.id) ? (
                     <span className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
                       <Shield className="h-4 w-4" />
-                      Administrador
+                      Moderador
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2 bg-muted px-3 py-1 rounded-full text-sm">
@@ -142,19 +142,19 @@ export const UserRoleManager = () => {
                 </td>
                 <td className="p-4">
                   <Button
-                    variant={isAdmin(profile.id) ? "destructive" : "default"}
+                    variant={isModerator(profile.id) ? "destructive" : "default"}
                     size="sm"
-                    onClick={() => toggleAdminRole(profile.id)}
+                    onClick={() => toggleModeratorRole(profile.id)}
                   >
-                    {isAdmin(profile.id) ? (
+                    {isModerator(profile.id) ? (
                       <>
                         <ShieldOff className="h-4 w-4 mr-2" />
-                        Remover Admin
+                        Remover Moderador
                       </>
                     ) : (
                       <>
                         <Shield className="h-4 w-4 mr-2" />
-                        Hacer Admin
+                        Hacer Moderador
                       </>
                     )}
                   </Button>
