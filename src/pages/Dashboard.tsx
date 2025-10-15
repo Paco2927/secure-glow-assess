@@ -98,7 +98,7 @@ const Dashboard = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <img
-            src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/025.png"
+            src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fes.linkedin.com%2Fposts%2Fvane-masis-4066941ab_techsecure-ai-linkedin-activity-7244036243036979202-e9Hu&psig=AOvVaw0n8z37WDlgJtkMCJN52CEM&ust=1760629015862000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCODAtqrEppADFQAAAAAdAAAAABAL"
             alt="Imagen a mostrar"
             width="400"
             height="300"
