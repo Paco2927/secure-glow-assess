@@ -15,7 +15,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -23,32 +25,28 @@ const Dashboard = () => {
       setUser(session.user);
 
       // Fetch user profile
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-      
+      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+
       setProfile(profileData);
 
       // Check admin status
-      const { data: adminCheck } = await supabase.rpc('has_role', {
+      const { data: adminCheck } = await supabase.rpc("has_role", {
         _user_id: session.user.id,
-        _role: 'admin'
+        _role: "admin",
       });
       setIsAdmin(adminCheck || false);
     };
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT") {
-          navigate("/auth");
-        }
-        setUser(session?.user ?? null);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        navigate("/auth");
       }
-    );
+      setUser(session?.user ?? null);
+    });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -99,7 +97,12 @@ const Dashboard = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-          <img src={heroImage} alt="Cybersecurity" className="w-full h-full object-cover" />
+          <img
+            src="https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/025.png"
+            alt="Imagen a mostrar"
+            width="400"
+            height="300"
+          />
         </div>
         <div className="relative container mx-auto px-4 py-20 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -115,7 +118,7 @@ const Dashboard = () => {
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <Card 
+            <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
               onClick={() => navigate("/assessment/iso27001")}
             >
@@ -131,7 +134,7 @@ const Dashboard = () => {
               </div>
             </Card>
 
-            <Card 
+            <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
               onClick={() => navigate("/assessment/nist")}
             >
@@ -147,7 +150,7 @@ const Dashboard = () => {
               </div>
             </Card>
 
-            <Card 
+            <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
               onClick={() => navigate("/reportes")}
             >
