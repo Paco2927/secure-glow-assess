@@ -256,13 +256,11 @@ const AssessmentISO = () => {
               <Save className="w-4 h-4 mr-2" />
               {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
             </Button>
-            <div
             {!allControlsAnswered && (
               <p className="text-sm text-muted-foreground mt-2 text-center w-full absolute bottom-[-20px]">
                 Completa todos los controles para finalizar
               </p>
             )}
-            </div>
           </div>
         </div>
       </div>
