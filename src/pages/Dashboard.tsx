@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, LogOut, ArrowRight, Users, FileText, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-security.jpg";
+import techSecureIcon from "@/assets/techsecure_ai.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <Shield className="w-6 h-6 text-white" />
+              <img src={techSecureIcon} alt="TechSecureIA" className="w-6 h-6" />
             </div>
             <div>
               <h1 className="text-xl font-bold">TechSecureIA</h1>
