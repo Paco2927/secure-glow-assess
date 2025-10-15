@@ -10,6 +10,7 @@ import AssessmentNIST from "./pages/AssessmentNIST";
 import Admin from "./pages/Admin";
 import Results from "./pages/Results";
 import Reportes from "./pages/Reportes";
+import Organizations from "./pages/Organizations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/results" element={<Results />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/organizations" element={<Organizations />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

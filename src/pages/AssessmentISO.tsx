@@ -7,6 +7,7 @@ import { Shield, ArrowLeft, Save } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { OrganizationSelector } from "@/components/OrganizationSelector";
 
 interface Control {
   id: string;
@@ -32,10 +33,11 @@ const AssessmentISO = () => {
   const [controls, setControls] = useState<Control[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<Record<string, string>>({});
+  const [selectedOrganization, setSelectedOrganization] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Check if all controls have been answered
-  const allControlsAnswered = controls.length > 0 && controls.every(control => selectedLevels[control.id]);
+  // Check if all controls have been answered and organization selected
+  const allControlsAnswered = controls.length > 0 && controls.every(control => selectedLevels[control.id]) && selectedOrganization;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -77,6 +79,15 @@ const AssessmentISO = () => {
   }, [navigate]);
 
   const handleSubmit = async () => {
+    if (!selectedOrganization) {
+      toast({
+        title: "Selecciona una organización",
+        description: "Debes seleccionar una organización antes de continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!allControlsAnswered) {
       toast({
         title: "Completa todos los campos",
@@ -97,6 +108,7 @@ const AssessmentISO = () => {
           standard: "ISO27001",
           assessor_name: user.email,
           comments: "Evaluación inicial ISO 27001",
+          organization_id: selectedOrganization,
         })
         .select()
         .single();
@@ -165,6 +177,21 @@ const AssessmentISO = () => {
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          <Card className="mb-6 shadow-medium">
+            <CardHeader>
+              <CardTitle>Selecciona la Organización</CardTitle>
+              <CardDescription>
+                Debes seleccionar la organización a la cual se le realizará la evaluación
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <OrganizationSelector
+                value={selectedOrganization}
+                onChange={setSelectedOrganization}
+              />
+            </CardContent>
+          </Card>
+
           <Card className="mb-6 shadow-medium">
             <CardHeader>
               <CardTitle>Instrucciones</CardTitle>

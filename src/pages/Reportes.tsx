@@ -22,7 +22,9 @@ interface Assessment {
   standard: string;
   assessment_date: string;
   assessor_name: string;
+  organization_id: string | null;
   average_score?: number;
+  organization_name?: string;
 }
 
 interface DomainScore {
@@ -58,7 +60,10 @@ const Reportes = () => {
     try {
       const { data, error } = await supabase
         .from("assessments")
-        .select("*")
+        .select(`
+          *,
+          organizations(name)
+        `)
         .eq("user_id", userId)
         .order("assessment_date", { ascending: false });
 
@@ -93,6 +98,7 @@ const Reportes = () => {
           return {
             ...assessment,
             average_score: averageScore,
+            organization_name: assessment.organizations?.name || "Sin organización",
           };
         }),
       );
@@ -271,9 +277,14 @@ const Reportes = () => {
                             <FileText className="w-5 h-5" />
                             Evaluación {assessment.standard}
                           </CardTitle>
-                          <CardDescription className="flex items-center gap-2 mt-1">
-                            <Calendar className="w-4 h-4" />
-                            {formatDate(assessment.assessment_date)}
+                          <CardDescription className="space-y-1 mt-1">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(assessment.assessment_date)}
+                            </div>
+                            <div className="font-medium text-foreground">
+                              Organización: {assessment.organization_name}
+                            </div>
                           </CardDescription>
                         </div>
                         <div className="text-right">

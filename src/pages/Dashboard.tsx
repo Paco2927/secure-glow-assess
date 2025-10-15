@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, LogOut, ArrowRight, Users, FileText } from "lucide-react";
+import { Shield, LogOut, ArrowRight, Users, FileText, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-security.jpg";
 
@@ -116,8 +116,8 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <section className="container mx-auto px-4 py-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
               onClick={() => navigate("/assessment/iso27001")}
@@ -152,17 +152,33 @@ const Dashboard = () => {
 
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
-              onClick={() => navigate("/reportes")}
+              onClick={() => navigate("/organizations")}
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-accent" />
+                  <Building2 className="w-6 h-6 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold">Organizaciones</h2>
+                  <p className="text-sm text-muted-foreground">Gestionar empresas</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-accent" />
+              </div>
+            </Card>
+
+            <Card
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-muted/40"
+              onClick={() => navigate("/reportes")}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center">
+                  <FileText className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">Mis Reportes</h2>
                   <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores</p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-accent" />
+                <ArrowRight className="w-5 h-5" />
               </div>
             </Card>
           </div>
