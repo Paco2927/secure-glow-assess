@@ -31,7 +31,7 @@ const Dashboard = () => {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/auth");
+        navigate("/");
         return;
       }
       setUser(session.user);
@@ -69,7 +69,7 @@ const Dashboard = () => {
       title: "Sesión cerrada",
       description: "Has cerrado sesión exitosamente.",
     });
-    navigate("/auth");
+    navigate("/");
   };
 
   if (!user) return null;
