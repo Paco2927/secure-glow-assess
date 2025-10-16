@@ -9,8 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { LanguageToggle } from "@/components/LanguageToggle";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Correo electrónico inválido" }),
@@ -21,7 +19,6 @@ const authSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", name: "", dni: "" });
@@ -69,8 +66,8 @@ const Auth = () => {
       }
 
       toast({
-        title: t('auth.login.success'),
-        description: t('auth.login.success'),
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión exitosamente.",
       });
       navigate("/");
     } catch (error) {
@@ -125,8 +122,8 @@ const Auth = () => {
 
       if (data.user) {
         toast({
-          title: t('auth.signup.success'),
-          description: t('auth.signup.success'),
+          title: "¡Registro exitoso!",
+          description: "Por favor, verifica tu correo electrónico para confirmar tu cuenta.",
         });
         setSignupData({ email: "", password: "", name: "", dni: "" });
       }
@@ -146,15 +143,12 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center gradient-subtle p-4">
       <div className="w-full max-w-md">
-        <div className="absolute top-4 right-4">
-          <LanguageToggle />
-        </div>
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-hero shadow-glow mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">{t('auth.title')}</h1>
-          <p className="text-muted-foreground">{t('auth.subtitle')}</p>
+          <h1 className="text-3xl font-bold mb-2">TechSecureIA</h1>
+          <p className="text-muted-foreground">Evaluación de Ciberseguridad</p>
         </div>
 
         <Card className="shadow-strong">
@@ -168,14 +162,14 @@ const Auth = () => {
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-                <TabsTrigger value="signup">{t('auth.signup')}</TabsTrigger>
+                <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
+                <TabsTrigger value="signup">Registrarse</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">{t('auth.email')}</Label>
+                    <Label htmlFor="login-email">Correo Electrónico</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -186,7 +180,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">{t('auth.password')}</Label>
+                    <Label htmlFor="login-password">Contraseña</Label>
                     <Input
                       id="login-password"
                       type="password"
@@ -197,7 +191,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? t('common.loading') : t('auth.login.button')}
+                    {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                   </Button>
                 </form>
               </TabsContent>
@@ -205,7 +199,7 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">{t('auth.name')}</Label>
+                    <Label htmlFor="signup-name">Nombre Completo</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -216,7 +210,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-dni">{t('auth.dni')}</Label>
+                    <Label htmlFor="signup-dni">DNI (Opcional)</Label>
                     <Input
                       id="signup-dni"
                       type="text"
@@ -226,7 +220,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">{t('auth.email')}</Label>
+                    <Label htmlFor="signup-email">Correo Electrónico</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -237,7 +231,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">{t('auth.password')}</Label>
+                    <Label htmlFor="signup-password">Contraseña</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -248,7 +242,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? t('common.loading') : t('auth.signup.button')}
+                    {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                   </Button>
                 </form>
               </TabsContent>
