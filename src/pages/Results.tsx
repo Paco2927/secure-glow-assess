@@ -4,8 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+interface ControlResult {
+  control_id: string;
+  control_code: string;
+  control_name: string;
+  maturity_level: number;
+  maturity_level_name: string;
+  improvement_plan: string;
+}
 
 interface DomainResult {
   domain_name: string;
@@ -13,6 +23,7 @@ interface DomainResult {
   score: number;
   recommendation: string;
   color: "red" | "yellow" | "green";
+  controls: ControlResult[];
 }
 
 const Results = () => {
@@ -23,6 +34,7 @@ const Results = () => {
   const [results, setResults] = useState<DomainResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [averageScore, setAverageScore] = useState(0);
+  const [expandedDomains, setExpandedDomains] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!assessmentId) {
@@ -34,22 +46,33 @@ const Results = () => {
 
   const calculateResults = async () => {
     try {
-      // Fetch assessment results with related data
+      // Fetch assessment results with related data including improvement plan templates
       const { data: assessmentData, error } = await supabase
         .from("assessment_results")
         .select(
           `
           *,
-          maturity_levels(level),
-          controls(name, code, domains(name, standard))
+          maturity_levels(id, level, name),
+          controls(id, name, code, domains(name, standard))
         `,
         )
         .eq("assessment_id", assessmentId);
 
       if (error) throw error;
 
+      // Fetch all improvement plan templates
+      const { data: templates } = await supabase
+        .from("improvement_plan_templates")
+        .select("*");
+
       // Group by domain and calculate scores
-      const domainScores: Record<string, { total: number; count: number; name: string; standard: string }> = {};
+      const domainScores: Record<string, { 
+        total: number; 
+        count: number; 
+        name: string; 
+        standard: string;
+        controls: ControlResult[];
+      }> = {};
 
       assessmentData?.forEach((result: any) => {
         const domainName = result.controls.domains.name;
@@ -69,11 +92,26 @@ const Results = () => {
             count: 0,
             name: domainName,
             standard: result.controls.domains.standard,
+            controls: []
           };
         }
 
+        // Find improvement plan template for this control and maturity level
+        const template = templates?.find(
+          t => t.control_id === result.controls.id && 
+               t.maturity_level_id === result.maturity_levels.id
+        );
+
         domainScores[domainName].total += percentage;
         domainScores[domainName].count += 1;
+        domainScores[domainName].controls.push({
+          control_id: result.controls.id,
+          control_code: result.controls.code,
+          control_name: result.controls.name,
+          maturity_level: result.maturity_levels.level,
+          maturity_level_name: result.maturity_levels.name,
+          improvement_plan: template?.template_text || "No hay plan de mejora configurado para este control y nivel."
+        });
       });
 
       // Calculate average scores and get recommendations
@@ -85,6 +123,7 @@ const Results = () => {
           score,
           recommendation: getRecommendation(domain.name, score),
           color: score <= 50 ? "red" : score <= 75 ? "yellow" : "green",
+          controls: domain.controls
         };
       });
 
@@ -105,6 +144,18 @@ const Results = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleDomain = (domainCode: string) => {
+    setExpandedDomains(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(domainCode)) {
+        newSet.delete(domainCode);
+      } else {
+        newSet.add(domainCode);
+      }
+      return newSet;
+    });
   };
 
   const getRecommendation = (domainName: string, score: number): string => {
@@ -233,7 +284,7 @@ const Results = () => {
           {results.map((result) => (
             <Card
               key={result.domain_code}
-              className={`p-6 border-l-4 ${
+              className={`border-l-4 ${
                 result.color === "red"
                   ? "border-l-red-500"
                   : result.color === "yellow"
@@ -241,45 +292,95 @@ const Results = () => {
                     : "border-l-green-500"
               }`}
             >
-              <div className="mb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-semibold">{result.domain_name}</h3>
-                  <span
-                    className={`text-2xl font-bold ${
-                      result.color === "red"
-                        ? "text-red-500"
-                        : result.color === "yellow"
-                          ? "text-yellow-500"
-                          : "text-green-500"
-                    }`}
-                  >
-                    {result.score}%
-                  </span>
-                </div>
-                <Progress value={result.score} className="h-3" />
-              </div>
+              <Collapsible 
+                open={expandedDomains.has(result.domain_code)}
+                onOpenChange={() => toggleDomain(result.domain_code)}
+              >
+                <div className="p-6">
+                  <div className="mb-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-semibold">{result.domain_name}</h3>
+                      <span
+                        className={`text-2xl font-bold ${
+                          result.color === "red"
+                            ? "text-red-500"
+                            : result.color === "yellow"
+                              ? "text-yellow-500"
+                              : "text-green-500"
+                        }`}
+                      >
+                        {result.score}%
+                      </span>
+                    </div>
+                    <Progress value={result.score} className="h-3" />
+                  </div>
 
-              <div className="mt-4">
-                <h4
-                  className={`font-semibold mb-2 flex items-center gap-2 ${
-                    result.color === "red"
-                      ? "text-red-500"
-                      : result.color === "yellow"
-                        ? "text-yellow-500"
-                        : "text-green-500"
-                  }`}
-                >
-                  {result.score <= 50 ? "🔴" : result.score <= 75 ? "🟡" : "🟢"}
-                  {result.score <= 50
-                    ? "Mejora Crítica Necesaria (0-50%)"
-                    : result.score <= 75
-                      ? "Necesita Mejoras (51-75%)"
-                      : "Buen Desempeño (76-100%)"}
-                </h4>
-                <div className="whitespace-pre-line text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg">
-                  {result.recommendation}
+                  <div className="mt-4">
+                    <h4
+                      className={`font-semibold mb-2 flex items-center gap-2 ${
+                        result.color === "red"
+                          ? "text-red-500"
+                          : result.color === "yellow"
+                            ? "text-yellow-500"
+                            : "text-green-500"
+                      }`}
+                    >
+                      {result.score <= 50 ? "🔴" : result.score <= 75 ? "🟡" : "🟢"}
+                      {result.score <= 50
+                        ? "Mejora Crítica Necesaria (0-50%)"
+                        : result.score <= 75
+                          ? "Necesita Mejoras (51-75%)"
+                          : "Buen Desempeño (76-100%)"}
+                    </h4>
+                    <div className="whitespace-pre-line text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg">
+                      {result.recommendation}
+                    </div>
+                  </div>
+
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full mt-4 flex items-center justify-center gap-2">
+                      {expandedDomains.has(result.domain_code) ? (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          Ocultar controles
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          Ver controles ({result.controls.length})
+                        </>
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
-              </div>
+
+                <CollapsibleContent>
+                  <div className="px-6 pb-6 space-y-3">
+                    {result.controls.map((control) => (
+                      <Card key={control.control_id} className="p-4 bg-muted/30">
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-semibold">
+                                {control.control_code} - {control.control_name}
+                              </h5>
+                              <p className="text-sm text-muted-foreground">
+                                Nivel {control.maturity_level}: {control.maturity_level_name}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-3 bg-background p-3 rounded-lg border">
+                            <p className="text-sm font-medium mb-2">Plan de Mejora:</p>
+                            <p className="text-sm text-muted-foreground whitespace-pre-line">
+                              {control.improvement_plan}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </Card>
           ))}
         </div>

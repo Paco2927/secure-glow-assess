@@ -154,6 +154,48 @@ export type Database = {
         }
         Relationships: []
       }
+      improvement_plan_templates: {
+        Row: {
+          control_id: string
+          created_at: string | null
+          id: string
+          maturity_level_id: string
+          template_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          control_id: string
+          created_at?: string | null
+          id?: string
+          maturity_level_id: string
+          template_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          control_id?: string
+          created_at?: string | null
+          id?: string
+          maturity_level_id?: string
+          template_text?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "improvement_plan_templates_control_id_fkey"
+            columns: ["control_id"]
+            isOneToOne: false
+            referencedRelation: "controls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "improvement_plan_templates_maturity_level_id_fkey"
+            columns: ["maturity_level_id"]
+            isOneToOne: false
+            referencedRelation: "maturity_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       improvement_plans: {
         Row: {
           action_description: string

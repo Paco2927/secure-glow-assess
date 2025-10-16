@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, FileText, List } from "lucide-react";
+import { ArrowLeft, Users, FileText, List, ClipboardCheck } from "lucide-react";
 import { UserRoleManager } from "@/components/admin/UserRoleManager";
 import { DomainManager } from "@/components/admin/DomainManager";
 import { ControlManager } from "@/components/admin/ControlManager";
+import ImprovementPlanManager from "@/components/admin/ImprovementPlanManager";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ const Admin = () => {
 
         <Card className="p-6">
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="users">
                 <Users className="h-4 w-4 mr-2" />
                 Usuarios y Roles
@@ -100,6 +101,10 @@ const Admin = () => {
               <TabsTrigger value="controls">
                 <List className="h-4 w-4 mr-2" />
                 Controles
+              </TabsTrigger>
+              <TabsTrigger value="plans">
+                <ClipboardCheck className="h-4 w-4 mr-2" />
+                Planes de Mejora
               </TabsTrigger>
             </TabsList>
 
@@ -113,6 +118,10 @@ const Admin = () => {
 
             <TabsContent value="controls" className="mt-6">
               <ControlManager />
+            </TabsContent>
+
+            <TabsContent value="plans" className="mt-6">
+              <ImprovementPlanManager />
             </TabsContent>
           </Tabs>
         </Card>
