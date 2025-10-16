@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -21,6 +23,7 @@ import IsoIcon from "@/assets/IsoIcon.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -66,8 +69,8 @@ const Dashboard = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
-      title: "Sesión cerrada",
-      description: "Has cerrado sesión exitosamente.",
+      title: t('common.logout'),
+      description: t('auth.login.success'),
     });
     navigate("/auth");
   };
@@ -84,15 +87,16 @@ const Dashboard = () => {
               <img src={techSecureIcon} alt="TechSecureIA" className="w-4.5 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">TechSecureIA</h1>
-              <p className="text-xs text-muted-foreground">Cybersecurity Assessment</p>
+              <h1 className="text-xl font-bold">{t('dashboard.title')}</h1>
+              <p className="text-xs text-muted-foreground">{t('dashboard.subtitle')}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageToggle />
             {isAdmin && (
               <Button variant="secondary" size="sm" onClick={() => navigate("/admin")}>
                 <Shield className="w-4 h-4 mr-2" />
-                Admin
+                {t('dashboard.admin')}
               </Button>
             )}
             
@@ -119,12 +123,12 @@ const Dashboard = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
-                  <span>Mi Perfil</span>
+                  <span>{t('common.profile')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Cerrar Sesión</span>
+                  <span>{t('common.logout')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -144,10 +148,10 @@ const Dashboard = () => {
         </div>
         <div className="relative container mx-auto px-4 py-20 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Evalúa tu Madurez de <span className="text-primary">Ciberseguridad</span>
+            {t('dashboard.subtitle')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Realiza evaluaciones completas basadas en los estándares ISO 27001 y NIST Cybersecurity Framework
+            {t('dashboard.description')}
           </p>
         </div>
       </section>
@@ -165,8 +169,8 @@ const Dashboard = () => {
                   <img src={IsoIcon} alt="IsoIcon" className="w-11 h-11" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold">ISO 27001</h2>
-                  <p className="text-sm text-muted-foreground">Seguridad de la Información</p>
+                  <h2 className="text-xl font-bold">{t('dashboard.iso27001')}</h2>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.iso27001.desc')}</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-primary" />
               </div>
@@ -181,8 +185,8 @@ const Dashboard = () => {
                   <img src={NistIcon} alt="NistIcon" className="w-10 h-10" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold">NIST CSF</h2>
-                  <p className="text-sm text-muted-foreground">Cybersecurity Framework</p>
+                  <h2 className="text-xl font-bold">{t('dashboard.nist')}</h2>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.nist.desc')}</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-secondary" />
               </div>
@@ -197,8 +201,8 @@ const Dashboard = () => {
                   <Building2 className="w-6 h-6 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold">Organizaciones</h2>
-                  <p className="text-sm text-muted-foreground">Gestionar empresas</p>
+                  <h2 className="text-xl font-bold">{t('dashboard.organizations')}</h2>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.organizations.desc')}</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-accent" />
               </div>
@@ -213,8 +217,8 @@ const Dashboard = () => {
                   <FileText className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold">Mis Reportes</h2>
-                  <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores</p>
+                  <h2 className="text-xl font-bold">{t('dashboard.reports')}</h2>
+                  <p className="text-sm text-muted-foreground">{t('dashboard.reports.desc')}</p>
                 </div>
                 <ArrowRight className="w-5 h-5" />
               </div>
@@ -225,11 +229,11 @@ const Dashboard = () => {
           <div className="mt-12">
             <Card className="shadow-medium">
               <CardHeader>
-                <CardTitle>Funcionalidades Disponibles</CardTitle>
+                <CardTitle>{t('dashboard.features')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Accede a todas las herramientas de evaluación y consulta tus reportes históricos.
+                  {t('dashboard.features.desc')}
                 </p>
               </CardContent>
             </Card>
