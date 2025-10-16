@@ -214,7 +214,7 @@ const Auth = () => {
                     <Input
                       id="signup-dni"
                       type="text"
-                      placeholder="12345678"
+                      placeholder="Identificación"
                       value={signupData.dni}
                       onChange={(e) => setSignupData({ ...signupData, dni: e.target.value })}
                     />
