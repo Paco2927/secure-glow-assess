@@ -1,13 +1,36 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, FileCheck, Award, TrendingUp, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
 import IsoIcon from "@/assets/IsoIcon.png";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleStartAssessment = () => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
+    }
+  };
 
   const isoCategories = [
     "Políticas de Seguridad",
@@ -100,7 +123,7 @@ const Landing = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => navigate("/dashboard")} className="shadow-medium text-lg px-8 py-6">
+              <Button size="lg" onClick={handleStartAssessment} className="shadow-medium text-lg px-8 py-6">
                 Comenzar Evaluación
               </Button>
               <Button
