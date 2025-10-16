@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
-
+import IsoIcon from "@/assets/IsoIcon.png";
 interface Control {
   id: string;
   name: string;
@@ -159,7 +159,7 @@ const AssessmentISO = () => {
             </Button>
             <div className="flex items-center gap-3 flex-1">
               <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+                <img src={IsoIcon} alt="ISO 27001" className="w-12 h-12 object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">Evaluación ISO 27001</h1>
