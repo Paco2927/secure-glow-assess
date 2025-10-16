@@ -69,7 +69,7 @@ const Auth = () => {
         title: "¡Bienvenido!",
         description: "Has iniciado sesión exitosamente.",
       });
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
