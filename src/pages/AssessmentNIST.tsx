@@ -159,7 +159,7 @@ const AssessmentNIST = () => {
             </Button>
             <div className="flex items-center gap-3 flex-1">
               <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-secondary" />
+                <img src={NistIcon} alt="NIST CSF" className="w-12 h-12 object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">Evaluación NIST CSF</h1>
