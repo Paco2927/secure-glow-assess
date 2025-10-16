@@ -22,7 +22,7 @@ const Landing = () => {
     "Relaciones con Proveedores",
     "Gestión de Incidentes",
     "Continuidad del Negocio",
-    "Cumplimiento Legal"
+    "Cumplimiento Legal",
   ];
 
   const nistCategories = [
@@ -30,30 +30,30 @@ const Landing = () => {
     "Proteger (Protect)",
     "Detectar (Detect)",
     "Responder (Respond)",
-    "Recuperar (Recover)"
+    "Recuperar (Recover)",
   ];
 
   const benefits = [
     {
       icon: Shield,
       title: "Evaluación Integral",
-      description: "Analiza tu organización según estándares internacionales reconocidos"
+      description: "Analiza tu organización según estándares internacionales reconocidos",
     },
     {
       icon: FileCheck,
       title: "Reportes Detallados",
-      description: "Genera informes completos que se guardan automáticamente para seguimiento"
+      description: "Genera informes completos que se guardan automáticamente para seguimiento",
     },
     {
       icon: TrendingUp,
       title: "Planes de Mejora",
-      description: "Recibe recomendaciones específicas para fortalecer tu ciberseguridad"
+      description: "Recibe recomendaciones específicas para fortalecer tu ciberseguridad",
     },
     {
       icon: Award,
       title: "Cumplimiento Normativo",
-      description: "Asegura que tu empresa cumpla con ISO 27001 y NIST CSF"
-    }
+      description: "Asegura que tu empresa cumpla con ISO 27001 y NIST CSF",
+    },
   ];
 
   return (
@@ -82,36 +82,32 @@ const Landing = () => {
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary rounded-full blur-3xl" />
         </div>
-        
+
         <div className="relative container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
               <Shield className="w-4 h-4" />
               <span className="text-sm font-medium">Plataforma de Evaluación de Ciberseguridad</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               Evalúa y Fortalece la <span className="text-primary">Ciberseguridad</span> de tu Empresa
             </h1>
-            
+
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Descubre si tu organización cumple con los estándares internacionales de ciberseguridad 
+              Descubre si tu organización cumple con los estándares internacionales de ciberseguridad
               <strong> ISO 27001</strong> y <strong>NIST Cybersecurity Framework</strong>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                onClick={() => navigate("/auth")} 
-                className="shadow-medium text-lg px-8 py-6"
-              >
+              <Button size="lg" onClick={() => navigate("/dashboard")} className="shadow-medium text-lg px-8 py-6">
                 Comenzar Evaluación
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Button
+                size="lg"
+                variant="outline"
                 onClick={() => {
-                  document.getElementById('standards')?.scrollIntoView({ behavior: 'smooth' });
+                  document.getElementById("standards")?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="text-lg px-8 py-6"
               >
@@ -129,7 +125,7 @@ const Landing = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
               ¿Por qué Usar <span className="text-primary">TechSecureIA</span>?
             </h2>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {benefits.map((benefit, index) => (
                 <Card key={index} className="shadow-soft hover:shadow-medium transition-shadow">
@@ -151,9 +147,7 @@ const Landing = () => {
       <section id="standards" className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-              Estándares que Evaluamos
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Estándares que Evaluamos</h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
               Nuestras evaluaciones están basadas en dos de los marcos de ciberseguridad más reconocidos mundialmente
             </p>
@@ -173,8 +167,8 @@ const Landing = () => {
                   </div>
 
                   <p className="text-muted-foreground mb-4">
-                    ISO 27001 es el estándar internacional para sistemas de gestión de seguridad de la información (SGSI). 
-                    Evaluamos las siguientes categorías:
+                    ISO 27001 es el estándar internacional para sistemas de gestión de seguridad de la información
+                    (SGSI). Evaluamos las siguientes categorías:
                   </p>
 
                   <div className="space-y-2">
@@ -202,8 +196,8 @@ const Landing = () => {
                   </div>
 
                   <p className="text-muted-foreground mb-4">
-                    El NIST Cybersecurity Framework proporciona un enfoque flexible para gestionar riesgos de ciberseguridad. 
-                    Evaluamos las cinco funciones principales:
+                    El NIST Cybersecurity Framework proporciona un enfoque flexible para gestionar riesgos de
+                    ciberseguridad. Evaluamos las cinco funciones principales:
                   </p>
 
                   <div className="space-y-3">
@@ -217,8 +211,8 @@ const Landing = () => {
 
                   <div className="mt-6 p-4 bg-secondary/10 rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                      Cada función contiene múltiples categorías que evaluamos en detalle para proporcionarte 
-                      un panorama completo de tu madurez en ciberseguridad.
+                      Cada función contiene múltiples categorías que evaluamos en detalle para proporcionarte un
+                      panorama completo de tu madurez en ciberseguridad.
                     </p>
                   </div>
                 </CardContent>
@@ -233,11 +227,9 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <FileCheck className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Reportes que Impulsan la Mejora
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Reportes que Impulsan la Mejora</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Al completar una evaluación, obtendrás un <strong>reporte detallado</strong> que se guarda automáticamente 
+              Al completar una evaluación, obtendrás un <strong>reporte detallado</strong> que se guarda automáticamente
               en tu cuenta. Este reporte incluye:
             </p>
 
@@ -286,18 +278,12 @@ const Landing = () => {
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 gradient-hero opacity-10" />
         <div className="relative container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            ¿Listo para Evaluar tu Ciberseguridad?
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">¿Listo para Evaluar tu Ciberseguridad?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Comienza hoy mismo a fortalecer la seguridad de tu organización con evaluaciones 
-            basadas en estándares internacionales
+            Comienza hoy mismo a fortalecer la seguridad de tu organización con evaluaciones basadas en estándares
+            internacionales
           </p>
-          <Button 
-            size="lg" 
-            onClick={() => navigate("/auth")}
-            className="shadow-medium text-lg px-10 py-6"
-          >
+          <Button size="lg" onClick={() => navigate("/auth")} className="shadow-medium text-lg px-10 py-6">
             Crear Cuenta Gratis
           </Button>
         </div>
@@ -306,9 +292,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p className="text-sm">
-            © 2025 TechSecureIA. Plataforma profesional de evaluación de ciberseguridad.
-          </p>
+          <p className="text-sm">© 2025 TechSecureIA. Plataforma profesional de evaluación de ciberseguridad.</p>
         </div>
       </footer>
     </div>
