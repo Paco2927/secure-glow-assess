@@ -203,7 +203,7 @@ const Auth = () => {
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="Ingresar Nombre"
+                      placeholder="Ingresar nombre"
                       value={signupData.name}
                       onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                       required
