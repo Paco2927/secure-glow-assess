@@ -7,8 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Organization {
   id: string;
@@ -40,7 +56,9 @@ const Organizations = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       navigate("/auth");
     }
@@ -91,9 +109,11 @@ const Organizations = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
       if (editingOrg) {
@@ -108,24 +128,22 @@ const Organizations = () => {
           .eq("id", editingOrg.id);
 
         if (error) throw error;
-        
+
         toast({
           title: "Organización actualizada",
           description: "Los cambios se guardaron correctamente",
         });
       } else {
-        const { error } = await supabase
-          .from("organizations")
-          .insert({
-            name: formData.name,
-            sector: formData.sector || null,
-            contact_email: formData.contact_email || null,
-            country: formData.country || null,
-            user_id: user.id,
-          });
+        const { error } = await supabase.from("organizations").insert({
+          name: formData.name,
+          sector: formData.sector || null,
+          contact_email: formData.contact_email || null,
+          country: formData.country || null,
+          user_id: user.id,
+        });
 
         if (error) throw error;
-        
+
         toast({
           title: "Organización creada",
           description: "La organización se creó correctamente",
@@ -148,10 +166,7 @@ const Organizations = () => {
     if (!deleteOrgId) return;
 
     try {
-      const { error } = await supabase
-        .from("organizations")
-        .delete()
-        .eq("id", deleteOrgId);
+      const { error } = await supabase.from("organizations").delete().eq("id", deleteOrgId);
 
       if (error) throw error;
 
@@ -186,7 +201,7 @@ const Organizations = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -194,9 +209,7 @@ const Organizations = () => {
                 <Building2 className="h-10 w-10" />
                 Organizaciones
               </h1>
-              <p className="text-muted-foreground mt-2">
-                Gestiona las organizaciones para tus evaluaciones
-              </p>
+              <p className="text-muted-foreground mt-2">Gestiona las organizaciones para tus evaluaciones</p>
             </div>
           </div>
           <Button onClick={() => handleOpenDialog()}>
@@ -210,9 +223,7 @@ const Organizations = () => {
             <CardContent className="py-12 text-center">
               <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">No hay organizaciones</h3>
-              <p className="text-muted-foreground mb-4">
-                Crea tu primera organización para comenzar
-              </p>
+              <p className="text-muted-foreground mb-4">Crea tu primera organización para comenzar</p>
               <Button onClick={() => handleOpenDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
                 Crear Organización
@@ -231,25 +242,13 @@ const Organizations = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {org.contact_email && (
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {org.contact_email}
-                    </p>
-                  )}
+                  {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenDialog(org)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(org)}>
                       <Pencil className="h-4 w-4 mr-2" />
                       Editar
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteOrgId(org.id)}
-                    >
+                    <Button variant="destructive" size="sm" onClick={() => setDeleteOrgId(org.id)}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Eliminar
                     </Button>
@@ -264,12 +263,8 @@ const Organizations = () => {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingOrg ? "Editar Organización" : "Nueva Organización"}
-            </DialogTitle>
-            <DialogDescription>
-              Completa los datos de la organización
-            </DialogDescription>
+            <DialogTitle>{editingOrg ? "Editar Organización" : "Nueva Organización"}</DialogTitle>
+            <DialogDescription>Completa los datos de la organización</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
@@ -279,9 +274,7 @@ const Organizations = () => {
                   id="name"
                   required
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -289,9 +282,7 @@ const Organizations = () => {
                 <Input
                   id="sector"
                   value={formData.sector}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sector: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -300,9 +291,7 @@ const Organizations = () => {
                   id="email"
                   type="email"
                   value={formData.contact_email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, contact_email: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -310,9 +299,7 @@ const Organizations = () => {
                 <Input
                   id="country"
                   value={formData.country}
-                  onChange={(e) =>
-                    setFormData({ ...formData, country: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                 />
               </div>
             </div>
@@ -320,9 +307,7 @@ const Organizations = () => {
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                {editingOrg ? "Guardar Cambios" : "Crear Organización"}
-              </Button>
+              <Button type="submit">{editingOrg ? "Guardar Cambios" : "Crear Organización"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -338,9 +323,7 @@ const Organizations = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Eliminar
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
