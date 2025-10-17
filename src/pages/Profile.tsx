@@ -17,7 +17,7 @@ export default function Profile() {
   const [profile, setProfile] = useState({
     name: "",
     email: "",
-    avatar_url: ""
+    avatar_url: "",
   });
 
   useEffect(() => {
@@ -26,32 +26,30 @@ export default function Profile() {
 
   const getProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         navigate("/auth");
         return;
       }
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).single();
 
       if (error) throw error;
 
       setProfile({
         name: data.name || "",
         email: data.email || "",
-        avatar_url: data.avatar_url || ""
+        avatar_url: data.avatar_url || "",
       });
     } catch (error: any) {
       console.error("Error loading profile:", error);
       toast({
         title: "Error",
         description: "No se pudo cargar el perfil",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -61,28 +59,30 @@ export default function Profile() {
   const updateProfile = async () => {
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) return;
 
       const { error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
-          name: profile.name
+          name: profile.name,
         })
-        .eq('id', user.id);
+        .eq("id", user.id);
 
       if (error) throw error;
 
       toast({
         title: "Perfil actualizado",
-        description: "Los cambios se guardaron correctamente"
+        description: "Los cambios se guardaron correctamente",
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "No se pudo actualizar el perfil",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -92,18 +92,18 @@ export default function Profile() {
   const updateEmail = async (newEmail: string) => {
     try {
       const { error } = await supabase.auth.updateUser({ email: newEmail });
-      
+
       if (error) throw error;
 
       toast({
         title: "Correo actualizado",
-        description: "Se ha enviado un correo de confirmación a tu nuevo correo electrónico"
+        description: "Se ha enviado un correo de confirmación a tu nuevo correo electrónico",
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "No se pudo actualizar el correo",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -111,18 +111,18 @@ export default function Profile() {
   const updatePassword = async (newPassword: string) => {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      
+
       if (error) throw error;
 
       toast({
         title: "Contraseña actualizada",
-        description: "Tu contraseña ha sido cambiada exitosamente"
+        description: "Tu contraseña ha sido cambiada exitosamente",
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "No se pudo actualizar la contraseña",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -130,33 +130,33 @@ export default function Profile() {
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
-      
+
       if (!event.target.files || event.target.files.length === 0) {
         return;
       }
 
       const file = event.target.files[0];
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) return;
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/avatar.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
+        .eq("id", user.id);
 
       if (updateError) throw updateError;
 
@@ -164,13 +164,13 @@ export default function Profile() {
 
       toast({
         title: "Avatar actualizado",
-        description: "Tu foto de perfil ha sido actualizada"
+        description: "Tu foto de perfil ha sido actualizada",
       });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "No se pudo subir el avatar",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setUploading(false);
@@ -184,11 +184,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-2xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6"
-        >
+        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver
         </Button>
@@ -196,9 +192,7 @@ export default function Profile() {
         <Card>
           <CardHeader>
             <CardTitle>Mi Perfil</CardTitle>
-            <CardDescription>
-              Gestiona tu información personal y preferencias
-            </CardDescription>
+            <CardDescription>Gestiona tu información personal y preferencias</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Avatar Section */}
@@ -247,9 +241,7 @@ export default function Profile() {
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
               />
-              <Button onClick={() => updateEmail(profile.email)}>
-                Actualizar Correo
-              </Button>
+              <Button onClick={() => updateEmail(profile.email)}>Actualizar Correo</Button>
               <p className="text-sm text-muted-foreground">
                 Se enviará un correo de confirmación al nuevo correo electrónico
               </p>
@@ -269,9 +261,7 @@ export default function Profile() {
                   }
                 }}
               />
-              <p className="text-sm text-muted-foreground">
-                Deja en blanco si no deseas cambiar tu contraseña
-              </p>
+              <p className="text-sm text-muted-foreground">Deja en blanco si no deseas cambiar tu contraseña</p>
             </div>
           </CardContent>
         </Card>
