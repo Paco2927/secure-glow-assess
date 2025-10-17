@@ -60,10 +60,12 @@ const Reportes = () => {
     try {
       const { data, error } = await supabase
         .from("assessments")
-        .select(`
+        .select(
+          `
           *,
           organizations(name)
-        `)
+        `,
+        )
         .eq("user_id", userId)
         .order("assessment_date", { ascending: false });
 
@@ -160,10 +162,7 @@ const Reportes = () => {
       if (resultsError) throw resultsError;
 
       // Then delete the assessment
-      const { error: assessmentError } = await supabase
-        .from("assessments")
-        .delete()
-        .eq("id", assessmentToDelete);
+      const { error: assessmentError } = await supabase.from("assessments").delete().eq("id", assessmentToDelete);
 
       if (assessmentError) throw assessmentError;
 
@@ -204,7 +203,7 @@ const Reportes = () => {
       <header className="bg-card border-b shadow-soft">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div className="flex items-center gap-3 flex-1">
