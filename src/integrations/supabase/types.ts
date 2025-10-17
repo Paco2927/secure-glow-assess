@@ -17,27 +17,36 @@ export type Database = {
       assessment_results: {
         Row: {
           assessment_id: string | null
+          comments: string | null
+          conformity_status: Database["public"]["Enums"]["conformity_status"]
           control_id: string | null
           evidence: string | null
           id: string
           improvement_action: string | null
           maturity_level_id: string | null
+          proof_image_url: string | null
         }
         Insert: {
           assessment_id?: string | null
+          comments?: string | null
+          conformity_status?: Database["public"]["Enums"]["conformity_status"]
           control_id?: string | null
           evidence?: string | null
           id?: string
           improvement_action?: string | null
           maturity_level_id?: string | null
+          proof_image_url?: string | null
         }
         Update: {
           assessment_id?: string | null
+          comments?: string | null
+          conformity_status?: Database["public"]["Enums"]["conformity_status"]
           control_id?: string | null
           evidence?: string | null
           id?: string
           improvement_action?: string | null
           maturity_level_id?: string | null
+          proof_image_url?: string | null
         }
         Relationships: [
           {
@@ -355,6 +364,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "moderator"
+      conformity_status:
+        | "conforme"
+        | "no_conformidad"
+        | "no_conformidad_menor"
+        | "punto_de_mejora"
       maturity_level_name:
         | "Inicial"
         | "Repetible"
@@ -490,6 +504,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "moderator"],
+      conformity_status: [
+        "conforme",
+        "no_conformidad",
+        "no_conformidad_menor",
+        "punto_de_mejora",
+      ],
       maturity_level_name: [
         "Inicial",
         "Repetible",

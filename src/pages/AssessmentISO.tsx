@@ -20,6 +20,12 @@ interface Control {
   };
 }
 
+interface ControlData {
+  conformityStatus: "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora";
+  comments: string;
+  proofImage: File | null;
+}
+
 interface MaturityLevel {
   id: string;
   level: number;
@@ -33,12 +39,17 @@ const AssessmentISO = () => {
   const [controls, setControls] = useState<Control[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<Record<string, string>>({});
+  const [controlData, setControlData] = useState<Record<string, ControlData>>({});
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Check if all controls have been answered and organization selected
   const allControlsAnswered =
-    controls.length > 0 && controls.every((control) => selectedLevels[control.id]) && selectedOrganization;
+    controls.length > 0 && 
+    controls.every((control) => 
+      selectedLevels[control.id] && controlData[control.id]?.conformityStatus
+    ) && 
+    selectedOrganization;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -117,13 +128,40 @@ const AssessmentISO = () => {
 
       if (assessmentError) throw assessmentError;
 
-      // Save assessment results for each control
-      const results = Object.entries(selectedLevels).map(([controlId, levelId]) => ({
-        assessment_id: assessment.id,
-        control_id: controlId,
-        maturity_level_id: levelId,
-        evidence: "",
-      }));
+      // Upload images and save assessment results for each control
+      const results = await Promise.all(
+        Object.entries(selectedLevels).map(async ([controlId, levelId]) => {
+          let proofImageUrl = null;
+          
+          // Upload proof image if exists
+          if (controlData[controlId]?.proofImage) {
+            const file = controlData[controlId].proofImage;
+            const fileExt = file!.name.split('.').pop();
+            const fileName = `${assessment.id}/${controlId}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
+              .from('avatars')
+              .upload(fileName, file!, { upsert: true });
+            
+            if (!uploadError) {
+              const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+              proofImageUrl = publicUrl;
+            }
+          }
+          
+          return {
+            assessment_id: assessment.id,
+            control_id: controlId,
+            maturity_level_id: levelId,
+            evidence: "",
+            comments: controlData[controlId]?.comments || null,
+            proof_image_url: proofImageUrl,
+            conformity_status: controlData[controlId]?.conformityStatus,
+          };
+        })
+      );
 
       const { error: resultsError } = await supabase.from("assessment_results").insert(results);
 
@@ -239,6 +277,85 @@ const AssessmentISO = () => {
                         </Button>
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <Label className="mb-3 block">Estado de Conformidad *</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {[
+                        { value: "conforme", label: "Conforme" },
+                        { value: "no_conformidad", label: "No Conformidad" },
+                        { value: "no_conformidad_menor", label: "No Conformidad Menor" },
+                        { value: "punto_de_mejora", label: "Punto de Mejora" },
+                       ].map((status) => (
+                        <Button
+                          key={status.value}
+                          variant={controlData[control.id]?.conformityStatus === status.value ? "default" : "outline"}
+                          className="w-full text-xs sm:text-sm"
+                          onClick={() =>
+                            setControlData({
+                              ...controlData,
+                              [control.id]: {
+                                ...controlData[control.id],
+                                conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
+                                comments: controlData[control.id]?.comments || "",
+                                proofImage: controlData[control.id]?.proofImage || null,
+                              },
+                            })
+                          }
+                        >
+                          {status.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor={`comments-${control.id}`}>Comentarios (Opcional)</Label>
+                    <Textarea
+                      id={`comments-${control.id}`}
+                      placeholder="Agrega comentarios adicionales..."
+                      value={controlData[control.id]?.comments || ""}
+                      onChange={(e) =>
+                        setControlData({
+                          ...controlData,
+                          [control.id]: {
+                            ...controlData[control.id],
+                            conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
+                            comments: e.target.value,
+                            proofImage: controlData[control.id]?.proofImage || null,
+                          },
+                        })
+                      }
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor={`proof-${control.id}`}>Imagen de Prueba (Opcional)</Label>
+                    <input
+                      id={`proof-${control.id}`}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setControlData({
+                          ...controlData,
+                          [control.id]: {
+                            ...controlData[control.id],
+                            conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
+                            comments: controlData[control.id]?.comments || "",
+                            proofImage: file,
+                          },
+                        });
+                      }}
+                      className="mt-2 w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                    />
+                    {controlData[control.id]?.proofImage && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Archivo: {controlData[control.id].proofImage.name}
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
