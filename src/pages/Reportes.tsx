@@ -226,7 +226,7 @@ const Reportes = () => {
               <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <h2 className="text-2xl font-semibold mb-2">No hay evaluaciones</h2>
               <p className="text-muted-foreground mb-6">Aún no has completado ninguna evaluación</p>
-              <Button onClick={() => navigate("/")} variant="hero">
+              <Button onClick={() => navigate("/dashboard")} variant="hero">
                 Ir al Dashboard
               </Button>
             </Card>
