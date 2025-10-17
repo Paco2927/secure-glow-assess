@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, ArrowLeft, Users } from "lucide-react";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { OrganizationMembersManager } from "@/components/admin/OrganizationMembersManager";
 import {
   Dialog,
   DialogContent,
@@ -38,11 +40,13 @@ interface Organization {
 const Organizations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin, loading: adminLoading } = useAdminRole();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [deleteOrgId, setDeleteOrgId] = useState<string | null>(null);
+  const [selectedOrgForMembers, setSelectedOrgForMembers] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     sector: "",
@@ -86,6 +90,15 @@ const Organizations = () => {
   };
 
   const handleOpenDialog = (org?: Organization) => {
+    if (!isAdmin && !org) {
+      toast({
+        title: "Permiso denegado",
+        description: "Solo los administradores pueden crear organizaciones",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (org) {
       setEditingOrg(org);
       setFormData({
@@ -188,7 +201,7 @@ const Organizations = () => {
     }
   };
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Cargando...</p>
@@ -212,10 +225,12 @@ const Organizations = () => {
               <p className="text-muted-foreground mt-2">Gestiona las organizaciones para tus evaluaciones</p>
             </div>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Organización
-          </Button>
+          {isAdmin && (
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Organización
+            </Button>
+          )}
         </div>
 
         {organizations.length === 0 ? (
@@ -244,14 +259,26 @@ const Organizations = () => {
                 <CardContent>
                   {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(org)}>
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Editar
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedOrgForMembers(org.id)}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Miembros
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => setDeleteOrgId(org.id)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Eliminar
-                    </Button>
+                    {isAdmin && (
+                      <>
+                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(org)}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => setDeleteOrgId(org.id)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Eliminar
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -327,6 +354,23 @@ const Organizations = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!selectedOrgForMembers} onOpenChange={() => setSelectedOrgForMembers(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Gestionar Miembros</DialogTitle>
+            <DialogDescription>
+              Administra los miembros de esta organización
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrgForMembers && (
+            <OrganizationMembersManager
+              organizationId={selectedOrgForMembers}
+              isOwner={isAdmin}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

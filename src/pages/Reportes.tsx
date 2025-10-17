@@ -23,6 +23,7 @@ interface Assessment {
   assessment_date: string;
   assessor_name: string;
   organization_id: string | null;
+  status: string;
   average_score?: number;
   organization_name?: string;
 }
@@ -287,21 +288,34 @@ const Reportes = () => {
                           </CardDescription>
                         </div>
                         <div className="text-right">
-                          <div
-                            className="text-3xl font-bold mb-1"
-                            style={{ color: getScoreColor(assessment.average_score || 0) }}
-                          >
-                            {assessment.average_score}%
-                          </div>
-                          <span
-                            className="text-sm font-semibold px-3 py-1 rounded-full"
-                            style={{
-                              backgroundColor: `${getScoreColor(assessment.average_score || 0)}20`,
-                              color: getScoreColor(assessment.average_score || 0),
-                            }}
-                          >
-                            {getScoreLabel(assessment.average_score || 0)}
-                          </span>
+                          {assessment.status === "pending" ? (
+                            <div>
+                              <div className="text-2xl font-bold mb-1 text-yellow-600">
+                                Pendiente
+                              </div>
+                              <span className="text-sm font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-600">
+                                En Progreso
+                              </span>
+                            </div>
+                          ) : (
+                            <div>
+                              <div
+                                className="text-3xl font-bold mb-1"
+                                style={{ color: getScoreColor(assessment.average_score || 0) }}
+                              >
+                                {assessment.average_score}%
+                              </div>
+                              <span
+                                className="text-sm font-semibold px-3 py-1 rounded-full"
+                                style={{
+                                  backgroundColor: `${getScoreColor(assessment.average_score || 0)}20`,
+                                  color: getScoreColor(assessment.average_score || 0),
+                                }}
+                              >
+                                {getScoreLabel(assessment.average_score || 0)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardHeader>

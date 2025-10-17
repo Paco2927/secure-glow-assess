@@ -15,6 +15,9 @@ interface ControlResult {
   maturity_level: number;
   maturity_level_name: string;
   improvement_plan: string;
+  comments: string | null;
+  conformity_status: string;
+  proof_image_url: string | null;
 }
 
 interface DomainResult {
@@ -110,7 +113,10 @@ const Results = () => {
           control_name: result.controls.name,
           maturity_level: result.maturity_levels.level,
           maturity_level_name: result.maturity_levels.name,
-          improvement_plan: template?.template_text || "No hay plan de mejora configurado para este control y nivel."
+          improvement_plan: template?.template_text || "No hay plan de mejora configurado para este control y nivel.",
+          comments: result.comments,
+          conformity_status: result.conformity_status,
+          proof_image_url: result.proof_image_url,
         });
       });
 
@@ -367,8 +373,46 @@ const Results = () => {
                               <p className="text-sm text-muted-foreground">
                                 Nivel {control.maturity_level}: {control.maturity_level_name}
                               </p>
+                              <div className="mt-2 flex items-center gap-2">
+                                <span className="text-sm font-medium">Estado de Conformidad:</span>
+                                <span className={`text-sm px-2 py-1 rounded-full ${
+                                  control.conformity_status === "conforme" 
+                                    ? "bg-green-100 text-green-800" 
+                                    : control.conformity_status === "no_conformidad"
+                                    ? "bg-red-100 text-red-800"
+                                    : control.conformity_status === "no_conformidad_menor"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-blue-100 text-blue-800"
+                                }`}>
+                                  {control.conformity_status === "conforme" 
+                                    ? "Conforme" 
+                                    : control.conformity_status === "no_conformidad"
+                                    ? "No Conformidad"
+                                    : control.conformity_status === "no_conformidad_menor"
+                                    ? "No Conformidad Menor"
+                                    : "Punto de Mejora"}
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          {control.comments && (
+                            <div className="mt-3 bg-background p-3 rounded-lg border">
+                              <p className="text-sm font-medium mb-1">Comentarios:</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-line">
+                                {control.comments}
+                              </p>
+                            </div>
+                          )}
+                          {control.proof_image_url && (
+                            <div className="mt-3 bg-background p-3 rounded-lg border">
+                              <p className="text-sm font-medium mb-2">Prueba Adjunta:</p>
+                              <img 
+                                src={control.proof_image_url} 
+                                alt="Prueba" 
+                                className="max-w-full h-auto rounded-lg border"
+                              />
+                            </div>
+                          )}
                           <div className="mt-3 bg-background p-3 rounded-lg border">
                             <p className="text-sm font-medium mb-2">Plan de Mejora:</p>
                             <p className="text-sm text-muted-foreground whitespace-pre-line">

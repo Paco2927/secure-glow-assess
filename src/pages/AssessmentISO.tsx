@@ -113,7 +113,7 @@ const AssessmentISO = () => {
     setIsSubmitting(true);
 
     try {
-      // Create a new assessment
+      // Create a new assessment with pending status
       const { data: assessment, error: assessmentError } = await supabase
         .from("assessments")
         .insert({
@@ -122,6 +122,7 @@ const AssessmentISO = () => {
           assessor_name: user.email,
           comments: "Evaluación inicial ISO 27001",
           organization_id: selectedOrganization,
+          status: "pending",
         })
         .select()
         .single();
@@ -166,6 +167,12 @@ const AssessmentISO = () => {
       const { error: resultsError } = await supabase.from("assessment_results").insert(results);
 
       if (resultsError) throw resultsError;
+
+      // Update assessment status to completed
+      await supabase
+        .from("assessments")
+        .update({ status: "completed" })
+        .eq("id", assessment.id);
 
       toast({
         title: "¡Evaluación guardada!",
