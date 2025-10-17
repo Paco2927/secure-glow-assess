@@ -80,6 +80,7 @@ export type Database = {
           id: string
           organization_id: string | null
           standard: string
+          status: Database["public"]["Enums"]["assessment_status"]
           user_id: string
         }
         Insert: {
@@ -89,6 +90,7 @@ export type Database = {
           id?: string
           organization_id?: string | null
           standard: string
+          status?: Database["public"]["Enums"]["assessment_status"]
           user_id: string
         }
         Update: {
@@ -98,6 +100,7 @@ export type Database = {
           id?: string
           organization_id?: string | null
           standard?: string
+          status?: Database["public"]["Enums"]["assessment_status"]
           user_id?: string
         }
         Relationships: [
@@ -271,6 +274,61 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          invited_at: string | null
+          invited_by: string | null
+          organization_id: string
+          organization_role: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          organization_id: string
+          organization_role?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          organization_id?: string
+          organization_role?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           contact_email: string | null
@@ -364,6 +422,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "moderator"
+      assessment_status: "pending" | "completed"
       conformity_status:
         | "conforme"
         | "no_conformidad"
@@ -504,6 +563,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "moderator"],
+      assessment_status: ["pending", "completed"],
       conformity_status: [
         "conforme",
         "no_conformidad",
