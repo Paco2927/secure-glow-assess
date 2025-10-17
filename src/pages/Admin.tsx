@@ -23,17 +23,19 @@ const Admin = () => {
 
   const checkAdminAccess = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         navigate("/auth");
         return;
       }
 
       // Check if user is admin using the has_role function
-      const { data, error } = await supabase.rpc('has_role', {
+      const { data, error } = await supabase.rpc("has_role", {
         _user_id: user.id,
-        _role: 'admin'
+        _role: "admin",
       });
 
       if (error) throw error;
@@ -42,16 +44,16 @@ const Admin = () => {
         toast({
           title: "Acceso denegado",
           description: "No tienes permisos de administrador",
-          variant: "destructive"
+          variant: "destructive",
         });
-        navigate("/");
+        navigate("/dashboard");
         return;
       }
 
       setIsAdmin(true);
     } catch (error) {
       console.error("Error checking admin access:", error);
-      navigate("/");
+      navigate("/dashboard");
     } finally {
       setLoading(false);
     }
@@ -76,11 +78,7 @@ const Admin = () => {
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/")}
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
