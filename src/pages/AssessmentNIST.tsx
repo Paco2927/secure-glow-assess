@@ -42,6 +42,7 @@ const AssessmentNIST = () => {
   const [controlData, setControlData] = useState<Record<string, ControlData>>({});
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(null);
 
   // Check if all controls have been answered and organization selected
   const allControlsAnswered =
@@ -91,6 +92,105 @@ const AssessmentNIST = () => {
     loadData();
   }, [navigate]);
 
+  // Load pending assessment when organization changes
+  useEffect(() => {
+    const loadPendingAssessment = async () => {
+      if (!selectedOrganization || !user) return;
+
+      const { data: pendingAssessment } = await supabase
+        .from("assessments")
+        .select("id")
+        .eq("organization_id", selectedOrganization)
+        .eq("user_id", user.id)
+        .eq("standard", "NIST")
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (pendingAssessment) {
+        setCurrentAssessmentId(pendingAssessment.id);
+        
+        // Load existing results
+        const { data: results } = await supabase
+          .from("assessment_results")
+          .select("control_id, maturity_level_id, conformity_status, comments")
+          .eq("assessment_id", pendingAssessment.id);
+
+        if (results) {
+          const newSelectedLevels: Record<string, string> = {};
+          const newControlData: Record<string, ControlData> = {};
+          
+          results.forEach((result) => {
+            newSelectedLevels[result.control_id] = result.maturity_level_id;
+            newControlData[result.control_id] = {
+              conformityStatus: result.conformity_status,
+              comments: result.comments || "",
+              proofImage: null,
+            };
+          });
+          
+          setSelectedLevels(newSelectedLevels);
+          setControlData(newControlData);
+        }
+
+        toast({
+          title: "Evaluación pendiente encontrada",
+          description: "Se ha cargado tu evaluación anterior para continuar.",
+        });
+      } else {
+        setCurrentAssessmentId(null);
+        setSelectedLevels({});
+        setControlData({});
+      }
+    };
+
+    loadPendingAssessment();
+  }, [selectedOrganization, user]);
+
+  // Auto-save progress when answering questions
+  const saveProgress = async (controlId: string, levelId: string, data: ControlData) => {
+    if (!selectedOrganization || !user) return;
+
+    try {
+      let assessmentId = currentAssessmentId;
+
+      // Create assessment if it doesn't exist
+      if (!assessmentId) {
+        const { data: newAssessment, error: assessmentError } = await supabase
+          .from("assessments")
+          .insert({
+            user_id: user.id,
+            standard: "NIST",
+            assessor_name: user.email,
+            comments: "Evaluación NIST CSF en progreso",
+            organization_id: selectedOrganization,
+            status: "pending",
+          })
+          .select()
+          .single();
+
+        if (assessmentError) throw assessmentError;
+        assessmentId = newAssessment.id;
+        setCurrentAssessmentId(assessmentId);
+      }
+
+      // Upsert the result
+      await supabase
+        .from("assessment_results")
+        .upsert({
+          assessment_id: assessmentId,
+          control_id: controlId,
+          maturity_level_id: levelId,
+          conformity_status: data.conformityStatus,
+          comments: data.comments || null,
+          evidence: "",
+        }, {
+          onConflict: "assessment_id,control_id"
+        });
+    } catch (error) {
+      console.error("Error saving progress:", error);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedOrganization) {
       toast({
@@ -113,72 +213,48 @@ const AssessmentNIST = () => {
     setIsSubmitting(true);
 
     try {
-      // Create a new assessment with pending status
-      const { data: assessment, error: assessmentError } = await supabase
-        .from("assessments")
-        .insert({
-          user_id: user.id,
-          standard: "NIST",
-          assessor_name: user.email,
-          comments: "Evaluación inicial NIST CSF",
-          organization_id: selectedOrganization,
-          status: "pending",
-        })
-        .select()
-        .single();
+      const assessmentId = currentAssessmentId;
 
-      if (assessmentError) throw assessmentError;
-
-      // Upload images and save assessment results for each control
-      const results = await Promise.all(
-        Object.entries(selectedLevels).map(async ([controlId, levelId]) => {
-          let proofImageUrl = null;
-          
-          // Upload proof image if exists
-          if (controlData[controlId]?.proofImage) {
-            const file = controlData[controlId].proofImage;
-            const fileExt = file!.name.split('.').pop();
-            const fileName = `${assessment.id}/${controlId}.${fileExt}`;
+      // Upload images for all controls
+      await Promise.all(
+        Object.entries(controlData).map(async ([controlId, data]) => {
+          if (data.proofImage) {
+            const file = data.proofImage;
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${assessmentId}/${controlId}.${fileExt}`;
             
             const { error: uploadError } = await supabase.storage
               .from('avatars')
-              .upload(fileName, file!, { upsert: true });
+              .upload(fileName, file, { upsert: true });
             
             if (!uploadError) {
               const { data: { publicUrl } } = supabase.storage
                 .from('avatars')
                 .getPublicUrl(fileName);
-              proofImageUrl = publicUrl;
+              
+              // Update the result with the proof image URL
+              await supabase
+                .from("assessment_results")
+                .update({ proof_image_url: publicUrl })
+                .eq("assessment_id", assessmentId)
+                .eq("control_id", controlId);
             }
           }
-          
-          return {
-            assessment_id: assessment.id,
-            control_id: controlId,
-            maturity_level_id: levelId,
-            evidence: "",
-            comments: controlData[controlId]?.comments || null,
-            proof_image_url: proofImageUrl,
-            conformity_status: controlData[controlId]?.conformityStatus,
-          };
         })
       );
-
-      const { error: resultsError } = await supabase.from("assessment_results").insert(results);
-
-      if (resultsError) throw resultsError;
 
       // Update assessment status to completed
       await supabase
         .from("assessments")
         .update({ status: "completed" })
-        .eq("id", assessment.id);
+        .eq("id", assessmentId);
 
       toast({
         title: "¡Evaluación guardada!",
         description: "Tu evaluación NIST CSF se ha guardado exitosamente.",
       });
 
+      setCurrentAssessmentId(null);
       navigate("/reportes");
     } catch (error: any) {
       toast({
@@ -278,7 +354,13 @@ const AssessmentNIST = () => {
                           key={level.id}
                           variant={selectedLevels[control.id] === level.id ? "secondary" : "outline"}
                           className="w-full text-xs sm:text-sm"
-                          onClick={() => setSelectedLevels({ ...selectedLevels, [control.id]: level.id })}
+                          onClick={() => {
+                            const newLevels = { ...selectedLevels, [control.id]: level.id };
+                            setSelectedLevels(newLevels);
+                            if (controlData[control.id]?.conformityStatus) {
+                              saveProgress(control.id, level.id, controlData[control.id]);
+                            }
+                          }}
                         >
                           {level.name}
                         </Button>
@@ -299,17 +381,21 @@ const AssessmentNIST = () => {
                           key={status.value}
                           variant={controlData[control.id]?.conformityStatus === status.value ? "secondary" : "outline"}
                           className="w-full text-xs sm:text-sm"
-                          onClick={() =>
+                          onClick={() => {
+                            const newData = {
+                              ...controlData[control.id],
+                              conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
+                              comments: controlData[control.id]?.comments || "",
+                              proofImage: controlData[control.id]?.proofImage || null,
+                            };
                             setControlData({
                               ...controlData,
-                              [control.id]: {
-                                ...controlData[control.id],
-                                conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
-                                comments: controlData[control.id]?.comments || "",
-                                proofImage: controlData[control.id]?.proofImage || null,
-                              },
-                            })
-                          }
+                              [control.id]: newData,
+                            });
+                            if (selectedLevels[control.id]) {
+                              saveProgress(control.id, selectedLevels[control.id], newData);
+                            }
+                          }}
                         >
                           {status.label}
                         </Button>
