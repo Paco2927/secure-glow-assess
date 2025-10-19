@@ -168,13 +168,21 @@ const AssessmentISO = () => {
           .select()
           .single();
 
-        if (assessmentError) throw assessmentError;
+        if (assessmentError) {
+          console.error("Error creating assessment:", assessmentError);
+          toast({
+            title: "Error al crear evaluación",
+            description: "No se pudo crear la evaluación. Por favor, intenta nuevamente.",
+            variant: "destructive",
+          });
+          throw assessmentError;
+        }
         assessmentId = newAssessment.id;
         setCurrentAssessmentId(assessmentId);
       }
 
       // Upsert the result
-      await supabase
+      const { error: upsertError } = await supabase
         .from("assessment_results")
         .upsert({
           assessment_id: assessmentId,
@@ -186,6 +194,16 @@ const AssessmentISO = () => {
         }, {
           onConflict: "assessment_id,control_id"
         });
+
+      if (upsertError) {
+        console.error("Error saving control result:", upsertError);
+        toast({
+          title: "Error al guardar respuesta",
+          description: "No se pudo guardar la respuesta. Verifica tus permisos.",
+          variant: "destructive",
+        });
+        throw upsertError;
+      }
     } catch (error) {
       console.error("Error saving progress:", error);
     }
