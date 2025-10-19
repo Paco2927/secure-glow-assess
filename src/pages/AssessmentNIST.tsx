@@ -179,6 +179,12 @@ const AssessmentNIST = () => {
         }
         assessmentId = newAssessment.id;
         setCurrentAssessmentId(assessmentId);
+        
+        // Notify user that assessment was created
+        toast({
+          title: "Evaluación iniciada",
+          description: "Tu progreso se guardará automáticamente",
+        });
       }
 
       // Upsert the result
@@ -375,9 +381,13 @@ const AssessmentNIST = () => {
                           onClick={() => {
                             const newLevels = { ...selectedLevels, [control.id]: level.id };
                             setSelectedLevels(newLevels);
-                            if (controlData[control.id]?.conformityStatus) {
-                              saveProgress(control.id, level.id, controlData[control.id]);
-                            }
+                            // Save immediately with existing data or defaults
+                            const dataToSave = controlData[control.id] || {
+                              conformityStatus: "conforme",
+                              comments: "",
+                              proofImage: null,
+                            };
+                            saveProgress(control.id, level.id, dataToSave);
                           }}
                         >
                           {level.name}
@@ -410,8 +420,10 @@ const AssessmentNIST = () => {
                               ...controlData,
                               [control.id]: newData,
                             });
-                            if (selectedLevels[control.id]) {
-                              saveProgress(control.id, selectedLevels[control.id], newData);
+                            // Save immediately with selected level or first maturity level
+                            const levelId = selectedLevels[control.id] || maturityLevels[0]?.id;
+                            if (levelId) {
+                              saveProgress(control.id, levelId, newData);
                             }
                           }}
                         >
@@ -438,6 +450,12 @@ const AssessmentNIST = () => {
                           },
                         })
                       }
+                      onBlur={() => {
+                        // Save when user finishes editing comments
+                        if (selectedLevels[control.id] && controlData[control.id]) {
+                          saveProgress(control.id, selectedLevels[control.id], controlData[control.id]);
+                        }
+                      }}
                       className="mt-2"
                     />
                   </div>
