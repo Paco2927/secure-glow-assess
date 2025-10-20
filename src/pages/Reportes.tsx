@@ -71,7 +71,7 @@ const Reportes = () => {
 
     try {
       // RLS policies handle access control:
-      // - Users see their own assessments
+      // - Users see all assessments
       // - Organization members see their org's assessments
       // - Admins/moderators see all assessments
       const { data, error } = await supabase
