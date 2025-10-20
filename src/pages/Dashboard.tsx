@@ -39,7 +39,6 @@ const Dashboard = () => {
 
       // Fetch user profile
       const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
-
       setProfile(profileData);
 
       // Check admin status
@@ -48,6 +47,13 @@ const Dashboard = () => {
         _role: "admin",
       });
       setIsAdmin(adminCheck || false);
+
+      // Check moderator status - AGREGAR ESTA PARTE
+      const { data: moderatorCheck } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "moderator", // Asegúrate de que este rol exista en tu base de datos
+      });
+      setIsModerator(moderatorCheck || false);
     };
 
     checkUser();
@@ -90,18 +96,13 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {isAdmin && (
+            {(isAdmin || isModerator) && (
               <Button variant="secondary" size="sm" onClick={() => navigate("/admin")}>
                 <Shield className="w-4 h-4 mr-2" />
-                Admin
+                {isAdmin ? "Admin" : "Moderador"}
               </Button>
             )}
-            {isModerator && (
-              <Button variant="outline" size="sm" className="cursor-default">
-                <Users className="w-4 h-4 mr-2 text-blue-500" />
-                Moderador
-              </Button>
-            )}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -118,6 +119,9 @@ const Dashboard = () => {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{profile?.name || "Usuario"}</p>
                     <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    {(isAdmin || isModerator) && (
+                      <p className="text-xs leading-none text-primary">{isAdmin ? "Administrador" : "Moderador"}</p>
+                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -160,7 +164,8 @@ const Dashboard = () => {
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {isAdmin && (
+            {/* ISO 27001 - Solo para Admin */}
+            {(isAdmin || isModerator) && (
               <Card
                 className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
                 onClick={() => navigate("/assessment/iso27001")}
@@ -177,6 +182,8 @@ const Dashboard = () => {
                 </div>
               </Card>
             )}
+
+            {/* NIST CSF - Para Admin y Moderador */}
             {(isAdmin || isModerator) && (
               <Card
                 className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
@@ -194,42 +201,25 @@ const Dashboard = () => {
                 </div>
               </Card>
             )}
-            {isAdmin && (
-              <Card
-                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
-                onClick={() => navigate("/organizations")}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold">Organizaciones</h2>
-                    <p className="text-sm text-muted-foreground">Gestionar empresas</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-accent" />
-                </div>
-              </Card>
-            )}
 
-            {!isAdmin && (
-              <Card
-                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
-                onClick={() => navigate("/organizations")}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold">Organizaciones</h2>
-                    <p className="text-sm text-muted-foreground">Gestionar empresas</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-accent" />
+            {/* Organizaciones - Para todos los usuarios */}
+            <Card
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
+              onClick={() => navigate("/organizations")}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-accent" />
                 </div>
-              </Card>
-            )}
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold">Organizaciones</h2>
+                  <p className="text-sm text-muted-foreground">Gestionar empresas</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-accent" />
+              </div>
+            </Card>
 
+            {/* Mis Reportes - Para todos los usuarios */}
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-muted/40"
               onClick={() => navigate("/reportes")}
@@ -252,6 +242,13 @@ const Dashboard = () => {
             <Card className="shadow-medium">
               <CardHeader>
                 <CardTitle>Funcionalidades Disponibles</CardTitle>
+                <CardDescription>
+                  {isAdmin && "Tienes acceso completo a todas las herramientas de administración."}
+                  {isModerator &&
+                    !isAdmin &&
+                    "Tienes acceso a herramientas de moderación y evaluación NIST e ISO27001."}
+                  {!isAdmin && !isModerator && "Accede a las herramientas básicas de evaluación y reportes."}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
