@@ -171,22 +171,23 @@ const Dashboard = () => {
                 </div>
               </Card>
             )}
-            <Card
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
-              onClick={() => navigate("/assessment/nist")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <img src={NistIcon} alt="NistIcon" className="w-10 h-10" />
+            {isAdmin && (
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
+                onClick={() => navigate("/assessment/nist")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
+                    <img src={NistIcon} alt="NistIcon" className="w-10 h-10" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">NIST CSF</h2>
+                    <p className="text-sm text-muted-foreground">Cybersecurity Framework</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-secondary" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">NIST CSF</h2>
-                  <p className="text-sm text-muted-foreground">Cybersecurity Framework</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-secondary" />
-              </div>
-            </Card>
-
+              </Card>
+            )}
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
               onClick={() => navigate("/organizations")}
