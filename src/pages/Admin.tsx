@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, FileText, List, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, Users, FileText, List, ClipboardCheck, Shield } from "lucide-react";
 import { UserRoleManager } from "@/components/admin/UserRoleManager";
 import { DomainManager } from "@/components/admin/DomainManager";
 import { ControlManager } from "@/components/admin/ControlManager";
@@ -14,7 +14,7 @@ import ImprovementPlanManager from "@/components/admin/ImprovementPlanManager";
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<"admin" | "moderator" | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,27 +32,40 @@ const Admin = () => {
         return;
       }
 
-      // Check if user is admin using the has_role function
-      const { data, error } = await supabase.rpc("has_role", {
+      // Check if user is admin
+      const { data: isAdmin, error: adminError } = await supabase.rpc("has_role", {
         _user_id: user.id,
         _role: "admin",
       });
 
-      if (error) throw error;
+      if (adminError) throw adminError;
 
-      if (!data) {
+      // Check if user is moderator
+      const { data: isModerator, error: moderatorError } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "moderator",
+      });
+
+      if (moderatorError) throw moderatorError;
+
+      if (!isAdmin && !isModerator) {
         toast({
           title: "Acceso denegado",
-          description: "No tienes permisos de administrador",
+          description: "No tienes permisos de administrador o moderador",
           variant: "destructive",
         });
         navigate("/dashboard");
         return;
       }
 
-      setIsAdmin(true);
+      setUserRole(isAdmin ? "admin" : "moderator");
     } catch (error) {
       console.error("Error checking admin access:", error);
+      toast({
+        title: "Error",
+        description: "Error al verificar permisos",
+        variant: "destructive",
+      });
       navigate("/dashboard");
     } finally {
       setLoading(false);
@@ -70,54 +83,79 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!userRole) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-          <h1 className="text-3xl font-bold">Panel de Administración</h1>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Panel de {userRole === "admin" ? "Administración" : "Moderación"}</h1>
+              <p className="text-sm text-muted-foreground">
+                {userRole === "admin" ? "Acceso completo al sistema" : "Acceso a funciones de gestión y moderación"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
+            <Shield className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium capitalize">{userRole}</span>
+          </div>
         </div>
 
         <Card className="p-6">
-          <Tabs defaultValue="users" className="w-full">
+          <Tabs defaultValue="domains" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="users">
-                <Users className="h-4 w-4 mr-2" />
-                Usuarios y Roles
-              </TabsTrigger>
+              {/* Solo Admin puede ver Usuarios y Roles */}
+              {userRole === "admin" && (
+                <TabsTrigger value="users">
+                  <Users className="h-4 w-4 mr-2" />
+                  Usuarios y Roles
+                </TabsTrigger>
+              )}
+
+              {/* Ambos roles pueden ver Dominios */}
               <TabsTrigger value="domains">
                 <FileText className="h-4 w-4 mr-2" />
                 Dominios
               </TabsTrigger>
+
+              {/* Ambos roles pueden ver Controles */}
               <TabsTrigger value="controls">
                 <List className="h-4 w-4 mr-2" />
                 Controles
               </TabsTrigger>
+
+              {/* Ambos roles pueden ver Planes de Mejora */}
               <TabsTrigger value="plans">
                 <ClipboardCheck className="h-4 w-4 mr-2" />
                 Planes de Mejora
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="mt-6">
-              <UserRoleManager />
-            </TabsContent>
+            {userRole === "admin" && (
+              <TabsContent value="users" className="mt-6">
+                <UserRoleManager />
+              </TabsContent>
+            )}
 
+            {/* Dominios visible para ambos roles */}
             <TabsContent value="domains" className="mt-6">
               <DomainManager />
             </TabsContent>
 
+            {/* Controles visible para ambos roles */}
             <TabsContent value="controls" className="mt-6">
               <ControlManager />
             </TabsContent>
 
+            {/* Planes de Mejora visible para ambos roles */}
             <TabsContent value="plans" className="mt-6">
               <ImprovementPlanManager />
             </TabsContent>
