@@ -96,7 +96,12 @@ const Dashboard = () => {
                 Admin
               </Button>
             )}
-
+            {isModerator && (
+              <Button variant="outline" size="sm" className="cursor-default">
+                <Users className="w-4 h-4 mr-2 text-blue-500" />
+                Moderador
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
