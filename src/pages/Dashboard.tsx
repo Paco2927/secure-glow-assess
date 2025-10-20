@@ -188,6 +188,7 @@ const Dashboard = () => {
                 </div>
               </Card>
             )}
+
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
               onClick={() => navigate("/organizations")}
@@ -203,6 +204,24 @@ const Dashboard = () => {
                 <ArrowRight className="w-5 h-5 text-accent" />
               </div>
             </Card>
+
+            {!isAdmin && (
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
+                onClick={() => navigate("/organizations")}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-accent" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">Organizaciones</h2>
+                    <p className="text-sm text-muted-foreground">Gestionar empresas</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-accent" />
+                </div>
+              </Card>
+            )}
 
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-muted/40"
