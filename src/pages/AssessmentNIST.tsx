@@ -46,10 +46,8 @@ const AssessmentNIST = () => {
 
   // Check if all controls have been answered and organization selected
   const allControlsAnswered =
-    controls.length > 0 && 
-    controls.every((control) => 
-      selectedLevels[control.id] && controlData[control.id]?.conformityStatus
-    ) && 
+    controls.length > 0 &&
+    controls.every((control) => selectedLevels[control.id] && controlData[control.id]?.conformityStatus) &&
     selectedOrganization;
 
   useEffect(() => {
@@ -108,7 +106,7 @@ const AssessmentNIST = () => {
 
       if (pendingAssessment) {
         setCurrentAssessmentId(pendingAssessment.id);
-        
+
         // Load existing results
         const { data: results } = await supabase
           .from("assessment_results")
@@ -118,7 +116,7 @@ const AssessmentNIST = () => {
         if (results) {
           const newSelectedLevels: Record<string, string> = {};
           const newControlData: Record<string, ControlData> = {};
-          
+
           results.forEach((result) => {
             newSelectedLevels[result.control_id] = result.maturity_level_id;
             newControlData[result.control_id] = {
@@ -127,7 +125,7 @@ const AssessmentNIST = () => {
               proofImage: null,
             };
           });
-          
+
           setSelectedLevels(newSelectedLevels);
           setControlData(newControlData);
         }
@@ -179,7 +177,7 @@ const AssessmentNIST = () => {
         }
         assessmentId = newAssessment.id;
         setCurrentAssessmentId(assessmentId);
-        
+
         // Notify user that assessment was created
         toast({
           title: "Evaluación iniciada",
@@ -188,18 +186,19 @@ const AssessmentNIST = () => {
       }
 
       // Upsert the result
-      const { error: upsertError } = await supabase
-        .from("assessment_results")
-        .upsert({
+      const { error: upsertError } = await supabase.from("assessment_results").upsert(
+        {
           assessment_id: assessmentId,
           control_id: controlId,
           maturity_level_id: levelId,
           conformity_status: data.conformityStatus,
           comments: data.comments || null,
           evidence: "",
-        }, {
-          onConflict: "assessment_id,control_id"
-        });
+        },
+        {
+          onConflict: "assessment_id,control_id",
+        },
+      );
 
       if (upsertError) {
         console.error("Error saving control result:", upsertError);
@@ -244,18 +243,18 @@ const AssessmentNIST = () => {
         Object.entries(controlData).map(async ([controlId, data]) => {
           if (data.proofImage) {
             const file = data.proofImage;
-            const fileExt = file.name.split('.').pop();
+            const fileExt = file.name.split(".").pop();
             const fileName = `${assessmentId}/${controlId}.${fileExt}`;
-            
+
             const { error: uploadError } = await supabase.storage
-              .from('avatars')
+              .from("avatars")
               .upload(fileName, file, { upsert: true });
-            
+
             if (!uploadError) {
-              const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(fileName);
-              
+              const {
+                data: { publicUrl },
+              } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
               // Update the result with the proof image URL
               await supabase
                 .from("assessment_results")
@@ -264,14 +263,11 @@ const AssessmentNIST = () => {
                 .eq("control_id", controlId);
             }
           }
-        })
+        }),
       );
 
       // Update assessment status to completed
-      await supabase
-        .from("assessments")
-        .update({ status: "completed" })
-        .eq("id", assessmentId);
+      await supabase.from("assessments").update({ status: "completed" }).eq("id", assessmentId);
 
       toast({
         title: "¡Evaluación guardada!",
@@ -404,7 +400,7 @@ const AssessmentNIST = () => {
                         { value: "no_conformidad", label: "No Conformidad" },
                         { value: "no_conformidad_menor", label: "No Conformidad Menor" },
                         { value: "punto_de_mejora", label: "Punto de Mejora" },
-                       ].map((status) => (
+                      ].map((status) => (
                         <Button
                           key={status.value}
                           variant={controlData[control.id]?.conformityStatus === status.value ? "secondary" : "outline"}
@@ -412,7 +408,11 @@ const AssessmentNIST = () => {
                           onClick={() => {
                             const newData = {
                               ...controlData[control.id],
-                              conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
+                              conformityStatus: status.value as
+                                | "conforme"
+                                | "no_conformidad"
+                                | "no_conformidad_menor"
+                                | "punto_de_mejora",
                               comments: controlData[control.id]?.comments || "",
                               proofImage: controlData[control.id]?.proofImage || null,
                             };
@@ -462,13 +462,6 @@ const AssessmentNIST = () => {
 
                   <div>
                     <Label htmlFor={`proof-${control.id}`}>Imagen de Prueba (Opcional)</Label>
-                    <div className="mt-2">
-  <label
-    htmlFor={`proof-${control.id}`}
-    className="inline-block cursor-pointer py-2 px-4 rounded-md bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90"
-  >
-    {controlData[control.id]?.proofImage ? "Cambiar imagen" : "Subir imagen"}
-  </label>
                     <input
                       id={`proof-${control.id}`}
                       type="file"
