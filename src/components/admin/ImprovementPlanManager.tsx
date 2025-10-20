@@ -212,7 +212,7 @@ const ImprovementPlanManager = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{editingId ? "Editar" : "Crear"} Template de Plan de Mejora</CardTitle>
+          <CardTitle>{editingId ? "Editar" : "Crear"} plantilla de plan de mejora</CardTitle>
           <CardDescription>
             Define el texto del plan de mejora para cada control según el nivel de madurez seleccionado
           </CardDescription>
