@@ -113,7 +113,8 @@ const Results = () => {
           control_name: result.controls.name,
           maturity_level: result.maturity_levels.level,
           maturity_level_name: result.maturity_levels.name,
-          improvement_plan: template?.template_text || "No hay plan de mejora configurado para este control y nivel.",
+          // Prioritize improvement_action from auditor, fallback to template
+          improvement_plan: result.improvement_action || template?.template_text || "No hay plan de mejora configurado para este control y nivel.",
           comments: result.comments,
           conformity_status: result.conformity_status,
           proof_image_url: result.proof_image_url,

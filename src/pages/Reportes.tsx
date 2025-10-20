@@ -59,16 +59,31 @@ const Reportes = () => {
 
   const loadAssessments = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("assessments")
-        .select(
-          `
-          *,
-          organizations(name)
-        `,
-        )
+      // Get organizations where user is a member
+      const { data: userOrgs } = await supabase
+        .from("organization_members")
+        .select("organization_id")
         .eq("user_id", userId)
+        .eq("status", "accepted");
+      
+      const orgIds = userOrgs?.map(o => o.organization_id) || [];
+      
+      // Build query to get assessments where:
+      // - User is the creator, OR
+      // - Assessment belongs to user's organizations
+      let query = supabase
+        .from("assessments")
+        .select(`*, organizations(name)`)
         .order("assessment_date", { ascending: false });
+      
+      // Apply OR filter for user_id or organization_id
+      if (orgIds.length > 0) {
+        query = query.or(`user_id.eq.${userId},organization_id.in.(${orgIds.join(',')})`);
+      } else {
+        query = query.eq("user_id", userId);
+      }
+      
+      const { data, error } = await query;
 
       if (error) throw error;
 
