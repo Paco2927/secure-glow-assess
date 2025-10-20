@@ -291,7 +291,7 @@ const ImprovementPlanManager = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Templates Existentes</CardTitle>
+          <CardTitle>Plantillas existentes</CardTitle>
           <CardDescription>Lista de todos las plantillas de planes de mejora configurados</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
