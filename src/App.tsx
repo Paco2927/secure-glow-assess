@@ -14,7 +14,7 @@ import Reportes from "./pages/Reportes";
 import Organizations from "./pages/Organizations";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-
+import Contactenos from "./pages/Contactenos";
 const queryClient = new QueryClient();
 
 const App = () => (
