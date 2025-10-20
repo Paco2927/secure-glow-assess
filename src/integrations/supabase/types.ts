@@ -53,6 +53,13 @@ export type Database = {
             foreignKeyName: "assessment_results_assessment_id_fkey"
             columns: ["assessment_id"]
             isOneToOne: false
+            referencedRelation: "accessible_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_results_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
             referencedRelation: "assessments"
             referencedColumns: ["id"]
           },
@@ -409,7 +416,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      accessible_assessments: {
+        Row: {
+          access_type: string | null
+          assessment_date: string | null
+          assessor_name: string | null
+          comments: string | null
+          id: string | null
+          organization_id: string | null
+          standard: string | null
+          status: Database["public"]["Enums"]["assessment_status"] | null
+          user_id: string | null
+        }
+        Insert: {
+          access_type?: never
+          assessment_date?: string | null
+          assessor_name?: string | null
+          comments?: string | null
+          id?: string | null
+          organization_id?: string | null
+          standard?: string | null
+          status?: Database["public"]["Enums"]["assessment_status"] | null
+          user_id?: string | null
+        }
+        Update: {
+          access_type?: never
+          assessment_date?: string | null
+          assessor_name?: string | null
+          comments?: string | null
+          id?: string | null
+          organization_id?: string | null
+          standard?: string | null
+          status?: Database["public"]["Enums"]["assessment_status"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
