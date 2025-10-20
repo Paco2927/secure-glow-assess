@@ -172,7 +172,7 @@ const Dashboard = () => {
                 </div>
               </Card>
             )}
-            {isAdmin && (
+            {(isAdmin || isModerator) && (
               <Card
                 className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
                 onClick={() => navigate("/assessment/nist")}
