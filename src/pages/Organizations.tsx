@@ -228,6 +228,7 @@ const countries = [
   "Zambia",
   "Zimbabue",
 ];
+const sector = ["mangos", "mango phonk", "labubu", "labubu phonk"];
 
 interface Organization {
   id: string;
@@ -504,11 +505,24 @@ const Organizations = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="sector">Sector</Label>
-                <Input
-                  id="sector"
-                  value={formData.sector}
-                  onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="sector">Sector</Label>
+                  <Select
+                    value={formData.sector}
+                    onValueChange={(value) => setFormData({ ...formData, sector: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un sector" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sectors.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
