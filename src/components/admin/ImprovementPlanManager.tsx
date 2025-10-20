@@ -44,7 +44,7 @@ const ImprovementPlanManager = () => {
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
-  
+
   const [selectedDomain, setSelectedDomain] = useState<string>("");
   const [selectedControl, setSelectedControl] = useState<string>("");
   const [selectedLevel, setSelectedLevel] = useState<string>("");
@@ -59,16 +59,21 @@ const ImprovementPlanManager = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       const [domainsRes, controlsRes, levelsRes, templatesRes] = await Promise.all([
         supabase.from("domains").select("*").order("name"),
         supabase.from("controls").select("*").order("code"),
         supabase.from("maturity_levels").select("*").order("level"),
-        supabase.from("improvement_plan_templates").select(`
+        supabase
+          .from("improvement_plan_templates")
+          .select(
+            `
           *,
           controls(id, code, name, domain_id),
           maturity_levels(id, name, level)
-        `).order("created_at", { ascending: false })
+        `,
+          )
+          .order("created_at", { ascending: false }),
       ]);
 
       if (domainsRes.error) throw domainsRes.error;
@@ -79,12 +84,12 @@ const ImprovementPlanManager = () => {
       setDomains(domainsRes.data || []);
       setControls(controlsRes.data || []);
       setMaturityLevels(levelsRes.data || []);
-      setTemplates(templatesRes.data as any || []);
+      setTemplates((templatesRes.data as any) || []);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -96,7 +101,7 @@ const ImprovementPlanManager = () => {
       toast({
         title: "Error",
         description: "Debes seleccionar un control, nivel de madurez y escribir un texto",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -107,37 +112,35 @@ const ImprovementPlanManager = () => {
           .from("improvement_plan_templates")
           .update({ template_text: templateText })
           .eq("id", editingId);
-        
+
         if (error) throw error;
-        
+
         toast({
           title: "Éxito",
-          description: "Template actualizado correctamente"
+          description: "Template actualizado correctamente",
         });
       } else {
-        const { error } = await supabase
-          .from("improvement_plan_templates")
-          .insert({
-            control_id: selectedControl,
-            maturity_level_id: selectedLevel,
-            template_text: templateText
-          });
-        
+        const { error } = await supabase.from("improvement_plan_templates").insert({
+          control_id: selectedControl,
+          maturity_level_id: selectedLevel,
+          template_text: templateText,
+        });
+
         if (error) throw error;
-        
+
         toast({
           title: "Éxito",
-          description: "Template creado correctamente"
+          description: "Template creado correctamente",
         });
       }
-      
+
       resetForm();
       fetchData();
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -147,8 +150,8 @@ const ImprovementPlanManager = () => {
     setSelectedControl(template.control_id);
     setSelectedLevel(template.maturity_level_id);
     setTemplateText(template.template_text);
-    
-    const control = controls.find(c => c.id === template.control_id);
+
+    const control = controls.find((c) => c.id === template.control_id);
     if (control) {
       setSelectedDomain(control.domain_id);
     }
@@ -156,26 +159,23 @@ const ImprovementPlanManager = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Estás seguro de eliminar este template?")) return;
-    
+
     try {
-      const { error } = await supabase
-        .from("improvement_plan_templates")
-        .delete()
-        .eq("id", id);
-      
+      const { error } = await supabase.from("improvement_plan_templates").delete().eq("id", id);
+
       if (error) throw error;
-      
+
       toast({
         title: "Éxito",
-        description: "Template eliminado correctamente"
+        description: "Template eliminado correctamente",
       });
-      
+
       fetchData();
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -188,16 +188,15 @@ const ImprovementPlanManager = () => {
     setTemplateText("");
   };
 
-  const filteredControls = controls.filter(c => 
-    selectedDomain ? c.domain_id === selectedDomain : true
-  );
+  const filteredControls = controls.filter((c) => (selectedDomain ? c.domain_id === selectedDomain : true));
 
-  const filteredTemplates = templates.filter(t => {
-    const matchesSearch = searchTerm === "" || 
+  const filteredTemplates = templates.filter((t) => {
+    const matchesSearch =
+      searchTerm === "" ||
       t.controls.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.controls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.maturity_levels.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesSearch;
   });
 
@@ -227,7 +226,7 @@ const ImprovementPlanManager = () => {
                   <SelectValue placeholder="Selecciona un dominio" />
                 </SelectTrigger>
                 <SelectContent>
-                  {domains.map(domain => (
+                  {domains.map((domain) => (
                     <SelectItem key={domain.id} value={domain.id}>
                       {domain.name}
                     </SelectItem>
@@ -238,16 +237,12 @@ const ImprovementPlanManager = () => {
 
             <div className="space-y-2">
               <Label>Control</Label>
-              <Select 
-                value={selectedControl} 
-                onValueChange={setSelectedControl}
-                disabled={!selectedDomain}
-              >
+              <Select value={selectedControl} onValueChange={setSelectedControl} disabled={!selectedDomain}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un control" />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredControls.map(control => (
+                  {filteredControls.map((control) => (
                     <SelectItem key={control.id} value={control.id}>
                       {control.code} - {control.name}
                     </SelectItem>
@@ -263,7 +258,7 @@ const ImprovementPlanManager = () => {
                   <SelectValue placeholder="Selecciona un nivel" />
                 </SelectTrigger>
                 <SelectContent>
-                  {maturityLevels.map(level => (
+                  {maturityLevels.map((level) => (
                     <SelectItem key={level.id} value={level.id}>
                       Nivel {level.level} - {level.name}
                     </SelectItem>
@@ -284,9 +279,7 @@ const ImprovementPlanManager = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={handleSave}>
-              {editingId ? "Actualizar" : "Crear"} Template
-            </Button>
+            <Button onClick={handleSave}>{editingId ? "Actualizar" : "Crear"} plantilla</Button>
             {editingId && (
               <Button variant="outline" onClick={resetForm}>
                 Cancelar
@@ -299,9 +292,7 @@ const ImprovementPlanManager = () => {
       <Card>
         <CardHeader>
           <CardTitle>Templates Existentes</CardTitle>
-          <CardDescription>
-            Lista de todos los templates de planes de mejora configurados
-          </CardDescription>
+          <CardDescription>Lista de todos los templates de planes de mejora configurados</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="relative">
@@ -314,12 +305,10 @@ const ImprovementPlanManager = () => {
             />
           </div>
 
-          <div className="text-sm text-muted-foreground">
-            Mostrando {filteredTemplates.length} template(s)
-          </div>
+          <div className="text-sm text-muted-foreground">Mostrando {filteredTemplates.length} template(s)</div>
 
           <div className="space-y-3">
-            {filteredTemplates.map(template => (
+            {filteredTemplates.map((template) => (
               <Card key={template.id} className="p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
@@ -335,26 +324,18 @@ const ImprovementPlanManager = () => {
                       <Button size="sm" variant="outline" onClick={() => handleEdit(template)}>
                         Editar
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
-                        onClick={() => handleDelete(template.id)}
-                      >
+                      <Button size="sm" variant="destructive" onClick={() => handleDelete(template.id)}>
                         Eliminar
                       </Button>
                     </div>
                   </div>
-                  <div className="bg-muted/30 p-3 rounded text-sm">
-                    {template.template_text}
-                  </div>
+                  <div className="bg-muted/30 p-3 rounded text-sm">{template.template_text}</div>
                 </div>
               </Card>
             ))}
 
             {filteredTemplates.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                No se encontraron templates
-              </div>
+              <div className="text-center text-muted-foreground py-8">No se encontraron templates</div>
             )}
           </div>
         </CardContent>
