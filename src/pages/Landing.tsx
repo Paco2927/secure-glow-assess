@@ -17,7 +17,9 @@ const Landing = () => {
       setIsAuthenticated(!!session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
 
@@ -134,7 +136,7 @@ const Landing = () => {
                 }}
                 className="text-lg px-8 py-6"
               >
-                Conocer Más
+                Contáctenos
               </Button>
             </div>
           </div>
