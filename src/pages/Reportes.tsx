@@ -43,13 +43,22 @@ const Reportes = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log("🔍 [Reportes] Iniciando verificación de autenticación");
       const {
         data: { session },
       } = await supabase.auth.getSession();
+
       if (!session) {
+        console.log("❌ [Reportes] No hay sesión activa, redirigiendo a auth");
         navigate("/auth");
         return;
       }
+
+      console.log("✅ [Reportes] Usuario autenticado:", {
+        id: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+      });
       setUser(session.user);
       loadAssessments(session.user.id);
     };
@@ -58,6 +67,8 @@ const Reportes = () => {
   }, [navigate]);
 
   const loadAssessments = async (userId: string) => {
+    console.log(`📋 [Reportes] Cargando evaluaciones para usuario ID: ${userId}`);
+
     try {
       // RLS policies handle access control:
       // - Users see their own assessments
@@ -68,12 +79,24 @@ const Reportes = () => {
         .select(`*, organizations(name)`)
         .order("assessment_date", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ [Reportes] Error de Supabase al cargar evaluaciones:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+        throw error;
+      }
+
+      console.log(`✅ [Reportes] Se retornaron ${data?.length || 0} evaluaciones`);
 
       // Calculate average score for each assessment
       const assessmentsWithScores = await Promise.all(
         (data || []).map(async (assessment) => {
-          const { data: results } = await supabase
+          console.log(`📊 [Reportes] Calculando puntaje para evaluación ID: ${assessment.id}`);
+
+          const { data: results, error: resultsError } = await supabase
             .from("assessment_results")
             .select(
               `
@@ -81,6 +104,13 @@ const Reportes = () => {
             `,
             )
             .eq("assessment_id", assessment.id);
+
+          if (resultsError) {
+            console.error("❌ [Reportes] Error al cargar resultados de evaluación:", {
+              assessmentId: assessment.id,
+              error: resultsError,
+            });
+          }
 
           let averageScore = 0;
           if (results && results.length > 0) {
@@ -94,6 +124,12 @@ const Reportes = () => {
             };
             const total = results.reduce((sum: number, r: any) => sum + scoreMap[r.maturity_levels.level], 0);
             averageScore = Math.round(total / results.length);
+
+            console.log(
+              `📈 [Reportes] Evaluación ${assessment.id}: ${results.length} resultados, puntaje promedio: ${averageScore}%`,
+            );
+          } else {
+            console.log(`⚠️ [Reportes] Evaluación ${assessment.id}: Sin resultados encontrados`);
           }
 
           return {
@@ -104,19 +140,28 @@ const Reportes = () => {
         }),
       );
 
+      console.log("🎯 [Reportes] Evaluaciones procesadas:", assessmentsWithScores);
       setAssessments(assessmentsWithScores);
     } catch (error: any) {
+      console.error("💥 [Reportes] Error general al cargar evaluaciones:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     } finally {
+      console.log("🏁 [Reportes] Carga de evaluaciones completada");
       setLoading(false);
     }
   };
 
   const viewResults = (assessmentId: string) => {
+    console.log(`👁️ [Reportes] Navegando a resultados de evaluación ID: ${assessmentId}`);
     navigate(`/results?id=${assessmentId}`);
   };
 
@@ -143,13 +188,19 @@ const Reportes = () => {
   };
 
   const handleDeleteClick = (assessmentId: string, e: React.MouseEvent) => {
+    console.log(`🗑️ [Reportes] Usuario intenta eliminar evaluación ID: ${assessmentId}`);
     e.stopPropagation();
     setAssessmentToDelete(assessmentId);
     setDeleteDialogOpen(true);
   };
 
   const deleteAssessment = async () => {
-    if (!assessmentToDelete) return;
+    if (!assessmentToDelete) {
+      console.warn("⚠️ [Reportes] Intento de eliminar evaluación sin ID");
+      return;
+    }
+
+    console.log(`🔥 [Reportes] Eliminando evaluación ID: ${assessmentToDelete}`);
 
     try {
       // First delete assessment results
@@ -158,12 +209,28 @@ const Reportes = () => {
         .delete()
         .eq("assessment_id", assessmentToDelete);
 
-      if (resultsError) throw resultsError;
+      if (resultsError) {
+        console.error("❌ [Reportes] Error al eliminar resultados de evaluación:", {
+          assessmentId: assessmentToDelete,
+          error: resultsError,
+        });
+        throw resultsError;
+      }
+
+      console.log(`✅ [Reportes] Resultados de evaluación ${assessmentToDelete} eliminados`);
 
       // Then delete the assessment
       const { error: assessmentError } = await supabase.from("assessments").delete().eq("id", assessmentToDelete);
 
-      if (assessmentError) throw assessmentError;
+      if (assessmentError) {
+        console.error("❌ [Reportes] Error al eliminar evaluación:", {
+          assessmentId: assessmentToDelete,
+          error: assessmentError,
+        });
+        throw assessmentError;
+      }
+
+      console.log(`✅ [Reportes] Evaluación ${assessmentToDelete} eliminada exitosamente`);
 
       toast({
         title: "Evaluación eliminada",
@@ -172,9 +239,16 @@ const Reportes = () => {
 
       // Refresh the list
       if (user) {
+        console.log("🔄 [Reportes] Recargando lista de evaluaciones después de eliminar");
         loadAssessments(user.id);
       }
     } catch (error: any) {
+      console.error("💥 [Reportes] Error general al eliminar evaluación:", {
+        assessmentId: assessmentToDelete,
+        message: error.message,
+        stack: error.stack,
+      });
+
       toast({
         title: "Error",
         description: error.message,
@@ -187,6 +261,7 @@ const Reportes = () => {
   };
 
   if (loading) {
+    console.log("⏳ [Reportes] Mostrando estado de carga...");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -196,6 +271,8 @@ const Reportes = () => {
       </div>
     );
   }
+
+  console.log("🎨 [Reportes] Renderizando componente con", assessments.length, "evaluaciones");
 
   return (
     <div className="min-h-screen gradient-subtle">
