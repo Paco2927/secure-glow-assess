@@ -219,27 +219,6 @@ const Dashboard = () => {
               </div>
             </Card>
 
-            {(!isAdmin || !isModerator) && (
-
-                
-
-      )}
-            {(!isAdmin || !isModerator) && (
-
-                
-
-      )}
-            {(!isAdmin || !isModerator) && (
-
-                
-
-      )}
-            {(!isAdmin || !isModerator) && (
-
-                
-
-      )}
-
             {/* Mis Reportes - Para todos los usuarios */}
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-muted/40"
