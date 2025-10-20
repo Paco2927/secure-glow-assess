@@ -3,88 +3,80 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-interface Control {
+interface Organization {
   id: string;
-  code: string;
   name: string;
-  domain_id: string;
 }
 
-interface MaturityLevel {
+interface Assessment {
   id: string;
-  name: string;
-  level: number;
-}
-
-interface Domain {
-  id: string;
-  name: string;
   standard: string;
+  assessment_date: string;
+  status: string;
 }
 
-interface Template {
+interface AssessmentResult {
   id: string;
   control_id: string;
   maturity_level_id: string;
-  template_text: string;
-  controls: Control;
-  maturity_levels: MaturityLevel;
+  conformity_status: string;
+  improvement_action: string | null;
+  comments: string | null;
+  controls: {
+    code: string;
+    name: string;
+  };
+  maturity_levels: {
+    level: number;
+    name: string;
+  };
 }
 
 const ImprovementPlanManager = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [controls, setControls] = useState<Control[]>([]);
-  const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
-  const [domains, setDomains] = useState<Domain[]>([]);
-  const [templates, setTemplates] = useState<Template[]>([]);
-
-  const [selectedDomain, setSelectedDomain] = useState<string>("");
-  const [selectedControl, setSelectedControl] = useState<string>("");
-  const [selectedLevel, setSelectedLevel] = useState<string>("");
-  const [templateText, setTemplateText] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [assessmentResults, setAssessmentResults] = useState<AssessmentResult[]>([]);
+  
+  const [selectedOrganization, setSelectedOrganization] = useState<string>("");
+  const [selectedAssessment, setSelectedAssessment] = useState<string>("");
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchData();
+    fetchOrganizations();
   }, []);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (selectedOrganization) {
+      fetchAssessments();
+      setSelectedAssessment("");
+      setAssessmentResults([]);
+    }
+  }, [selectedOrganization]);
+
+  useEffect(() => {
+    if (selectedAssessment) {
+      fetchAssessmentResults();
+    }
+  }, [selectedAssessment]);
+
+  const fetchOrganizations = async () => {
     try {
       setLoading(true);
+      const { data, error } = await supabase
+        .from("organizations")
+        .select("id, name")
+        .order("name");
 
-      const [domainsRes, controlsRes, levelsRes, templatesRes] = await Promise.all([
-        supabase.from("domains").select("*").order("name"),
-        supabase.from("controls").select("*").order("code"),
-        supabase.from("maturity_levels").select("*").order("level"),
-        supabase
-          .from("improvement_plan_templates")
-          .select(
-            `
-          *,
-          controls(id, code, name, domain_id),
-          maturity_levels(id, name, level)
-        `,
-          )
-          .order("created_at", { ascending: false }),
-      ]);
-
-      if (domainsRes.error) throw domainsRes.error;
-      if (controlsRes.error) throw controlsRes.error;
-      if (levelsRes.error) throw levelsRes.error;
-      if (templatesRes.error) throw templatesRes.error;
-
-      setDomains(domainsRes.data || []);
-      setControls(controlsRes.data || []);
-      setMaturityLevels(levelsRes.data || []);
-      setTemplates((templatesRes.data as any) || []);
+      if (error) throw error;
+      setOrganizations(data || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -96,46 +88,16 @@ const ImprovementPlanManager = () => {
     }
   };
 
-  const handleSave = async () => {
-    if (!selectedControl || !selectedLevel || !templateText.trim()) {
-      toast({
-        title: "Error",
-        description: "Debes seleccionar un control, nivel de madurez y escribir un texto",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const fetchAssessments = async () => {
     try {
-      if (editingId) {
-        const { error } = await supabase
-          .from("improvement_plan_templates")
-          .update({ template_text: templateText })
-          .eq("id", editingId);
+      const { data, error } = await supabase
+        .from("assessments")
+        .select("id, standard, assessment_date, status")
+        .eq("organization_id", selectedOrganization)
+        .order("assessment_date", { ascending: false });
 
-        if (error) throw error;
-
-        toast({
-          title: "Éxito",
-          description: "Template actualizado correctamente",
-        });
-      } else {
-        const { error } = await supabase.from("improvement_plan_templates").insert({
-          control_id: selectedControl,
-          maturity_level_id: selectedLevel,
-          template_text: templateText,
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Éxito",
-          description: "Template creado correctamente",
-        });
-      }
-
-      resetForm();
-      fetchData();
+      if (error) throw error;
+      setAssessments(data || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -145,62 +107,73 @@ const ImprovementPlanManager = () => {
     }
   };
 
-  const handleEdit = (template: Template) => {
-    setEditingId(template.id);
-    setSelectedControl(template.control_id);
-    setSelectedLevel(template.maturity_level_id);
-    setTemplateText(template.template_text);
+  const fetchAssessmentResults = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("assessment_results")
+        .select(`
+          id,
+          control_id,
+          maturity_level_id,
+          conformity_status,
+          improvement_action,
+          comments,
+          controls(code, name),
+          maturity_levels(level, name)
+        `)
+        .eq("assessment_id", selectedAssessment)
+        .order("control_id");
 
-    const control = controls.find((c) => c.id === template.control_id);
-    if (control) {
-      setSelectedDomain(control.domain_id);
+      if (error) throw error;
+      setAssessmentResults((data as any) || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este template?")) return;
-
+  const handleSaveImprovementAction = async (resultId: string, improvementAction: string) => {
+    setSavingIds(prev => new Set(prev).add(resultId));
+    
     try {
-      const { error } = await supabase.from("improvement_plan_templates").delete().eq("id", id);
+      const { error } = await supabase
+        .from("assessment_results")
+        .update({ improvement_action: improvementAction })
+        .eq("id", resultId);
 
       if (error) throw error;
 
       toast({
-        title: "Éxito",
-        description: "Template eliminado correctamente",
+        title: "Guardado",
+        description: "Plan de mejora actualizado correctamente",
       });
 
-      fetchData();
+      // Update local state
+      setAssessmentResults(prev => 
+        prev.map(r => r.id === resultId ? { ...r, improvement_action: improvementAction } : r)
+      );
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setSavingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(resultId);
+        return newSet;
+      });
     }
   };
 
-  const resetForm = () => {
-    setEditingId(null);
-    setSelectedDomain("");
-    setSelectedControl("");
-    setSelectedLevel("");
-    setTemplateText("");
-  };
-
-  const filteredControls = controls.filter((c) => (selectedDomain ? c.domain_id === selectedDomain : true));
-
-  const filteredTemplates = templates.filter((t) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      t.controls.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.controls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.maturity_levels.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return matchesSearch;
-  });
-
-  if (loading) {
+  if (loading && organizations.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -212,23 +185,23 @@ const ImprovementPlanManager = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{editingId ? "Editar" : "Crear"} plantilla de plan de mejora</CardTitle>
+          <CardTitle>Editar Planes de Mejora por Organización</CardTitle>
           <CardDescription>
-            Define el texto del plan de mejora para cada control según el nivel de madurez seleccionado
+            Selecciona una organización y evaluación para personalizar los planes de mejora de cada control
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Dominio</Label>
-              <Select value={selectedDomain} onValueChange={setSelectedDomain}>
+              <Label>Organización</Label>
+              <Select value={selectedOrganization} onValueChange={setSelectedOrganization}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un dominio" />
+                  <SelectValue placeholder="Selecciona una organización" />
                 </SelectTrigger>
                 <SelectContent>
-                  {domains.map((domain) => (
-                    <SelectItem key={domain.id} value={domain.id}>
-                      {domain.name}
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -236,110 +209,119 @@ const ImprovementPlanManager = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Control</Label>
-              <Select value={selectedControl} onValueChange={setSelectedControl} disabled={!selectedDomain}>
+              <Label>Evaluación</Label>
+              <Select 
+                value={selectedAssessment} 
+                onValueChange={setSelectedAssessment}
+                disabled={!selectedOrganization || assessments.length === 0}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un control" />
+                  <SelectValue placeholder={
+                    !selectedOrganization 
+                      ? "Primero selecciona una organización"
+                      : assessments.length === 0 
+                      ? "No hay evaluaciones realizadas"
+                      : "Selecciona una evaluación"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredControls.map((control) => (
-                    <SelectItem key={control.id} value={control.id}>
-                      {control.code} - {control.name}
+                  {assessments.map((assessment) => (
+                    <SelectItem key={assessment.id} value={assessment.id}>
+                      {assessment.standard} - {new Date(assessment.assessment_date).toLocaleDateString()} 
+                      <Badge variant="outline" className="ml-2">{assessment.status}</Badge>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label>Nivel de Madurez</Label>
-              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un nivel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {maturityLevels.map((level) => (
-                    <SelectItem key={level.id} value={level.id}>
-                      Nivel {level.level} - {level.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {selectedOrganization && assessments.length === 0 && (
+            <div className="text-center p-8 text-muted-foreground bg-muted/30 rounded-lg">
+              No hay evaluaciones realizadas para esta organización
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Texto del Plan de Mejora</Label>
-            <Textarea
-              value={templateText}
-              onChange={(e) => setTemplateText(e.target.value)}
-              placeholder="Escribe el plan de mejora recomendado para este control y nivel..."
-              rows={6}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleSave}>{editingId ? "Actualizar" : "Crear"} plantilla</Button>
-            {editingId && (
-              <Button variant="outline" onClick={resetForm}>
-                Cancelar
-              </Button>
-            )}
-          </div>
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Plantillas existentes</CardTitle>
-          <CardDescription>Lista de todos las plantillas de planes de mejora configurados</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por código, nombre o nivel..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+      {selectedAssessment && assessmentResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Controles Evaluados</CardTitle>
+            <CardDescription>
+              Edita el plan de mejora para cada control de esta evaluación
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {loading ? (
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {assessmentResults.map((result) => (
+                  <Card key={result.id} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold">
+                            {result.controls.code} - {result.controls.name}
+                          </h4>
+                          <div className="flex gap-2 mt-1">
+                            <Badge variant="outline">
+                              Nivel {result.maturity_levels.level}: {result.maturity_levels.name}
+                            </Badge>
+                            <Badge variant={result.conformity_status === 'conforme' ? 'default' : 'destructive'}>
+                              {result.conformity_status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
 
-          <div className="text-sm text-muted-foreground">Mostrando {filteredTemplates.length} template(s)</div>
+                      {result.comments && (
+                        <div className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
+                          <strong>Comentarios:</strong> {result.comments}
+                        </div>
+                      )}
 
-          <div className="space-y-3">
-            {filteredTemplates.map((template) => (
-              <Card key={template.id} className="p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold">
-                        {template.controls.code} - {template.controls.name}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Nivel {template.maturity_levels.level}: {template.maturity_levels.name}
-                      </p>
+                      <div className="space-y-2">
+                        <Label>Plan de Mejora</Label>
+                        <Textarea
+                          value={result.improvement_action || ""}
+                          onChange={(e) => {
+                            setAssessmentResults(prev =>
+                              prev.map(r => r.id === result.id ? { ...r, improvement_action: e.target.value } : r)
+                            );
+                          }}
+                          placeholder="Escribe el plan de mejora personalizado para este control..."
+                          rows={4}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => handleSaveImprovementAction(result.id, result.improvement_action || "")}
+                          disabled={savingIds.has(result.id)}
+                        >
+                          {savingIds.has(result.id) ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Guardando...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="h-4 w-4 mr-2" />
+                              Guardar
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(template)}>
-                        Editar
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(template.id)}>
-                        Eliminar
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="bg-muted/30 p-3 rounded text-sm">{template.template_text}</div>
-                </div>
-              </Card>
-            ))}
-
-            {filteredTemplates.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">No se encontraron templates</div>
+                  </Card>
+                ))}
+              </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
