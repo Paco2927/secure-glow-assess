@@ -140,7 +140,7 @@ const Reportes = () => {
 
   const getScoreLabel = (score: number) => {
     if (score <= 50) return "Crítico";
-    if (score <= 75) return "Mejorable";
+    if (score <= 75) return "Faltan muchas mejoras";
     return "Bueno";
   };
 
@@ -290,9 +290,7 @@ const Reportes = () => {
                         <div className="text-right">
                           {assessment.status === "pending" ? (
                             <div>
-                              <div className="text-2xl font-bold mb-1 text-yellow-600">
-                                Pendiente
-                              </div>
+                              <div className="text-2xl font-bold mb-1 text-yellow-600">Pendiente</div>
                               <span className="text-sm font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-600">
                                 En Progreso
                               </span>
