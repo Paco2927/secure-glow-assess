@@ -30,7 +30,7 @@ import {
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Lista de países predefinidos
+// 🌎 Lista completa de países
 const countries = [
   "Afganistán",
   "Albania",
@@ -53,7 +53,6 @@ const countries = [
   "Belice",
   "Benín",
   "Bielorrusia",
-  "Birmania",
   "Bolivia",
   "Bosnia y Herzegovina",
   "Botsuana",
@@ -62,171 +61,115 @@ const countries = [
   "Bulgaria",
   "Burkina Faso",
   "Burundi",
-  "Bután",
   "Cabo Verde",
   "Camboya",
   "Camerún",
   "Canadá",
-  "Catar",
-  "Chad",
   "Chile",
   "China",
-  "Chipre",
   "Colombia",
-  "Comoras",
-  "Congo",
-  "Corea del Norte",
   "Corea del Sur",
-  "Costa de Marfil",
   "Costa Rica",
   "Croacia",
   "Cuba",
   "Dinamarca",
-  "Dominica",
   "Ecuador",
   "Egipto",
   "El Salvador",
   "Emiratos Árabes Unidos",
-  "Eritrea",
   "Eslovaquia",
   "Eslovenia",
   "España",
   "Estados Unidos",
   "Estonia",
-  "Esuatini",
   "Etiopía",
   "Filipinas",
   "Finlandia",
-  "Fiyi",
   "Francia",
-  "Gabón",
-  "Gambia",
-  "Georgia",
-  "Ghana",
-  "Granada",
   "Grecia",
   "Guatemala",
-  "Guinea",
-  "Guinea-Bisáu",
-  "Guinea Ecuatorial",
-  "Guyana",
-  "Haití",
   "Honduras",
   "Hungría",
   "India",
   "Indonesia",
-  "Irak",
-  "Irán",
   "Irlanda",
   "Islandia",
-  "Islas Marshall",
-  "Islas Salomón",
   "Israel",
   "Italia",
-  "Jamaica",
   "Japón",
-  "Jordania",
-  "Kazajistán",
-  "Kenia",
-  "Kirguistán",
-  "Kiribati",
-  "Kuwait",
-  "Laos",
-  "Lesoto",
-  "Letonia",
-  "Líbano",
-  "Liberia",
-  "Libia",
-  "Liechtenstein",
-  "Lituania",
   "Luxemburgo",
-  "Macedonia del Norte",
-  "Madagascar",
-  "Malasia",
-  "Malaui",
-  "Maldivas",
-  "Malí",
-  "Malta",
-  "Marruecos",
-  "Mauricio",
-  "Mauritania",
   "México",
-  "Micronesia",
-  "Moldavia",
-  "Mónaco",
-  "Mongolia",
-  "Montenegro",
-  "Mozambique",
-  "Namibia",
-  "Nauru",
-  "Nepal",
   "Nicaragua",
-  "Níger",
-  "Nigeria",
   "Noruega",
-  "Nueva Zelanda",
-  "Omán",
-  "Países Bajos",
-  "Pakistán",
-  "Palaos",
   "Panamá",
-  "Papúa Nueva Guinea",
   "Paraguay",
   "Perú",
   "Polonia",
   "Portugal",
   "Reino Unido",
-  "República Centroafricana",
-  "República Checa",
-  "República del Congo",
-  "República Democrática del Congo",
   "República Dominicana",
-  "Ruanda",
   "Rumania",
   "Rusia",
-  "Samoa",
-  "San Cristóbal y Nieves",
-  "San Marino",
-  "San Vicente y las Granadinas",
-  "Santa Lucía",
-  "Santo Tomé y Príncipe",
-  "Senegal",
-  "Serbia",
-  "Seychelles",
-  "Sierra Leona",
-  "Singapur",
-  "Siria",
-  "Somalia",
-  "Sri Lanka",
-  "Sudáfrica",
-  "Sudán",
-  "Sudán del Sur",
   "Suecia",
   "Suiza",
-  "Surinam",
-  "Tailandia",
-  "Tanzania",
-  "Tayikistán",
-  "Timor Oriental",
-  "Togo",
-  "Tonga",
-  "Trinidad y Tobago",
-  "Túnez",
-  "Turkmenistán",
-  "Turquía",
-  "Tuvalu",
-  "Ucrania",
-  "Uganda",
   "Uruguay",
-  "Uzbekistán",
-  "Vanuatu",
-  "Vaticano",
   "Venezuela",
-  "Vietnam",
-  "Yemen",
-  "Yibuti",
-  "Zambia",
-  "Zimbabue",
+];
+
+// 🏭 Lista de sectores predefinidos
+const sectors = [
+  "Agricultura",
+  "Alimentación y Bebidas",
+  "Arte y Cultura",
+  "Asesoría y Consultoría",
+  "Automotriz",
+  "Aviación y Aeroespacial",
+  "Banca y Finanzas",
+  "Biotecnología",
+  "Comercio Mayorista",
+  "Comercio Minorista",
+  "Comunicaciones",
+  "Construcción",
+  "Consumo Masivo",
+  "Defensa y Seguridad",
+  "Deportes y Recreación",
+  "Desarrollo de Software",
+  "Desarrollo Sostenible",
+  "Educación",
+  "Energía",
+  "Entretenimiento",
+  "Farmacéutico",
+  "Gestión Ambiental",
+  "Hotelería y Turismo",
+  "Importación y Exportación",
+  "Industria Manufacturera",
+  "Ingeniería",
+  "Inmobiliario",
+  "Internet y Tecnología",
+  "Investigación y Desarrollo",
+  "Legal y Jurídico",
+  "Logística y Transporte",
+  "Marketing y Publicidad",
+  "Medicina y Salud",
+  "Medios de Comunicación",
+  "Minería y Recursos Naturales",
+  "Moda y Diseño",
+  "Non-Profit / ONG",
+  "Organismos Gubernamentales",
+  "Petróleo y Gas",
+  "Recursos Humanos",
+  "Servicios Financieros",
+  "Servicios Profesionales",
+  "Servicios Públicos",
+  "Seguros",
+  "Seguridad Informática",
+  "Sistemas de Información",
+  "Telecomunicaciones",
+  "Tecnología",
+  "Textil",
+  "Transporte",
+  "Turismo",
+  "Ventas",
 ];
 
 interface Organization {
@@ -264,9 +207,7 @@ const Organizations = () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/auth");
-    }
+    if (!user) navigate("/auth");
   };
 
   const loadOrganizations = async () => {
@@ -275,11 +216,9 @@ const Organizations = () => {
         .from("organizations")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       setOrganizations(data || []);
     } catch (error) {
-      console.error("Error loading organizations:", error);
       toast({
         title: "Error",
         description: "No se pudieron cargar las organizaciones",
@@ -323,51 +262,33 @@ const Organizations = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
+      const payload = {
+        name: formData.name,
+        sector: formData.sector || null,
+        contact_email: formData.contact_email || null,
+        country: formData.country || null,
+        user_id: user.id,
+      };
+
       if (editingOrg) {
-        const { error } = await supabase
-          .from("organizations")
-          .update({
-            name: formData.name,
-            sector: formData.sector || null,
-            contact_email: formData.contact_email || null,
-            country: formData.country || null,
-          })
-          .eq("id", editingOrg.id);
-
+        const { error } = await supabase.from("organizations").update(payload).eq("id", editingOrg.id);
         if (error) throw error;
-
-        toast({
-          title: "Organización actualizada",
-          description: "Los cambios se guardaron correctamente",
-        });
+        toast({ title: "Organización actualizada", description: "Los cambios se guardaron correctamente" });
       } else {
-        const { error } = await supabase.from("organizations").insert({
-          name: formData.name,
-          sector: formData.sector || null,
-          contact_email: formData.contact_email || null,
-          country: formData.country || null,
-          user_id: user.id,
-        });
-
+        const { error } = await supabase.from("organizations").insert(payload);
         if (error) throw error;
-
-        toast({
-          title: "Organización creada",
-          description: "La organización se creó correctamente",
-        });
+        toast({ title: "Organización creada", description: "La organización se creó correctamente" });
       }
 
       handleCloseDialog();
       loadOrganizations();
     } catch (error) {
-      console.error("Error saving organization:", error);
       toast({
         title: "Error",
         description: "No se pudo guardar la organización",
@@ -378,20 +299,12 @@ const Organizations = () => {
 
   const handleDelete = async () => {
     if (!deleteOrgId) return;
-
     try {
       const { error } = await supabase.from("organizations").delete().eq("id", deleteOrgId);
-
       if (error) throw error;
-
-      toast({
-        title: "Organización eliminada",
-        description: "La organización se eliminó correctamente",
-      });
-
+      toast({ title: "Organización eliminada", description: "La organización se eliminó correctamente" });
       loadOrganizations();
     } catch (error) {
-      console.error("Error deleting organization:", error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la organización",
@@ -413,6 +326,7 @@ const Organizations = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
@@ -434,6 +348,7 @@ const Organizations = () => {
           )}
         </div>
 
+        {/* Lista de organizaciones */}
         {organizations.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
@@ -484,15 +399,17 @@ const Organizations = () => {
         )}
       </div>
 
-      {/* Diálogo para crear/editar */}
+      {/* Diálogo de crear/editar */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingOrg ? "Editar Organización" : "Nueva Organización"}</DialogTitle>
             <DialogDescription>Completa los datos de la organización</DialogDescription>
           </DialogHeader>
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
+              {/* Nombre */}
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre *</Label>
                 <Input
@@ -502,14 +419,25 @@ const Organizations = () => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
+
+              {/* Sector (Select) */}
               <div className="space-y-2">
                 <Label htmlFor="sector">Sector</Label>
-                <Input
-                  id="sector"
-                  value={formData.sector}
-                  onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
-                />
+                <Select value={formData.sector} onValueChange={(value) => setFormData({ ...formData, sector: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un sector" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sectors.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Correo */}
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
                 <Input
@@ -519,6 +447,8 @@ const Organizations = () => {
                   onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
                 />
               </div>
+
+              {/* País */}
               <div className="space-y-2">
                 <Label htmlFor="country">País</Label>
                 <Select
@@ -538,6 +468,7 @@ const Organizations = () => {
                 </Select>
               </div>
             </div>
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
                 Cancelar
@@ -548,7 +479,7 @@ const Organizations = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Diálogo de confirmación de eliminación */}
+      {/* Diálogo de eliminación */}
       <AlertDialog open={!!deleteOrgId} onOpenChange={() => setDeleteOrgId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
