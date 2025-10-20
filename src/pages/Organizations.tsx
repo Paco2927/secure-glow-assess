@@ -28,6 +28,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Lista de países predefinidos
+const countries = ["Costa Rica", "México", "Colombia", "Argentina", "Chile", "Perú", "España", "Estados Unidos"];
+
 interface Organization {
   id: string;
   name: string;
@@ -259,11 +264,7 @@ const Organizations = () => {
                 <CardContent>
                   {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setSelectedOrgForMembers(org.id)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSelectedOrgForMembers(org.id)}>
                       <Users className="h-4 w-4 mr-2" />
                       Miembros
                     </Button>
@@ -287,6 +288,7 @@ const Organizations = () => {
         )}
       </div>
 
+      {/* Diálogo para crear/editar */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
@@ -323,11 +325,21 @@ const Organizations = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="country">País</Label>
-                <Input
-                  id="country"
+                <Select
                   value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                />
+                  onValueChange={(value) => setFormData({ ...formData, country: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
@@ -340,6 +352,7 @@ const Organizations = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Diálogo de confirmación de eliminación */}
       <AlertDialog open={!!deleteOrgId} onOpenChange={() => setDeleteOrgId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -355,19 +368,15 @@ const Organizations = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Gestor de miembros */}
       <Dialog open={!!selectedOrgForMembers} onOpenChange={() => setSelectedOrgForMembers(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Gestionar Miembros</DialogTitle>
-            <DialogDescription>
-              Administra los miembros de esta organización
-            </DialogDescription>
+            <DialogDescription>Administra los miembros de esta organización</DialogDescription>
           </DialogHeader>
           {selectedOrgForMembers && (
-            <OrganizationMembersManager
-              organizationId={selectedOrgForMembers}
-              isOwner={isAdmin}
-            />
+            <OrganizationMembersManager organizationId={selectedOrgForMembers} isOwner={isAdmin} />
           )}
         </DialogContent>
       </Dialog>
