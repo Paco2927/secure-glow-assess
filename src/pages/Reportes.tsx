@@ -40,6 +40,7 @@ const Reportes = () => {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assessmentToDelete, setAssessmentToDelete] = useState<string | null>(null);
+  const [userOrganizationId, setUserOrganizationId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -60,24 +61,66 @@ const Reportes = () => {
         role: session.user.role,
       });
       setUser(session.user);
-      loadAssessments(session.user.id);
+
+      // Obtener la organización del usuario
+      await loadUserOrganization(session.user.id);
     };
 
     checkAuth();
   }, [navigate]);
 
-  const loadAssessments = async (userId: string) => {
-    console.log(`📋 [Reportes] Cargando evaluaciones para usuario ID: ${userId}`);
+  const loadUserOrganization = async (userId: string) => {
+    try {
+      console.log(`🏢 [Reportes] Cargando organización para usuario: ${userId}`);
+
+      const { data: userData, error: userError } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", userId)
+        .single();
+
+      if (userError) {
+        console.error("❌ [Reportes] Error al cargar perfil de usuario:", userError);
+        throw userError;
+      }
+
+      console.log("✅ [Reportes] Organización del usuario:", userData?.organization_id);
+      setUserOrganizationId(userData?.organization_id);
+
+      // Cargar evaluaciones una vez que tenemos la organización
+      await loadAssessments(userData?.organization_id);
+    } catch (error: any) {
+      console.error("💥 [Reportes] Error al cargar organización:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo cargar la información de la organización",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadAssessments = async (organizationId: string | null) => {
+    console.log(`📋 [Reportes] Cargando evaluaciones para organización ID: ${organizationId}`);
 
     try {
-      // RLS policies handle access control:
-      // - Users see their own assessments
-      // - Organization members see their org's assessments
-      // - Admins/moderators see all assessments
-      const { data, error } = await supabase
+      let query = supabase
         .from("assessments")
         .select(`*, organizations(name)`)
         .order("assessment_date", { ascending: false });
+
+      // Si el usuario tiene una organización, cargar todas las evaluaciones de esa organización
+      if (organizationId) {
+        query = query.eq("organization_id", organizationId);
+        console.log("👥 [Reportes] Cargando evaluaciones de toda la organización");
+      } else {
+        console.log("👤 [Reportes] Usuario sin organización, cargando evaluaciones personales");
+        // Si no tiene organización, cargar solo las evaluaciones donde es el evaluador
+        if (user) {
+          query = query.eq("assessor_name", user.email); // Ajusta según tu estructura de datos
+        }
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("❌ [Reportes] Error de Supabase al cargar evaluaciones:", {
@@ -89,7 +132,9 @@ const Reportes = () => {
         throw error;
       }
 
-      console.log(`✅ [Reportes] Se retornaron ${data?.length || 0} evaluaciones`);
+      console.log(
+        `✅ [Reportes] Se retornaron ${data?.length || 0} evaluaciones para la organización ${organizationId}`,
+      );
 
       // Calculate average score for each assessment
       const assessmentsWithScores = await Promise.all(
@@ -238,9 +283,9 @@ const Reportes = () => {
       });
 
       // Refresh the list
-      if (user) {
+      if (userOrganizationId) {
         console.log("🔄 [Reportes] Recargando lista de evaluaciones después de eliminar");
-        loadAssessments(user.id);
+        loadAssessments(userOrganizationId);
       }
     } catch (error: any) {
       console.error("💥 [Reportes] Error general al eliminar evaluación:", {
@@ -258,6 +303,21 @@ const Reportes = () => {
       setDeleteDialogOpen(false);
       setAssessmentToDelete(null);
     }
+  };
+
+  // Verificar permisos para eliminar (solo el creador o admin puede eliminar)
+  const canDeleteAssessment = (assessment: Assessment) => {
+    // Si el usuario es admin o moderador, puede eliminar
+    if (user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "moderator") {
+      return true;
+    }
+
+    // Si el usuario es el evaluador, puede eliminar
+    if (assessment.assessor_name === user?.email) {
+      return true;
+    }
+
+    return false;
   };
 
   if (loading) {
@@ -288,7 +348,9 @@ const Reportes = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold">Reportes de Evaluaciones</h1>
-                <p className="text-xs text-muted-foreground">Historial y resultados</p>
+                <p className="text-xs text-muted-foreground">
+                  {userOrganizationId ? "Evaluaciones de toda la organización" : "Tus evaluaciones personales"}
+                </p>
               </div>
             </div>
           </div>
@@ -301,7 +363,11 @@ const Reportes = () => {
             <Card className="p-12 text-center">
               <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <h2 className="text-2xl font-semibold mb-2">No hay evaluaciones</h2>
-              <p className="text-muted-foreground mb-6">Aún no has completado ninguna evaluación</p>
+              <p className="text-muted-foreground mb-6">
+                {userOrganizationId
+                  ? "No hay evaluaciones en esta organización"
+                  : "Aún no has completado ninguna evaluación"}
+              </p>
               <Button onClick={() => navigate("/dashboard")} variant="hero">
                 Ir al Dashboard
               </Button>
@@ -311,7 +377,11 @@ const Reportes = () => {
               <Card className="mb-8 shadow-medium">
                 <CardHeader>
                   <CardTitle>Resumen de Evaluaciones</CardTitle>
-                  <CardDescription>Histórico de tus {assessments.length} evaluación(es) completada(s)</CardDescription>
+                  <CardDescription>
+                    {userOrganizationId
+                      ? `Histórico de ${assessments.length} evaluación(es) de la organización`
+                      : `Histórico de tus ${assessments.length} evaluación(es) completada(s)`}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -320,12 +390,21 @@ const Reportes = () => {
                         name: `${a.standard} #${assessments.length - i}`,
                         score: a.average_score || 0,
                         date: new Date(a.assessment_date).toLocaleDateString("es-ES"),
+                        assessor: a.assessor_name,
                       }))}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis domain={[0, 100]} />
-                      <Tooltip />
+                      <Tooltip
+                        formatter={(value, name) => [value, "Puntaje Promedio (%)"]}
+                        labelFormatter={(label, payload) => {
+                          if (payload && payload[0]) {
+                            return `Evaluador: ${payload[0].payload.assessor}`;
+                          }
+                          return label;
+                        }}
+                      />
                       <Legend />
                       <Bar dataKey="score" name="Puntaje Promedio (%)" radius={[8, 8, 0, 0]}>
                         {assessments.map((a, index) => (
@@ -338,7 +417,9 @@ const Reportes = () => {
               </Card>
 
               <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Evaluaciones Realizadas</h2>
+                <h2 className="text-2xl font-bold">
+                  {userOrganizationId ? "Evaluaciones de la Organización" : "Tus Evaluaciones Realizadas"}
+                </h2>
                 {assessments.map((assessment) => (
                   <Card
                     key={assessment.id}
@@ -360,6 +441,7 @@ const Reportes = () => {
                             <div className="font-medium text-foreground">
                               Organización: {assessment.organization_name}
                             </div>
+                            <div className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</div>
                           </CardDescription>
                         </div>
                         <div className="text-right">
@@ -394,19 +476,21 @@ const Reportes = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</p>
+                        <p className="text-sm text-muted-foreground">Creado por: {assessment.assessor_name}</p>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
                             Ver Detalles
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleDeleteClick(assessment.id, e)}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {canDeleteAssessment(assessment) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => handleDeleteClick(assessment.id, e)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
