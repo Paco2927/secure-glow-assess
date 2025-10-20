@@ -164,7 +164,7 @@ const Dashboard = () => {
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* ISO 27001 - Solo para Admin */}
+            {/* ISO 27001 - Solo para Admin y moderador*/}
             {(isAdmin || isModerator) && (
               <Card
                 className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
