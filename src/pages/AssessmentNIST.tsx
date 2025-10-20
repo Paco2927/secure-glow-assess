@@ -462,6 +462,13 @@ const AssessmentNIST = () => {
 
                   <div>
                     <Label htmlFor={`proof-${control.id}`}>Imagen de Prueba (Opcional)</Label>
+                    <div className="mt-2">
+  <label
+    htmlFor={`proof-${control.id}`}
+    className="inline-block cursor-pointer py-2 px-4 rounded-md bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90"
+  >
+    {controlData[control.id]?.proofImage ? "Cambiar imagen" : "Subir imagen"}
+  </label>
                     <input
                       id={`proof-${control.id}`}
                       type="file"
