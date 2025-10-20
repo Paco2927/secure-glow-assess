@@ -41,7 +41,7 @@ const Dashboard = () => {
       const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
       setProfile(profileData);
 
-      // Check admin status
+      // Check admin statusokk
       const { data: adminCheck } = await supabase.rpc("has_role", {
         _user_id: session.user.id,
         _role: "admin",
