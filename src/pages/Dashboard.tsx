@@ -95,7 +95,7 @@ const Dashboard = () => {
                 Admin
               </Button>
             )}
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -111,9 +111,7 @@ const Dashboard = () => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{profile?.name || "Usuario"}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -156,22 +154,23 @@ const Dashboard = () => {
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
-              onClick={() => navigate("/assessment/iso27001")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center">
-                  <img src={IsoIcon} alt="IsoIcon" className="w-11 h-11" />
+            {isAdmin && (
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
+                onClick={() => navigate("/assessment/iso27001")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center">
+                    <img src={IsoIcon} alt="IsoIcon" className="w-11 h-11" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">ISO 27001</h2>
+                    <p className="text-sm text-muted-foreground">Seguridad de la Información</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-primary" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">ISO 27001</h2>
-                  <p className="text-sm text-muted-foreground">Seguridad de la Información</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-primary" />
-              </div>
-            </Card>
-
+              </Card>
+            )}
             <Card
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
               onClick={() => navigate("/assessment/nist")}
