@@ -10,6 +10,7 @@ import { UserRoleManager } from "@/components/admin/UserRoleManager";
 import { DomainManager } from "@/components/admin/DomainManager";
 import { ControlManager } from "@/components/admin/ControlManager";
 import ImprovementPlanManager from "@/components/admin/ImprovementPlanManager";
+import ContactSettingsManager from "@/components/admin/ContactSettingsManager";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -111,7 +112,7 @@ const Admin = () => {
 
         <Card className="p-6">
           <Tabs defaultValue="domains" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               {/* Solo Admin puede ver Usuarios y Roles */}
               {userRole === "admin" && (
                 <TabsTrigger value="users">
@@ -137,6 +138,14 @@ const Admin = () => {
                 <ClipboardCheck className="h-4 w-4 mr-2" />
                 Planes de Mejora
               </TabsTrigger>
+
+              {/* Solo Admin puede ver Configuración de Contacto */}
+              {userRole === "admin" && (
+                <TabsTrigger value="contact">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Contacto
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {userRole === "admin" && (
@@ -159,6 +168,13 @@ const Admin = () => {
             <TabsContent value="plans" className="mt-6">
               <ImprovementPlanManager />
             </TabsContent>
+
+            {/* Configuración de Contacto solo para Admin */}
+            {userRole === "admin" && (
+              <TabsContent value="contact" className="mt-6">
+                <ContactSettingsManager />
+              </TabsContent>
+            )}
           </Tabs>
         </Card>
       </div>

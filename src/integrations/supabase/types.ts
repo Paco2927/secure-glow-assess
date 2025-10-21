@@ -120,6 +120,33 @@ export type Database = {
           },
         ]
       }
+      contact_settings: {
+        Row: {
+          company_location: string | null
+          company_phone: string | null
+          created_at: string | null
+          destination_email: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_location?: string | null
+          company_phone?: string | null
+          created_at?: string | null
+          destination_email: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_location?: string | null
+          company_phone?: string | null
+          created_at?: string | null
+          destination_email?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       controls: {
         Row: {
           code: string

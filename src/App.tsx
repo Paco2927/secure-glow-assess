@@ -13,6 +13,7 @@ import Results from "./pages/Results";
 import Reportes from "./pages/Reportes";
 import Organizations from "./pages/Organizations";
 import Profile from "./pages/Profile";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/assessment/iso27001" element={<AssessmentISO />} />
           <Route path="/assessment/nist" element={<AssessmentNIST />} />
           <Route path="/admin" element={<Admin />} />
