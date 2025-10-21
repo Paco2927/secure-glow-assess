@@ -224,7 +224,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
                         setEditRole(member.organization_role || "");
                       }}
                     >
-                      Asignar Rol
+                      Asignar mango
                     </Button>
                     <Button variant="destructive" size="sm" onClick={() => handleRemoveMember(member.id)}>
                       <Trash2 className="h-4 w-4" />
