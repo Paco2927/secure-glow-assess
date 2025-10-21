@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, FileText, List, ClipboardCheck, Shield } from "lucide-react";
+import { ArrowLeft, Users, FileText, List, ClipboardCheck, Shield, Palette } from "lucide-react";
 import { UserRoleManager } from "@/components/admin/UserRoleManager";
 import { DomainManager } from "@/components/admin/DomainManager";
 import { ControlManager } from "@/components/admin/ControlManager";
 import ImprovementPlanManager from "@/components/admin/ImprovementPlanManager";
 import ContactSettingsManager from "@/components/admin/ContactSettingsManager";
+import { ThemeSettingsManager } from "@/components/admin/ThemeSettingsManager";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -112,7 +113,7 @@ const Admin = () => {
 
         <Card className="p-6">
           <Tabs defaultValue="domains" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               {/* Solo Admin puede ver Usuarios y Roles */}
               {userRole === "admin" && (
                 <TabsTrigger value="users">
@@ -146,6 +147,14 @@ const Admin = () => {
                   Contacto
                 </TabsTrigger>
               )}
+
+              {/* Solo Admin puede ver Personalización de Tema */}
+              {userRole === "admin" && (
+                <TabsTrigger value="theme">
+                  <Palette className="h-4 w-4 mr-2" />
+                  Colores
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {userRole === "admin" && (
@@ -173,6 +182,13 @@ const Admin = () => {
             {userRole === "admin" && (
               <TabsContent value="contact" className="mt-6">
                 <ContactSettingsManager />
+              </TabsContent>
+            )}
+
+            {/* Personalización de Tema solo para Admin */}
+            {userRole === "admin" && (
+              <TabsContent value="theme" className="mt-6">
+                <ThemeSettingsManager />
               </TabsContent>
             )}
           </Tabs>
