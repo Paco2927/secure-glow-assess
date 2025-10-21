@@ -32,6 +32,49 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Rate limiting: Get IP address from headers
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+
+    console.log("Checking rate limit for IP:", ipAddress);
+
+    // Check submissions from this IP in the last hour
+    const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+    const { data: recentSubmissions, error: logError } = await supabase
+      .from('contact_submissions_log')
+      .select('created_at')
+      .eq('ip_address', ipAddress)
+      .gte('created_at', oneHourAgo);
+
+    if (logError) {
+      console.error('Error checking rate limit:', logError);
+    }
+
+    // Allow max 3 submissions per hour per IP
+    if (recentSubmissions && recentSubmissions.length >= 3) {
+      console.log(`Rate limit exceeded for IP: ${ipAddress} (${recentSubmissions.length} submissions in last hour)`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Demasiados envíos. Por favor, intenta de nuevo más tarde.' 
+        }),
+        { 
+          status: 429, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Log this submission attempt
+    const { error: insertLogError } = await supabase
+      .from('contact_submissions_log')
+      .insert({ ip_address: ipAddress, email });
+
+    if (insertLogError) {
+      console.error('Error logging submission:', insertLogError);
+      // Continue anyway - logging shouldn't block the submission
+    }
+
     // Fetch destination email from contact_settings
     const { data: settings, error: settingsError } = await supabase
       .from("contact_settings")

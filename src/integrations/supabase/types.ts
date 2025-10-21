@@ -147,6 +147,27 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_submissions_log: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          ip_address: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          ip_address: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          ip_address?: string
+        }
+        Relationships: []
+      }
       controls: {
         Row: {
           code: string
