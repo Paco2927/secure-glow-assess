@@ -274,7 +274,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="role">Rol (ej: Gerente de Administración)</Label>
+              <Label htmlFor="role">Puesto (ej: Gerente de Administración)</Label>
               <Input
                 id="role"
                 placeholder="Escribe el rol..."
