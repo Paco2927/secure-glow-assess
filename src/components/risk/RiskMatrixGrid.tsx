@@ -18,22 +18,27 @@ interface Risk {
 
 interface RiskMatrixGridProps {
   onEditRisk: (riskId: string) => void;
+  assessmentId: string | null;
 }
 
-export function RiskMatrixGrid({ onEditRisk }: RiskMatrixGridProps) {
+export function RiskMatrixGrid({ onEditRisk, assessmentId }: RiskMatrixGridProps) {
   const [risks, setRisks] = useState<Risk[]>([]);
   const [loading, setLoading] = useState(true);
   const [matrixSize] = useState(5);
 
   useEffect(() => {
     fetchRisksWithAssessments();
-  }, []);
+  }, [assessmentId]);
 
   const fetchRisksWithAssessments = async () => {
     try {
-      const { data: risksData, error: risksError } = await supabase
-        .from("risks")
-        .select("*");
+      let query = supabase.from("risks").select("*");
+      
+      if (assessmentId) {
+        query = query.eq("assessment_id", assessmentId);
+      }
+
+      const { data: risksData, error: risksError } = await query;
 
       if (risksError) throw risksError;
 

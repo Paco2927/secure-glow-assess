@@ -13,14 +13,16 @@ import { Loader2 } from "lucide-react";
 interface RiskFormProps {
   riskId: string | null;
   onClose: () => void;
+  assessmentId?: string | null;
+  organizationId?: string;
 }
 
-export function RiskForm({ riskId, onClose }: RiskFormProps) {
+export function RiskForm({ riskId, onClose, assessmentId, organizationId }: RiskFormProps) {
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
-    organization_id: "",
+    organization_id: organizationId || "",
     asset: "",
     owner: "",
     threat: "",
@@ -148,7 +150,11 @@ export function RiskForm({ riskId, onClose }: RiskFormProps) {
       } else {
         const { data: newRisk, error } = await supabase
           .from("risks")
-          .insert({ ...formData, created_by: user.id })
+          .insert({ 
+            ...formData, 
+            created_by: user.id,
+            assessment_id: assessmentId || null
+          })
           .select()
           .single();
         if (error) throw error;
@@ -227,6 +233,7 @@ export function RiskForm({ riskId, onClose }: RiskFormProps) {
               <Select
                 value={formData.organization_id}
                 onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
+                disabled={!!organizationId}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione organización" />
@@ -239,6 +246,11 @@ export function RiskForm({ riskId, onClose }: RiskFormProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {organizationId && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Organización predefinida por la evaluación
+                </p>
+              )}
             </div>
 
             <div>

@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,8 +11,31 @@ import { MatrixConfig } from "@/components/risk/MatrixConfig";
 
 export default function RiskMatrix() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const assessmentId = searchParams.get("assessment");
   const [showRiskForm, setShowRiskForm] = useState(false);
   const [editingRiskId, setEditingRiskId] = useState<string | null>(null);
+  const [assessmentInfo, setAssessmentInfo] = useState<any>(null);
+
+  useEffect(() => {
+    if (assessmentId) {
+      fetchAssessmentInfo();
+    }
+  }, [assessmentId]);
+
+  const fetchAssessmentInfo = async () => {
+    if (!assessmentId) return;
+    
+    const { data } = await supabase
+      .from("assessments")
+      .select("*, organizations(name)")
+      .eq("id", assessmentId)
+      .single();
+    
+    if (data) {
+      setAssessmentInfo(data);
+    }
+  };
 
   const handleEditRisk = (riskId: string) => {
     setEditingRiskId(riskId);
@@ -38,7 +62,10 @@ export default function RiskMatrix() {
             <div>
               <h1 className="text-3xl font-bold">Matriz de Riesgos ISO 27001</h1>
               <p className="text-muted-foreground">
-                Gestión integral de riesgos de seguridad de la información
+                {assessmentInfo 
+                  ? `Evaluación: ${assessmentInfo.organizations?.name || 'Sin organización'} - ${assessmentInfo.standard}`
+                  : "Gestión integral de riesgos de seguridad de la información"
+                }
               </p>
             </div>
           </div>
@@ -56,11 +83,11 @@ export default function RiskMatrix() {
           </TabsList>
 
           <TabsContent value="matrix" className="space-y-4">
-            <RiskMatrixGrid onEditRisk={handleEditRisk} />
+            <RiskMatrixGrid onEditRisk={handleEditRisk} assessmentId={assessmentId} />
           </TabsContent>
 
           <TabsContent value="list" className="space-y-4">
-            <RiskList onEditRisk={handleEditRisk} />
+            <RiskList onEditRisk={handleEditRisk} assessmentId={assessmentId} />
           </TabsContent>
 
           <TabsContent value="config" className="space-y-4">
@@ -72,6 +99,8 @@ export default function RiskMatrix() {
           <RiskForm
             riskId={editingRiskId}
             onClose={handleCloseForm}
+            assessmentId={assessmentId}
+            organizationId={assessmentInfo?.organization_id}
           />
         )}
       </div>

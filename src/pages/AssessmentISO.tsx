@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ArrowLeft, Save } from "lucide-react";
+import { Shield, ArrowLeft, Save, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -311,10 +311,21 @@ const AssessmentISO = () => {
                 <p className="text-xs text-muted-foreground">Seguridad de la Información</p>
               </div>
             </div>
-            <Button onClick={handleSubmit} disabled={isSubmitting || !allControlsAnswered} variant="hero">
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
-            </Button>
+            <div className="flex gap-2">
+              {currentAssessmentId && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/risk-matrix?assessment=${currentAssessmentId}`)}
+                >
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Matriz de Riesgos
+                </Button>
+              )}
+              <Button onClick={handleSubmit} disabled={isSubmitting || !allControlsAnswered} variant="hero">
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
+              </Button>
+            </div>
           </div>
         </div>
       </header>

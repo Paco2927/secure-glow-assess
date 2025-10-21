@@ -608,6 +608,7 @@ export type Database = {
       }
       risks: {
         Row: {
+          assessment_id: string | null
           asset: string
           control_reference: string | null
           created_at: string | null
@@ -621,6 +622,7 @@ export type Database = {
           vulnerability: string
         }
         Insert: {
+          assessment_id?: string | null
           asset: string
           control_reference?: string | null
           created_at?: string | null
@@ -634,6 +636,7 @@ export type Database = {
           vulnerability: string
         }
         Update: {
+          assessment_id?: string | null
           asset?: string
           control_reference?: string | null
           created_at?: string | null
@@ -646,7 +649,22 @@ export type Database = {
           updated_at?: string | null
           vulnerability?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "risks_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "accessible_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risks_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       theme_settings: {
         Row: {

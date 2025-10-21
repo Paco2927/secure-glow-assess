@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Calendar, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -396,6 +396,19 @@ const Reportes = () => {
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</p>
                         <div className="flex gap-2">
+                          {assessment.standard === "ISO27001" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/risk-matrix?assessment=${assessment.id}`);
+                              }}
+                            >
+                              <AlertTriangle className="w-4 h-4 mr-1" />
+                              Riesgos
+                            </Button>
+                          )}
                           <Button variant="outline" size="sm">
                             Ver Detalles
                           </Button>
