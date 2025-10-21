@@ -181,7 +181,7 @@ const Contact = () => {
                       </Label>
                       <Input
                         id="fullName"
-                        placeholder="Ingrsar Nombre"
+                        placeholder="Ingresar Nombre"
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         className={errors.fullName ? "border-destructive" : ""}
