@@ -138,8 +138,8 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
       if (error) throw error;
 
       toast({
-        title: "Rol actualizado",
-        description: "El rol del miembro ha sido actualizado",
+        title: "Puesto actualizado",
+        description: "El puesto del miembro ha sido actualizado",
       });
 
       setEditingMember(null);
@@ -211,7 +211,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
                   </div>
                   <p className="text-sm text-muted-foreground">{member.profiles.email}</p>
                   {member.organization_role && (
-                    <p className="text-sm text-primary mt-1">Rol: {member.organization_role}</p>
+                    <p className="text-sm text-primary mt-1">Puesto: {member.organization_role}</p>
                   )}
                 </div>
                 {isOwner && (
