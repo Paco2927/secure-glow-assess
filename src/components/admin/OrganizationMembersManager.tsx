@@ -287,7 +287,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
             <Button variant="outline" onClick={() => setEditingMember(null)}>
               Cancelar
             </Button>
-            <Button onClick={handleUpdateRole}>Guardar Rol</Button>
+            <Button onClick={handleUpdateRole}>Guardar puesto</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
