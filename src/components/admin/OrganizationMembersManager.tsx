@@ -48,13 +48,15 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
     try {
       const { data, error } = await supabase
         .from("organization_members")
-        .select(`
+        .select(
+          `
           id,
           user_id,
           organization_role,
           status,
           profiles!organization_members_user_id_fkey(name, email)
-        `)
+        `,
+        )
         .eq("organization_id", organizationId);
 
       if (error) throw error;
@@ -94,7 +96,9 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
       }
 
       // Add member to organization
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const { error } = await supabase.from("organization_members").insert({
         organization_id: organizationId,
         user_id: profileData.id,
@@ -153,10 +157,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
 
   const handleRemoveMember = async (memberId: string) => {
     try {
-      const { error } = await supabase
-        .from("organization_members")
-        .delete()
-        .eq("id", memberId);
+      const { error } = await supabase.from("organization_members").delete().eq("id", memberId);
 
       if (error) throw error;
 
@@ -199,15 +200,10 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
       <CardContent>
         <div className="space-y-3">
           {members.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No hay miembros en esta organización
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-4">No hay miembros en esta organización</p>
           ) : (
             members.map((member) => (
-              <div
-                key={member.id}
-                className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
-              >
+              <div key={member.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
@@ -230,11 +226,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
                     >
                       Asignar Rol
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemoveMember(member.id)}
-                    >
+                    <Button variant="destructive" size="sm" onClick={() => handleRemoveMember(member.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -277,10 +269,8 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
       <Dialog open={!!editingMember} onOpenChange={() => setEditingMember(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Asignar Rol</DialogTitle>
-            <DialogDescription>
-              Define el rol de {editingMember?.profiles.name} en la organización
-            </DialogDescription>
+            <DialogTitle>Asignar Puesto</DialogTitle>
+            <DialogDescription>Define el puesto de {editingMember?.profiles.name} en la organización</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
