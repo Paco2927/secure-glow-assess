@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,7 @@ interface DomainScore {
 
 const Reportes = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAdminRole();
   const [user, setUser] = useState<any>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -412,14 +414,16 @@ const Reportes = () => {
                           <Button variant="outline" size="sm">
                             Ver Detalles
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleDeleteClick(assessment.id, e)}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {isAdmin && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => handleDeleteClick(assessment.id, e)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>

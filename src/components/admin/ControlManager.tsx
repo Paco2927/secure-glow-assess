@@ -5,6 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 
@@ -32,6 +42,8 @@ export const ControlManager = () => {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [controlToDelete, setControlToDelete] = useState<string | null>(null);
   const [editingControl, setEditingControl] = useState<Control | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDomain, setFilterDomain] = useState<string>("all");
@@ -119,13 +131,16 @@ export const ControlManager = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este control?")) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setControlToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!controlToDelete) return;
 
     try {
-      const { error } = await supabase.from("controls").delete().eq("id", id);
+      const { error } = await supabase.from("controls").delete().eq("id", controlToDelete);
 
       if (error) throw error;
 
@@ -142,6 +157,9 @@ export const ControlManager = () => {
         description: error.message || "No se pudo eliminar el control",
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialogOpen(false);
+      setControlToDelete(null);
     }
   };
 
@@ -284,7 +302,7 @@ export const ControlManager = () => {
                 <Button size="sm" variant="outline" onClick={() => handleEdit(control)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(control.id)}>
+                <Button size="sm" variant="destructive" onClick={() => handleDeleteClick(control.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -292,6 +310,23 @@ export const ControlManager = () => {
           </div>
         ))}
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar control?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el control.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

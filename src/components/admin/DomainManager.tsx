@@ -5,6 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
@@ -20,6 +30,8 @@ export const DomainManager = () => {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [domainToDelete, setDomainToDelete] = useState<string | null>(null);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -106,16 +118,19 @@ export const DomainManager = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este dominio? Esto también eliminará todos los controles asociados.")) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setDomainToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!domainToDelete) return;
 
     try {
       const { error } = await supabase
         .from('domains')
         .delete()
-        .eq('id', id);
+        .eq('id', domainToDelete);
 
       if (error) throw error;
 
@@ -132,6 +147,9 @@ export const DomainManager = () => {
         description: error.message || "No se pudo eliminar el dominio",
         variant: "destructive"
       });
+    } finally {
+      setDeleteDialogOpen(false);
+      setDomainToDelete(null);
     }
   };
 
@@ -223,7 +241,7 @@ export const DomainManager = () => {
                 <Button size="sm" variant="outline" onClick={() => handleEdit(domain)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(domain.id)}>
+                <Button size="sm" variant="destructive" onClick={() => handleDeleteClick(domain.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -231,6 +249,23 @@ export const DomainManager = () => {
           </div>
         ))}
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar dominio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el dominio y todos los controles asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
