@@ -131,7 +131,7 @@ const Landing = () => {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => navigate("/contáctanos")}
+                onClick={() => navigate("/contact")}
                 className="text-lg px-8 py-6"
               >
                 Conocer

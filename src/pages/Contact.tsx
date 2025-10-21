@@ -24,7 +24,7 @@ const Contact = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [contactSettings, setContactSettings] = useState({
-    email: "tester7531yt@gmail.com",
+    email: "info@techsecureai.com",
     phone: "+(506) 62979402",
     location: "San José, Costa Rica",
   });
@@ -44,7 +44,11 @@ const Contact = () => {
   }, []);
 
   const fetchContactSettings = async () => {
-    const { data, error } = await supabase.from("contact_settings").select("*").limit(1).single();
+    const { data, error } = await supabase
+      .from("contact_settings")
+      .select("*")
+      .limit(1)
+      .single();
 
     if (data && !error) {
       setContactSettings({
@@ -132,8 +136,7 @@ const Contact = () => {
                 Contáctenos - <span className="text-primary">TechSecure AI</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                ¿Listo para fortalecer su postura de ciberseguridad? Nuestros expertos están aquí para ayudarle a
-                implementar soluciones de seguridad impulsadas por IA.
+                ¿Listo para fortalecer su postura de ciberseguridad? Nuestros expertos están aquí para ayudarle a implementar soluciones de seguridad impulsadas por IA.
               </p>
             </div>
 
@@ -186,7 +189,9 @@ const Contact = () => {
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         className={errors.fullName ? "border-destructive" : ""}
                       />
-                      {errors.fullName && <p className="text-sm text-destructive mt-1">{errors.fullName}</p>}
+                      {errors.fullName && (
+                        <p className="text-sm text-destructive mt-1">{errors.fullName}</p>
+                      )}
                     </div>
 
                     <div>
@@ -217,7 +222,9 @@ const Contact = () => {
                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                         className={errors.companyName ? "border-destructive" : ""}
                       />
-                      {errors.companyName && <p className="text-sm text-destructive mt-1">{errors.companyName}</p>}
+                      {errors.companyName && (
+                        <p className="text-sm text-destructive mt-1">{errors.companyName}</p>
+                      )}
                     </div>
 
                     <div>
@@ -246,7 +253,9 @@ const Contact = () => {
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       className={errors.message ? "border-destructive" : ""}
                     />
-                    {errors.message && <p className="text-sm text-destructive mt-1">{errors.message}</p>}
+                    {errors.message && (
+                      <p className="text-sm text-destructive mt-1">{errors.message}</p>
+                    )}
                   </div>
 
                   <Button type="submit" size="lg" className="w-full shadow-medium" disabled={loading}>
