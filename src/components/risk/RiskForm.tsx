@@ -20,11 +20,11 @@ interface RiskFormProps {
 export function RiskForm({ riskId, onClose, assessmentId, organizationId }: RiskFormProps) {
   const [loading, setLoading] = useState(false);
   const [organizations, setOrganizations] = useState<any[]>([]);
+  const [controls, setControls] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     organization_id: organizationId || "",
     asset: "",
-    owner: "",
     threat: "",
     vulnerability: "",
     control_reference: "",
@@ -56,6 +56,7 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
 
   useEffect(() => {
     fetchOrganizations();
+    fetchControls();
     if (riskId) {
       fetchRiskData();
     }
@@ -64,6 +65,14 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
   const fetchOrganizations = async () => {
     const { data } = await supabase.from("organizations").select("*");
     setOrganizations(data || []);
+  };
+
+  const fetchControls = async () => {
+    const { data } = await supabase
+      .from("controls")
+      .select("id, code, name, description")
+      .order("code");
+    setControls(data || []);
   };
 
   const fetchRiskData = async () => {
@@ -129,7 +138,7 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
   };
 
   const handleSubmit = async () => {
-    if (!formData.organization_id || !formData.asset || !formData.risk_description) {
+    if (!formData.organization_id || !formData.asset || !formData.risk_description || !formData.threat || !formData.vulnerability) {
       toast.error("Por favor complete los campos obligatorios");
       return;
     }
@@ -264,16 +273,6 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
             </div>
 
             <div>
-              <Label htmlFor="owner">Propietario *</Label>
-              <Input
-                id="owner"
-                value={formData.owner}
-                onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-                placeholder="Persona o rol responsable"
-              />
-            </div>
-
-            <div>
               <Label htmlFor="threat">Amenaza *</Label>
               <Input
                 id="threat"
@@ -295,12 +294,21 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
 
             <div>
               <Label htmlFor="control_reference">Referencia Control Anexo A</Label>
-              <Input
-                id="control_reference"
+              <Select
                 value={formData.control_reference}
-                onChange={(e) => setFormData({ ...formData, control_reference: e.target.value })}
-                placeholder="ej: A.5.7, A.8.28"
-              />
+                onValueChange={(value) => setFormData({ ...formData, control_reference: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un control" />
+                </SelectTrigger>
+                <SelectContent>
+                  {controls.map((control) => (
+                    <SelectItem key={control.id} value={control.code}>
+                      {control.code} - {control.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
