@@ -149,7 +149,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
       console.error("Error updating role:", error);
       toast({
         title: "Error",
-        description: "No se pudo actualizar el rol",
+        description: "No se pudo actualizar el puesto",
         variant: "destructive",
       });
     }
