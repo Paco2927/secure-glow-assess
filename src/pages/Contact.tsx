@@ -196,7 +196,7 @@ const Contact = () => {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="juan@empresa.com"
+                        placeholder="TuEmpresa@gmail.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className={errors.email ? "border-destructive" : ""}
