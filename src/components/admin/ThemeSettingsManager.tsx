@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { RefreshCw, Save } from "lucide-react";
+import { RefreshCw, Save, Pipette } from "lucide-react";
+import { HslColorPicker } from "react-colorful";
 
 interface ThemeColors {
   primary?: string;
@@ -58,6 +60,20 @@ export const ThemeSettingsManager = () => {
     setColors((prev) => ({ ...prev, [key]: value }));
   };
 
+  const hslToObject = (hslString: string) => {
+    const match = hslString.match(/(\d+\.?\d*)\s+(\d+\.?\d*)%\s+(\d+\.?\d*)%/);
+    if (!match) return { h: 0, s: 0, l: 0 };
+    return {
+      h: parseFloat(match[1]),
+      s: parseFloat(match[2]),
+      l: parseFloat(match[3])
+    };
+  };
+
+  const objectToHsl = (hsl: { h: number; s: number; l: number }) => {
+    return `${hsl.h.toFixed(1)} ${hsl.s.toFixed(1)}% ${hsl.l.toFixed(1)}%`;
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -76,23 +92,15 @@ export const ThemeSettingsManager = () => {
         if (error) throw error;
       }
 
-      toast.success("Tema actualizado correctamente");
-      applyTheme();
+      toast.success("Tema actualizado correctamente. Todos los usuarios verán estos cambios.");
+      // Reload the page to apply changes globally
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error("Error saving theme:", error);
       toast.error("Error al guardar el tema");
     } finally {
       setSaving(false);
     }
-  };
-
-  const applyTheme = () => {
-    const root = document.documentElement;
-    Object.entries(colors).forEach(([key, value]) => {
-      if (value) {
-        root.style.setProperty(`--${key}`, value);
-      }
-    });
   };
 
   const handleReset = () => {
@@ -134,29 +142,55 @@ export const ThemeSettingsManager = () => {
         <CardHeader>
           <CardTitle>Personalización de Colores</CardTitle>
           <CardDescription>
-            Configura los colores del tema de la plataforma. Los valores deben estar en formato HSL (ej: "222.2 47.4% 11.2%")
+            Configura los colores del tema de la plataforma. Estos cambios serán visibles para todos los usuarios.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            {colorFields.map(({ key, label, description }) => (
-              <div key={key} className="space-y-2">
-                <Label htmlFor={key}>{label}</Label>
-                <div className="flex gap-2 items-center">
-                  <div
-                    className="w-10 h-10 rounded border shrink-0"
-                    style={{ backgroundColor: `hsl(${colors[key as keyof ThemeColors] || "0 0% 50%"})` }}
-                  />
-                  <Input
-                    id={key}
-                    value={colors[key as keyof ThemeColors] || ""}
-                    onChange={(e) => handleColorChange(key as keyof ThemeColors, e.target.value)}
-                    placeholder="222.2 47.4% 11.2%"
-                  />
+            {colorFields.map(({ key, label, description }) => {
+              const currentColor = colors[key as keyof ThemeColors] || "0 0% 50%";
+              const hslObject = hslToObject(currentColor);
+              
+              return (
+                <div key={key} className="space-y-2">
+                  <Label htmlFor={key}>{label}</Label>
+                  <div className="flex gap-2 items-start">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-10 h-10 p-0 shrink-0"
+                          style={{ backgroundColor: `hsl(${currentColor})` }}
+                        >
+                          <Pipette className="w-4 h-4 opacity-0 hover:opacity-100 transition-opacity" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-3">
+                        <HslColorPicker
+                          color={hslObject}
+                          onChange={(newColor) => {
+                            const hslString = objectToHsl(newColor);
+                            handleColorChange(key as keyof ThemeColors, hslString);
+                          }}
+                        />
+                        <div className="mt-2 p-2 bg-muted rounded text-xs font-mono text-center">
+                          {currentColor}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <div className="flex-1">
+                      <Input
+                        id={key}
+                        value={currentColor}
+                        onChange={(e) => handleColorChange(key as keyof ThemeColors, e.target.value)}
+                        placeholder="222.2 47.4% 11.2%"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{description}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">{description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex gap-3 pt-4">
