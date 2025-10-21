@@ -420,6 +420,234 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_assessments: {
+        Row: {
+          assessed_by: string
+          assessment_date: string | null
+          created_at: string | null
+          existing_controls: string | null
+          id: string
+          impact: number
+          is_current: boolean | null
+          likelihood: number
+          residual_risk: string | null
+          risk_id: string
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          risk_score: number
+        }
+        Insert: {
+          assessed_by: string
+          assessment_date?: string | null
+          created_at?: string | null
+          existing_controls?: string | null
+          id?: string
+          impact: number
+          is_current?: boolean | null
+          likelihood: number
+          residual_risk?: string | null
+          risk_id: string
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          risk_score: number
+        }
+        Update: {
+          assessed_by?: string
+          assessment_date?: string | null
+          created_at?: string | null
+          existing_controls?: string | null
+          id?: string
+          impact?: number
+          is_current?: boolean | null
+          likelihood?: number
+          residual_risk?: string | null
+          risk_id?: string
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          risk_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_assessments_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "risks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_audit_log: {
+        Row: {
+          action: string
+          changed_at: string | null
+          changed_by: string
+          description: string | null
+          field_changed: string | null
+          id: string
+          new_value: string | null
+          old_value: string | null
+          risk_id: string
+        }
+        Insert: {
+          action: string
+          changed_at?: string | null
+          changed_by: string
+          description?: string | null
+          field_changed?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          risk_id: string
+        }
+        Update: {
+          action?: string
+          changed_at?: string | null
+          changed_by?: string
+          description?: string | null
+          field_changed?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          risk_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_audit_log_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "risks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_matrix_config: {
+        Row: {
+          color_zones: Json
+          created_at: string | null
+          id: string
+          impact_scale: number
+          is_active: boolean
+          likelihood_scale: number
+          name: string
+          organization_id: string | null
+          scoring_formula: string
+          updated_at: string | null
+        }
+        Insert: {
+          color_zones?: Json
+          created_at?: string | null
+          id?: string
+          impact_scale?: number
+          is_active?: boolean
+          likelihood_scale?: number
+          name?: string
+          organization_id?: string | null
+          scoring_formula?: string
+          updated_at?: string | null
+        }
+        Update: {
+          color_zones?: Json
+          created_at?: string | null
+          id?: string
+          impact_scale?: number
+          is_active?: boolean
+          likelihood_scale?: number
+          name?: string
+          organization_id?: string | null
+          scoring_formula?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      risk_treatments: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          notes: string | null
+          responsible_person: string
+          review_date: string | null
+          risk_id: string
+          status: Database["public"]["Enums"]["treatment_status"]
+          target_date: string | null
+          treatment_plan: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          notes?: string | null
+          responsible_person: string
+          review_date?: string | null
+          risk_id: string
+          status?: Database["public"]["Enums"]["treatment_status"]
+          target_date?: string | null
+          treatment_plan: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          notes?: string | null
+          responsible_person?: string
+          review_date?: string | null
+          risk_id?: string
+          status?: Database["public"]["Enums"]["treatment_status"]
+          target_date?: string | null
+          treatment_plan?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_treatments_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "risks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risks: {
+        Row: {
+          asset: string
+          control_reference: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          organization_id: string
+          owner: string
+          risk_description: string
+          threat: string
+          updated_at: string | null
+          vulnerability: string
+        }
+        Insert: {
+          asset: string
+          control_reference?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          organization_id: string
+          owner: string
+          risk_description: string
+          threat: string
+          updated_at?: string | null
+          vulnerability: string
+        }
+        Update: {
+          asset?: string
+          control_reference?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          organization_id?: string
+          owner?: string
+          risk_description?: string
+          threat?: string
+          updated_at?: string | null
+          vulnerability?: string
+        }
+        Relationships: []
+      }
       theme_settings: {
         Row: {
           colors: Json
@@ -536,6 +764,13 @@ export type Database = {
         | "no_conformidad"
         | "no_conformidad_menor"
         | "punto_de_mejora"
+      impact_level: "negligible" | "minor" | "moderate" | "major" | "critical"
+      likelihood_level:
+        | "rare"
+        | "unlikely"
+        | "possible"
+        | "likely"
+        | "almost_certain"
       maturity_level_name:
         | "Inicial"
         | "Repetible"
@@ -543,6 +778,8 @@ export type Database = {
         | "Gestionado"
         | "Optimizado"
       plan_status: "Pendiente" | "En Progreso" | "Completado"
+      risk_level: "low" | "medium" | "high" | "extreme"
+      treatment_status: "open" | "in_progress" | "closed" | "accepted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -678,6 +915,14 @@ export const Constants = {
         "no_conformidad_menor",
         "punto_de_mejora",
       ],
+      impact_level: ["negligible", "minor", "moderate", "major", "critical"],
+      likelihood_level: [
+        "rare",
+        "unlikely",
+        "possible",
+        "likely",
+        "almost_certain",
+      ],
       maturity_level_name: [
         "Inicial",
         "Repetible",
@@ -686,6 +931,8 @@ export const Constants = {
         "Optimizado",
       ],
       plan_status: ["Pendiente", "En Progreso", "Completado"],
+      risk_level: ["low", "medium", "high", "extreme"],
+      treatment_status: ["open", "in_progress", "closed", "accepted"],
     },
   },
 } as const

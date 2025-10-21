@@ -15,6 +15,7 @@ import Reportes from "./pages/Reportes";
 import Organizations from "./pages/Organizations";
 import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
+import RiskMatrix from "./pages/RiskMatrix";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const AppContent = () => {
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/organizations" element={<Organizations />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/risk-matrix" element={<RiskMatrix />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
