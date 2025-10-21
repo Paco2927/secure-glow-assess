@@ -181,7 +181,7 @@ const Contact = () => {
                       </Label>
                       <Input
                         id="fullName"
-                        placeholder="Juan Pérez"
+                        placeholder="Tu Nombre"
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         className={errors.fullName ? "border-destructive" : ""}
@@ -225,7 +225,7 @@ const Contact = () => {
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder="+(506) 00000000"
+                        placeholder="Número telefónico"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className={errors.phone ? "border-destructive" : ""}
