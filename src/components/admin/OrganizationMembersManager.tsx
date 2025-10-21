@@ -277,7 +277,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
               <Label htmlFor="role">Puesto (ej: Gerente de Administración)</Label>
               <Input
                 id="role"
-                placeholder="Escribe el rol..."
+                placeholder="Escribe el puesto..."
                 value={editRole}
                 onChange={(e) => setEditRole(e.target.value)}
               />
