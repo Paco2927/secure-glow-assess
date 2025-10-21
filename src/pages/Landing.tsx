@@ -7,25 +7,26 @@ import { supabase } from "@/integrations/supabase/client";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
 import IsoIcon from "@/assets/IsoIcon.png";
-
 const Landing = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setIsAuthenticated(!!session);
     });
-
     const {
-      data: { subscription },
+      data: {
+        subscription
+      }
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
-
   const handleStartAssessment = () => {
     if (isAuthenticated) {
       navigate("/dashboard");
@@ -33,56 +34,26 @@ const Landing = () => {
       navigate("/auth");
     }
   };
-
-  const isoCategories = [
-    "Políticas de Seguridad",
-    "Organización de la Seguridad",
-    "Gestión de Activos",
-    "Control de Acceso",
-    "Criptografía",
-    "Seguridad Física",
-    "Seguridad Operacional",
-    "Seguridad en las Comunicaciones",
-    "Adquisición y Desarrollo",
-    "Relaciones con Proveedores",
-    "Gestión de Incidentes",
-    "Continuidad del Negocio",
-    "Cumplimiento Legal",
-  ];
-
-  const nistCategories = [
-    "Identificar (Identify)",
-    "Proteger (Protect)",
-    "Detectar (Detect)",
-    "Responder (Respond)",
-    "Recuperar (Recover)",
-  ];
-
-  const benefits = [
-    {
-      icon: Shield,
-      title: "Evaluación Integral",
-      description: "Analiza tu organización según estándares internacionales reconocidos",
-    },
-    {
-      icon: FileCheck,
-      title: "Reportes Detallados",
-      description: "Genera informes completos que se guardan automáticamente para seguimiento",
-    },
-    {
-      icon: TrendingUp,
-      title: "Planes de Mejora",
-      description: "Recibe recomendaciones específicas para fortalecer tu ciberseguridad",
-    },
-    {
-      icon: Award,
-      title: "Cumplimiento Normativo",
-      description: "Asegura que tu empresa cumpla con ISO 27001 y NIST CSF",
-    },
-  ];
-
-  return (
-    <div className="min-h-screen gradient-subtle">
+  const isoCategories = ["Políticas de Seguridad", "Organización de la Seguridad", "Gestión de Activos", "Control de Acceso", "Criptografía", "Seguridad Física", "Seguridad Operacional", "Seguridad en las Comunicaciones", "Adquisición y Desarrollo", "Relaciones con Proveedores", "Gestión de Incidentes", "Continuidad del Negocio", "Cumplimiento Legal"];
+  const nistCategories = ["Identificar (Identify)", "Proteger (Protect)", "Detectar (Detect)", "Responder (Respond)", "Recuperar (Recover)"];
+  const benefits = [{
+    icon: Shield,
+    title: "Evaluación Integral",
+    description: "Analiza tu organización según estándares internacionales reconocidos"
+  }, {
+    icon: FileCheck,
+    title: "Reportes Detallados",
+    description: "Genera informes completos que se guardan automáticamente para seguimiento"
+  }, {
+    icon: TrendingUp,
+    title: "Planes de Mejora",
+    description: "Recibe recomendaciones específicas para fortalecer tu ciberseguridad"
+  }, {
+    icon: Award,
+    title: "Cumplimiento Normativo",
+    description: "Asegura que tu empresa cumpla con ISO 27001 y NIST CSF"
+  }];
+  return <div className="min-h-screen gradient-subtle">
       {/* Header */}
       <header className="bg-card/80 backdrop-blur-sm border-b shadow-soft sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -128,14 +99,7 @@ const Landing = () => {
               <Button size="lg" onClick={handleStartAssessment} className="shadow-medium text-lg px-8 py-6">
                 Comenzar Evaluación
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate("/contact")}
-                className="text-lg px-8 py-6"
-              >
-                Conocer
-              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate("/contact")} className="text-lg px-8 py-6">contáctanos</Button>
             </div>
           </div>
         </div>
@@ -150,8 +114,7 @@ const Landing = () => {
             </h2>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {benefits.map((benefit, index) => (
-                <Card key={index} className="shadow-soft hover:shadow-medium transition-shadow">
+              {benefits.map((benefit, index) => <Card key={index} className="shadow-soft hover:shadow-medium transition-shadow">
                   <CardContent className="pt-6">
                     <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center mb-4">
                       <benefit.icon className="w-6 h-6 text-primary-foreground" />
@@ -159,8 +122,7 @@ const Landing = () => {
                     <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
                     <p className="text-muted-foreground text-sm">{benefit.description}</p>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
         </div>
@@ -195,12 +157,10 @@ const Landing = () => {
                   </p>
 
                   <div className="space-y-2">
-                    {isoCategories.map((category, index) => (
-                      <div key={index} className="flex items-start gap-2">
+                    {isoCategories.map((category, index) => <div key={index} className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                         <span className="text-sm">{category}</span>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
               </Card>
@@ -224,12 +184,10 @@ const Landing = () => {
                   </p>
 
                   <div className="space-y-3">
-                    {nistCategories.map((category, index) => (
-                      <div key={index} className="flex items-start gap-2">
+                    {nistCategories.map((category, index) => <div key={index} className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
                         <span className="text-sm font-medium">{category}</span>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
 
                   <div className="mt-6 p-4 bg-secondary/10 rounded-lg">
@@ -318,8 +276,6 @@ const Landing = () => {
           <p className="text-sm">© 2025 TechSecureIA. Plataforma profesional de evaluación de ciberseguridad.</p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
