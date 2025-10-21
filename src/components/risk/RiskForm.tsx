@@ -160,7 +160,8 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
         const { data: newRisk, error } = await supabase
           .from("risks")
           .insert({ 
-            ...formData, 
+            ...formData,
+            owner: treatment.responsible_person || "Sin asignar",
             created_by: user.id,
             assessment_id: assessmentId || null
           })
