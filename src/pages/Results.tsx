@@ -114,8 +114,10 @@ const Results = () => {
           control_name: result.controls.name,
           maturity_level: result.maturity_levels.level,
           maturity_level_name: result.maturity_levels.name,
-          // Prioritize improvement_action from auditor, fallback to template
-          improvement_plan: result.improvement_action || template?.template_text || "No hay plan de mejora configurado para este control y nivel.",
+          // No mostrar plan de mejora si el nivel es 5 (Siempre - perfecto)
+          improvement_plan: result.maturity_levels.level === 5 
+            ? "" 
+            : (result.improvement_action || template?.template_text || "No hay plan de mejora configurado para este control y nivel."),
           comments: result.comments,
           conformity_status: result.conformity_status,
           proof_image_url: result.proof_image_url,
@@ -413,12 +415,14 @@ const Results = () => {
                               />
                             </div>
                           )}
-                          <div className="mt-3 bg-background p-3 rounded-lg border">
-                            <p className="text-sm font-medium mb-2">Plan de Mejora:</p>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line">
-                              {control.improvement_plan}
-                            </p>
-                          </div>
+                          {control.improvement_plan && (
+                            <div className="mt-3 bg-background p-3 rounded-lg border">
+                              <p className="text-sm font-medium mb-2">Plan de Mejora:</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-line">
+                                {control.improvement_plan}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </Card>
                     ))}
