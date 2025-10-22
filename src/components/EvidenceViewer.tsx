@@ -20,12 +20,36 @@ interface EvidenceViewerProps {
 const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!evidenceUrl) return null;
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setPageNumber(1);
+  };
+
+  const handleDownload = async () => {
+    if (!evidenceUrl) return;
+    
+    try {
+      setIsDownloading(true);
+      const response = await fetch(evidenceUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al descargar:', error);
+      window.open(evidenceUrl, '_blank');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const getFileType = (url: string): "image" | "pdf" | "video" | "document" => {
@@ -124,11 +148,9 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
             <p className="text-sm text-muted-foreground">
               Este tipo de archivo no se puede previsualizar en el navegador
             </p>
-            <Button asChild>
-              <a href={evidenceUrl} download={fileName} target="_blank" rel="noopener noreferrer">
-                <Download className="h-4 w-4 mr-2" />
-                Descargar {fileName}
-              </a>
+            <Button onClick={handleDownload} disabled={isDownloading}>
+              <Download className="h-4 w-4 mr-2" />
+              {isDownloading ? 'Descargando...' : `Descargar ${fileName}`}
             </Button>
           </div>
         );
@@ -165,11 +187,9 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
           {renderPreview()}
           {fileType !== "document" && (
             <div className="mt-4 flex justify-center">
-              <Button variant="outline" asChild>
-                <a href={evidenceUrl} download={fileName} target="_blank" rel="noopener noreferrer">
-                  <Download className="h-4 w-4 mr-2" />
-                  Descargar
-                </a>
+              <Button variant="outline" onClick={handleDownload} disabled={isDownloading}>
+                <Download className="h-4 w-4 mr-2" />
+                {isDownloading ? 'Descargando...' : 'Descargar'}
               </Button>
             </div>
           )}
