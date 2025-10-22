@@ -414,10 +414,10 @@ const Organizations = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {organizations.map((org) => (
-              <Card key={org.id}>
-                <CardHeader>
+              <Card key={org.id} className="flex flex-col min-h-[280px]">
+                <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={org.logo_url || undefined} alt={org.name} />
@@ -426,28 +426,28 @@ const Organizations = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <CardTitle>{org.name}</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-lg">{org.name}</CardTitle>
+                      <CardDescription className="text-xs">
                         {org.sector && <div>Sector: {org.sector}</div>}
                         {org.country && <div>País: {org.country}</div>}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex-1 flex flex-col justify-between pt-0">
                   {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setSelectedOrgForMembers(org.id)}>
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    <Button variant="outline" size="sm" onClick={() => setSelectedOrgForMembers(org.id)} className="flex-1 min-w-[100px]">
                       <Users className="h-4 w-4 mr-2" />
                       Miembros
                     </Button>
                     {isAdmin && (
                       <>
-                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(org)}>
+                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(org)} className="flex-1 min-w-[100px]">
                           <Pencil className="h-4 w-4 mr-2" />
                           Editar
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => setDeleteOrgId(org.id)}>
+                        <Button variant="destructive" size="sm" onClick={() => setDeleteOrgId(org.id)} className="flex-1 min-w-[100px]">
                           <Trash2 className="h-4 w-4 mr-2" />
                           Eliminar
                         </Button>
