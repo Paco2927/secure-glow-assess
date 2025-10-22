@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
 import heroImage from "@/assets/hero-security.jpg";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
@@ -21,6 +22,7 @@ import IsoIcon from "@/assets/IsoIcon.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { logoUrl, dashboardBackgroundUrl } = useThemeSettings();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -88,7 +90,11 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <img src={techSecureIcon} alt="TechSecureIA" className="w-4.5 h-6" />
+              <img 
+                src={logoUrl || techSecureIcon} 
+                alt="Logo" 
+                className={logoUrl ? "w-10 h-10 object-contain" : "w-4.5 h-6"} 
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold">TechSecureIA</h1>
@@ -144,7 +150,7 @@ const Dashboard = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 flex items-center justify-center">
           <img
-            src="https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"
+            src={dashboardBackgroundUrl || "https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"}
             alt="Imagen a mostrar"
             width="250"
             height="200"

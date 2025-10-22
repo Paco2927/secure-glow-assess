@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { RefreshCw, Save, Pipette } from "lucide-react";
+import { RefreshCw, Save, Pipette, Upload, X } from "lucide-react";
 import { HslColorPicker } from "react-colorful";
 
 interface ThemeColors {
@@ -29,6 +29,10 @@ export const ThemeSettingsManager = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [themeId, setThemeId] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
 
   useEffect(() => {
     loadThemeSettings();
@@ -47,6 +51,8 @@ export const ThemeSettingsManager = () => {
       if (data) {
         setThemeId(data.id);
         setColors(data.colors as ThemeColors);
+        setLogoUrl(data.logo_url);
+        setDashboardBackgroundUrl(data.dashboard_background_url);
       }
     } catch (error) {
       console.error("Error loading theme settings:", error);
@@ -74,26 +80,92 @@ export const ThemeSettingsManager = () => {
     return `${hsl.h.toFixed(1)} ${hsl.s.toFixed(1)}% ${hsl.l.toFixed(1)}%`;
   };
 
+  const handleUploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `logo-${Date.now()}.${fileExt}`;
+      const filePath = `theme/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("organization-logos")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("organization-logos")
+        .getPublicUrl(filePath);
+
+      setLogoUrl(publicUrl);
+      toast.success("Logo cargado correctamente");
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast.error("Error al cargar el logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleUploadBackground = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBackground(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `background-${Date.now()}.${fileExt}`;
+      const filePath = `theme/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("organization-logos")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("organization-logos")
+        .getPublicUrl(filePath);
+
+      setDashboardBackgroundUrl(publicUrl);
+      toast.success("Imagen de fondo cargada correctamente");
+    } catch (error) {
+      console.error("Error uploading background:", error);
+      toast.error("Error al cargar la imagen de fondo");
+    } finally {
+      setUploadingBackground(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
+      const updateData = {
+        colors: colors as any,
+        logo_url: logoUrl,
+        dashboard_background_url: dashboardBackgroundUrl,
+        updated_at: new Date().toISOString()
+      };
+
       if (themeId) {
         const { error } = await supabase
           .from("theme_settings")
-          .update({ colors: colors as any, updated_at: new Date().toISOString() })
+          .update(updateData)
           .eq("id", themeId);
 
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("theme_settings")
-          .insert({ name: "custom", colors: colors as any, is_active: true });
+          .insert({ name: "custom", ...updateData, is_active: true });
 
         if (error) throw error;
       }
 
       toast.success("Tema actualizado correctamente. Todos los usuarios verán estos cambios.");
-      // Reload the page to apply changes globally
       setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error("Error saving theme:", error);
@@ -138,6 +210,82 @@ export const ThemeSettingsManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* Imágenes personalizadas */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Personalización de Imágenes</CardTitle>
+          <CardDescription>
+            Configura el logo y la imagen de fondo del dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Logo */}
+            <div className="space-y-3">
+              <Label>Logo de la Empresa</Label>
+              <p className="text-sm text-muted-foreground">
+                Este logo aparecerá en la esquina superior izquierda del dashboard
+              </p>
+              {logoUrl && (
+                <div className="relative w-32 h-32 border rounded-lg p-2 bg-muted/30">
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute -top-2 -right-2 h-6 w-6"
+                    onClick={() => setLogoUrl(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadLogo}
+                  disabled={uploadingLogo}
+                  className="cursor-pointer"
+                />
+                {uploadingLogo && <p className="text-sm text-muted-foreground mt-2">Subiendo...</p>}
+              </div>
+            </div>
+
+            {/* Imagen de fondo del dashboard */}
+            <div className="space-y-3">
+              <Label>Imagen de Fondo del Dashboard</Label>
+              <p className="text-sm text-muted-foreground">
+                Esta imagen aparecerá como fondo en el dashboard
+              </p>
+              {dashboardBackgroundUrl && (
+                <div className="relative w-full h-32 border rounded-lg overflow-hidden bg-muted/30">
+                  <img src={dashboardBackgroundUrl} alt="Fondo" className="w-full h-full object-cover" />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6"
+                    onClick={() => setDashboardBackgroundUrl(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadBackground}
+                  disabled={uploadingBackground}
+                  className="cursor-pointer"
+                />
+                {uploadingBackground && <p className="text-sm text-muted-foreground mt-2">Subiendo...</p>}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Colores */}
       <Card>
         <CardHeader>
           <CardTitle>Personalización de Colores</CardTitle>

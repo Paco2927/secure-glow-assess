@@ -18,6 +18,8 @@ interface ThemeColors {
 
 export const useThemeSettings = () => {
   const [loaded, setLoaded] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
 
   useEffect(() => {
     loadAndApplyTheme();
@@ -27,14 +29,18 @@ export const useThemeSettings = () => {
     try {
       const { data, error } = await supabase
         .from("theme_settings")
-        .select("colors")
+        .select("colors, logo_url, dashboard_background_url")
         .eq("is_active", true)
         .maybeSingle();
 
       if (error) throw error;
 
-      if (data?.colors) {
-        applyTheme(data.colors as ThemeColors);
+      if (data) {
+        if (data.colors) {
+          applyTheme(data.colors as ThemeColors);
+        }
+        setLogoUrl(data.logo_url);
+        setDashboardBackgroundUrl(data.dashboard_background_url);
       }
     } catch (error) {
       console.error("Error loading theme:", error);
@@ -52,5 +58,5 @@ export const useThemeSettings = () => {
     });
   };
 
-  return { loaded };
+  return { loaded, logoUrl, dashboardBackgroundUrl };
 };

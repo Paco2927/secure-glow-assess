@@ -694,24 +694,30 @@ export type Database = {
         Row: {
           colors: Json
           created_at: string | null
+          dashboard_background_url: string | null
           id: string
           is_active: boolean
+          logo_url: string | null
           name: string
           updated_at: string | null
         }
         Insert: {
           colors?: Json
           created_at?: string | null
+          dashboard_background_url?: string | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
           name: string
           updated_at?: string | null
         }
         Update: {
           colors?: Json
           created_at?: string | null
+          dashboard_background_url?: string | null
           id?: string
           is_active?: boolean
+          logo_url?: string | null
           name?: string
           updated_at?: string | null
         }
