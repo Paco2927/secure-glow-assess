@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ArrowLeft, Save } from "lucide-react";
+import { Shield, ArrowLeft, Save, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -484,9 +484,40 @@ const AssessmentNIST = () => {
                       className="mt-2 w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/90"
                     />
                     {controlData[control.id]?.proofImage && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Archivo: {controlData[control.id].proofImage.name}
-                      </p>
+                      <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border">
+                        <p className="text-xs font-medium text-foreground mb-2">
+                          Vista previa: {controlData[control.id].proofImage.name}
+                        </p>
+                        {controlData[control.id].proofImage.type.startsWith('image/') && (
+                          <img
+                            src={URL.createObjectURL(controlData[control.id].proofImage)}
+                            alt="Vista previa"
+                            className="max-w-full h-auto max-h-60 rounded border object-contain"
+                          />
+                        )}
+                        {controlData[control.id].proofImage.type === 'application/pdf' && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <FileText className="h-8 w-8" />
+                            <span className="text-sm">Archivo PDF seleccionado</span>
+                          </div>
+                        )}
+                        {controlData[control.id].proofImage.type.startsWith('video/') && (
+                          <video
+                            src={URL.createObjectURL(controlData[control.id].proofImage)}
+                            controls
+                            className="max-w-full h-auto max-h-60 rounded border"
+                          >
+                            Tu navegador no soporta la reproducción de videos.
+                          </video>
+                        )}
+                        {(controlData[control.id].proofImage.type.includes('word') ||
+                          controlData[control.id].proofImage.type.includes('document')) && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <FileText className="h-8 w-8" />
+                            <span className="text-sm">Documento seleccionado</span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </CardContent>
