@@ -2,3 +2,6 @@ project_id = "cqpfwdxfmemwegkrxkre"
 
 [functions.send-contact-email]
 verify_jwt = false
+
+[functions.validate-cedula-cr]
+verify_jwt = false

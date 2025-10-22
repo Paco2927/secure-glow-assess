@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Lock } from "lucide-react";
+import { Shield, Lock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 
@@ -22,6 +22,12 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", name: "", dni: "" });
+  
+  // DNI validation states
+  const [isValidatingDni, setIsValidatingDni] = useState(false);
+  const [dniValidationMessage, setDniValidationMessage] = useState("");
+  const [isDniValidated, setIsDniValidated] = useState(false);
+  const dniTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -80,6 +86,66 @@ const Auth = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const validateCedulaCR = useCallback(async (cedula: string) => {
+    if (!cedula.trim()) {
+      setDniValidationMessage("");
+      setIsDniValidated(false);
+      return;
+    }
+
+    setIsValidatingDni(true);
+    setDniValidationMessage("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-cedula-cr', {
+        body: { cedula },
+      });
+
+      if (error) {
+        console.error('Error calling validate-cedula-cr:', error);
+        setDniValidationMessage("Error al validar cédula. Puedes ingresar el nombre manualmente.");
+        setIsDniValidated(false);
+        return;
+      }
+
+      if (data.success && data.name) {
+        setSignupData(prev => ({ ...prev, name: data.name }));
+        setDniValidationMessage(`✓ Nombre encontrado: ${data.name}`);
+        setIsDniValidated(true);
+      } else {
+        setDniValidationMessage(data.error || "Cédula no encontrada. Ingresa tu nombre manualmente.");
+        setIsDniValidated(false);
+      }
+    } catch (error) {
+      console.error('Error validating cedula:', error);
+      setDniValidationMessage("Error de conexión. Puedes ingresar el nombre manualmente.");
+      setIsDniValidated(false);
+    } finally {
+      setIsValidatingDni(false);
+    }
+  }, []);
+
+  const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDni = e.target.value;
+    setSignupData({ ...signupData, dni: newDni });
+    
+    // Clear previous validation
+    setDniValidationMessage("");
+    setIsDniValidated(false);
+    
+    // Clear existing timeout
+    if (dniTimeoutRef.current) {
+      clearTimeout(dniTimeoutRef.current);
+    }
+
+    // Set new timeout for validation
+    if (newDni.trim()) {
+      dniTimeoutRef.current = setTimeout(() => {
+        validateCedulaCR(newDni);
+      }, 800);
     }
   };
 
@@ -199,25 +265,52 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="signup-dni">Cédula (Opcional)</Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-dni"
+                        type="text"
+                        placeholder="1-2345-6789"
+                        value={signupData.dni}
+                        onChange={handleDniChange}
+                        className={isDniValidated ? "pr-10 border-green-500" : ""}
+                      />
+                      {isValidatingDni && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                      )}
+                      {isDniValidated && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                    {dniValidationMessage && (
+                      <p className={`text-sm flex items-center gap-1 ${
+                        isDniValidated ? "text-green-600" : "text-muted-foreground"
+                      }`}>
+                        {isDniValidated ? (
+                          <CheckCircle2 className="w-3 h-3" />
+                        ) : (
+                          <AlertCircle className="w-3 h-3" />
+                        )}
+                        {dniValidationMessage}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="signup-name">Nombre Completo</Label>
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="Ingresar nombre"
+                      placeholder="Ingresa tu nombre"
                       value={signupData.name}
                       onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                       required
+                      className={isDniValidated ? "bg-muted/50" : ""}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-dni">DNI (Opcional)</Label>
-                    <Input
-                      id="signup-dni"
-                      type="text"
-                      placeholder="Identificación"
-                      value={signupData.dni}
-                      onChange={(e) => setSignupData({ ...signupData, dni: e.target.value })}
-                    />
+                    {isDniValidated && (
+                      <p className="text-xs text-muted-foreground">
+                        Puedes editar el nombre si es necesario
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Correo Electrónico</Label>
