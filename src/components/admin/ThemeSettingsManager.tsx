@@ -80,9 +80,71 @@ export const ThemeSettingsManager = () => {
     return `${hsl.h.toFixed(1)} ${hsl.s.toFixed(1)}% ${hsl.l.toFixed(1)}%`;
   };
 
+  const validateImageFile = (file: File, maxSizeMB: number): { valid: boolean; error?: string } => {
+    // Validate MIME type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'];
+    if (!validTypes.includes(file.type)) {
+      return { 
+        valid: false, 
+        error: 'Formato no válido. Use JPG, PNG, WEBP o SVG' 
+      };
+    }
+    
+    // Validate file size
+    const maxSize = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSize) {
+      return { 
+        valid: false, 
+        error: `Archivo muy grande. Máximo ${maxSizeMB}MB` 
+      };
+    }
+    
+    return { valid: true };
+  };
+
+  const validateImageDimensions = (file: File, maxWidth: number, maxHeight: number): Promise<{ valid: boolean; error?: string }> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        if (img.width > maxWidth || img.height > maxHeight) {
+          resolve({ 
+            valid: false, 
+            error: `Dimensiones muy grandes. Máximo ${maxWidth}x${maxHeight}px` 
+          });
+        } else {
+          resolve({ valid: true });
+        }
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve({ valid: false, error: 'No se pudo cargar la imagen' });
+      };
+      
+      img.src = url;
+    });
+  };
+
   const handleUploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Validate file type and size
+    const fileValidation = validateImageFile(file, 5);
+    if (!fileValidation.valid) {
+      toast.error(fileValidation.error);
+      return;
+    }
+
+    // Validate dimensions (logo: 800x800px max)
+    const dimValidation = await validateImageDimensions(file, 800, 800);
+    if (!dimValidation.valid) {
+      toast.error(dimValidation.error);
+      return;
+    }
 
     setUploadingLogo(true);
     try {
@@ -113,6 +175,20 @@ export const ThemeSettingsManager = () => {
   const handleUploadBackground = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Validate file type and size (10MB for background)
+    const fileValidation = validateImageFile(file, 10);
+    if (!fileValidation.valid) {
+      toast.error(fileValidation.error);
+      return;
+    }
+
+    // Validate dimensions (background: 1920x1080px max)
+    const dimValidation = await validateImageDimensions(file, 1920, 1080);
+    if (!dimValidation.valid) {
+      toast.error(dimValidation.error);
+      return;
+    }
 
     setUploadingBackground(true);
     try {
@@ -224,7 +300,7 @@ export const ThemeSettingsManager = () => {
             <div className="space-y-3">
               <Label>Logo de la Empresa</Label>
               <p className="text-sm text-muted-foreground">
-                Este logo aparecerá en la esquina superior izquierda del dashboard
+                Este logo aparecerá en la esquina superior izquierda del dashboard. Máximo 5MB, 800x800px.
               </p>
               {logoUrl && (
                 <div className="relative w-32 h-32 border rounded-lg p-2 bg-muted/30">
@@ -255,7 +331,7 @@ export const ThemeSettingsManager = () => {
             <div className="space-y-3">
               <Label>Imagen de Fondo del Dashboard</Label>
               <p className="text-sm text-muted-foreground">
-                Esta imagen aparecerá como fondo en el dashboard
+                Esta imagen aparecerá como fondo en el dashboard. Máximo 10MB, 1920x1080px.
               </p>
               {dashboardBackgroundUrl && (
                 <div className="relative w-full h-32 border rounded-lg overflow-hidden bg-muted/30">
