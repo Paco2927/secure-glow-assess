@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Pencil, Trash2, ArrowLeft, Users } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, ArrowLeft, Users, Upload } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { OrganizationMembersManager } from "@/components/admin/OrganizationMembersManager";
 import {
@@ -179,6 +180,7 @@ interface Organization {
   contact_email: string | null;
   country: string | null;
   created_at: string;
+  logo_url: string | null;
 }
 
 const Organizations = () => {
@@ -197,6 +199,8 @@ const Organizations = () => {
     contact_email: "",
     country: "",
   });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -247,9 +251,13 @@ const Organizations = () => {
         contact_email: org.contact_email || "",
         country: org.country || "",
       });
+      setLogoPreview(org.logo_url);
+      setLogoFile(null);
     } else {
       setEditingOrg(null);
       setFormData({ name: "", sector: "", contact_email: "", country: "" });
+      setLogoPreview(null);
+      setLogoFile(null);
     }
     setShowDialog(true);
   };
@@ -258,6 +266,28 @@ const Organizations = () => {
     setShowDialog(false);
     setEditingOrg(null);
     setFormData({ name: "", sector: "", contact_email: "", country: "" });
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Archivo muy grande",
+          description: "El logo debe ser menor a 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -268,12 +298,34 @@ const Organizations = () => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
+      let logoUrl = editingOrg?.logo_url || null;
+
+      // Upload logo if a new file is selected
+      if (logoFile) {
+        const fileExt = logoFile.name.split(".").pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `organization-logos/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, logoFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+
+        logoUrl = publicUrl;
+      }
+
       const payload = {
         name: formData.name,
         sector: formData.sector || null,
         contact_email: formData.contact_email || null,
         country: formData.country || null,
         user_id: user.id,
+        logo_url: logoUrl,
       };
 
       if (editingOrg) {
@@ -366,11 +418,21 @@ const Organizations = () => {
             {organizations.map((org) => (
               <Card key={org.id}>
                 <CardHeader>
-                  <CardTitle>{org.name}</CardTitle>
-                  <CardDescription>
-                    {org.sector && <div>Sector: {org.sector}</div>}
-                    {org.country && <div>País: {org.country}</div>}
-                  </CardDescription>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={org.logo_url || undefined} alt={org.name} />
+                      <AvatarFallback>
+                        <Building2 className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <CardTitle>{org.name}</CardTitle>
+                      <CardDescription>
+                        {org.sector && <div>Sector: {org.sector}</div>}
+                        {org.country && <div>País: {org.country}</div>}
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
@@ -409,6 +471,31 @@ const Organizations = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
+              {/* Logo */}
+              <div className="space-y-2">
+                <Label htmlFor="logo">Logo de la Organización</Label>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={logoPreview || undefined} alt="Logo preview" />
+                    <AvatarFallback>
+                      <Building2 className="h-10 w-10" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <Input
+                      id="logo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formatos: JPG, PNG, GIF (máx. 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Nombre */}
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre *</Label>

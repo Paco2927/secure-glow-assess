@@ -390,6 +390,7 @@ export type Database = {
           country: string | null
           created_at: string | null
           id: string
+          logo_url: string | null
           name: string
           sector: string | null
           user_id: string | null
@@ -399,6 +400,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           id?: string
+          logo_url?: string | null
           name: string
           sector?: string | null
           user_id?: string | null
@@ -408,6 +410,7 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
           sector?: string | null
           user_id?: string | null
