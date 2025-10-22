@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
+import EvidenceViewer from "@/components/EvidenceViewer";
 import NistIcon from "@/assets/NistShiel.png";
 interface Control {
   id: string;
@@ -24,6 +25,7 @@ interface ControlData {
   conformityStatus: "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora";
   comments: string;
   proofImage: File | null;
+  existingProofUrl?: string;
 }
 
 interface MaturityLevel {
@@ -123,6 +125,7 @@ const AssessmentNIST = () => {
               conformityStatus: result.conformity_status,
               comments: result.comments || "",
               proofImage: null,
+              existingProofUrl: result.proof_image_url || undefined,
             };
           });
 
@@ -492,8 +495,22 @@ const AssessmentNIST = () => {
 
                   <div>
                     <Label htmlFor={`proof-${control.id}`}>Evidencia (Opcional)</Label>
+                    
+                    {/* Mostrar evidencia existente */}
+                    {controlData[control.id]?.existingProofUrl && !controlData[control.id]?.proofImage && (
+                      <div className="mt-2 mb-3 p-3 bg-muted/30 rounded-lg border border-border">
+                        <p className="text-xs font-medium mb-2">Evidencia guardada:</p>
+                        <EvidenceViewer 
+                          evidenceUrl={controlData[control.id].existingProofUrl!}
+                          controlName={control.name}
+                        />
+                      </div>
+                    )}
+                    
                     <p className="text-xs text-muted-foreground mb-2">
-                      Puedes adjuntar imágenes, PDFs, documentos Word o videos cortos (máx. 20MB)
+                      {controlData[control.id]?.existingProofUrl 
+                        ? "Puedes reemplazar la evidencia subiendo un nuevo archivo"
+                        : "Puedes adjuntar imágenes, PDFs, documentos Word o videos cortos (máx. 20MB)"}
                     </p>
                     <input
                       id={`proof-${control.id}`}
