@@ -14,7 +14,7 @@ const authSchema = z.object({
   email: z.string().trim().email({ message: "Correo electrónico inválido" }),
   password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
   name: z.string().trim().min(2, { message: "El nombre debe tener al menos 2 caracteres" }).optional(),
-  dni: z.string().trim().optional(),
+  dni: z.string().trim().min(9, { message: "La cédula debe tener al menos 9 dígitos" }),
 });
 
 const Auth = () => {
@@ -265,7 +265,7 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-dni">Cédula (Opcional)</Label>
+                    <Label htmlFor="signup-dni">Cédula</Label>
                     <div className="relative">
                       <Input
                         id="signup-dni"
@@ -274,6 +274,7 @@ const Auth = () => {
                         value={signupData.dni}
                         onChange={handleDniChange}
                         className={isDniValidated ? "pr-10 border-green-500" : ""}
+                        required
                       />
                       {isValidatingDni && (
                         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
