@@ -271,8 +271,28 @@ const ImprovementPlanManager = () => {
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : (
-              <div className="space-y-4">
-                {assessmentResults.map((result) => (
+              <>
+                {(() => {
+                  // Filtrar controles que tengan nivel 5 (Siempre - perfecto)
+                  const filteredResults = assessmentResults.filter(r => r.maturity_levels.level !== 5);
+                  const perfectControlsCount = assessmentResults.length - filteredResults.length;
+                  
+                  return (
+                    <>
+                      {perfectControlsCount > 0 && (
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+                          <p className="text-sm text-green-800 dark:text-green-200">
+                            ✅ {perfectControlsCount} control(es) con nivel 5 (Siempre) no requieren plan de mejora
+                          </p>
+                        </div>
+                      )}
+                      {filteredResults.length === 0 ? (
+                        <div className="text-center p-8 text-muted-foreground bg-muted/30 rounded-lg">
+                          🎉 ¡Excelente! Todos los controles están en nivel 5 (Siempre). No se requieren planes de mejora.
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {filteredResults.map((result) => (
                   <Card key={result.id} className="p-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-start">
@@ -338,8 +358,13 @@ const ImprovementPlanManager = () => {
                       </div>
                     </div>
                   </Card>
-                ))}
-              </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </>
             )}
           </CardContent>
         </Card>
