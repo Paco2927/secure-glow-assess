@@ -22,7 +22,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", name: "", dni: "" });
-  
+
   // DNI validation states
   const [isValidatingDni, setIsValidatingDni] = useState(false);
   const [dniValidationMessage, setDniValidationMessage] = useState("");
@@ -100,19 +100,19 @@ const Auth = () => {
     setDniValidationMessage("");
 
     try {
-      const { data, error } = await supabase.functions.invoke('validate-cedula-cr', {
+      const { data, error } = await supabase.functions.invoke("validate-cedula-cr", {
         body: { cedula },
       });
 
       if (error) {
-        console.error('Error calling validate-cedula-cr:', error);
+        console.error("Error calling validate-cedula-cr:", error);
         setDniValidationMessage("Error al validar cédula. Puedes ingresar el nombre manualmente.");
         setIsDniValidated(false);
         return;
       }
 
       if (data.success && data.name) {
-        setSignupData(prev => ({ ...prev, name: data.name }));
+        setSignupData((prev) => ({ ...prev, name: data.name }));
         setDniValidationMessage(`✓ Nombre encontrado: ${data.name}`);
         setIsDniValidated(true);
       } else {
@@ -120,7 +120,7 @@ const Auth = () => {
         setIsDniValidated(false);
       }
     } catch (error) {
-      console.error('Error validating cedula:', error);
+      console.error("Error validating cedula:", error);
       setDniValidationMessage("Error de conexión. Puedes ingresar el nombre manualmente.");
       setIsDniValidated(false);
     } finally {
@@ -131,11 +131,11 @@ const Auth = () => {
   const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDni = e.target.value;
     setSignupData({ ...signupData, dni: newDni });
-    
+
     // Clear previous validation
     setDniValidationMessage("");
     setIsDniValidated(false);
-    
+
     // Clear existing timeout
     if (dniTimeoutRef.current) {
       clearTimeout(dniTimeoutRef.current);
@@ -270,7 +270,7 @@ const Auth = () => {
                       <Input
                         id="signup-dni"
                         type="text"
-                        placeholder="1-2345-6789 o 123456789"
+                        placeholder="Introduce la cédula"
                         value={signupData.dni}
                         onChange={handleDniChange}
                         className={isDniValidated ? "pr-10 border-green-500" : ""}
@@ -284,14 +284,12 @@ const Auth = () => {
                       )}
                     </div>
                     {dniValidationMessage && (
-                      <p className={`text-sm flex items-center gap-1 ${
-                        isDniValidated ? "text-green-600" : "text-muted-foreground"
-                      }`}>
-                        {isDniValidated ? (
-                          <CheckCircle2 className="w-3 h-3" />
-                        ) : (
-                          <AlertCircle className="w-3 h-3" />
-                        )}
+                      <p
+                        className={`text-sm flex items-center gap-1 ${
+                          isDniValidated ? "text-green-600" : "text-muted-foreground"
+                        }`}
+                      >
+                        {isDniValidated ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
                         {dniValidationMessage}
                       </p>
                     )}
@@ -308,9 +306,7 @@ const Auth = () => {
                       className={isDniValidated ? "bg-muted/50" : ""}
                     />
                     {isDniValidated && (
-                      <p className="text-xs text-muted-foreground">
-                        Puedes editar el nombre si es necesario
-                      </p>
+                      <p className="text-xs text-muted-foreground">Puedes editar el nombre si es necesario</p>
                     )}
                   </div>
                   <div className="space-y-2">
