@@ -461,11 +461,14 @@ const AssessmentNIST = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor={`proof-${control.id}`}>Imagen de Prueba (Opcional)</Label>
+                    <Label htmlFor={`proof-${control.id}`}>Evidencia (Opcional)</Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Puedes adjuntar imágenes, PDFs, documentos Word o videos cortos (máx. 20MB)
+                    </p>
                     <input
                       id={`proof-${control.id}`}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,.pdf,.doc,.docx,video/mp4,video/webm,video/quicktime"
                       onChange={(e) => {
                         const file = e.target.files?.[0] || null;
                         setControlData({

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EvidenceViewer from "@/components/EvidenceViewer";
 
 interface Organization {
   id: string;
@@ -28,6 +29,7 @@ interface AssessmentResult {
   conformity_status: string;
   improvement_action: string | null;
   comments: string | null;
+  proof_image_url: string | null;
   controls: {
     code: string;
     name: string;
@@ -119,6 +121,7 @@ const ImprovementPlanManager = () => {
           conformity_status,
           improvement_action,
           comments,
+          proof_image_url,
           controls(code, name),
           maturity_levels(level, name)
         `)
@@ -281,6 +284,15 @@ const ImprovementPlanManager = () => {
                       {result.comments && (
                         <div className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
                           <strong>Comentarios:</strong> {result.comments}
+                        </div>
+                      )}
+
+                      {result.proof_image_url && (
+                        <div className="flex items-center gap-2">
+                          <EvidenceViewer 
+                            evidenceUrl={result.proof_image_url}
+                            controlName={`${result.controls.code} - ${result.controls.name}`}
+                          />
                         </div>
                       )}
 

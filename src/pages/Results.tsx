@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import EvidenceViewer from "@/components/EvidenceViewer";
 
 interface ControlResult {
   control_id: string;
@@ -405,12 +406,10 @@ const Results = () => {
                             </div>
                           )}
                           {control.proof_image_url && (
-                            <div className="mt-3 bg-background p-3 rounded-lg border">
-                              <p className="text-sm font-medium mb-2">Prueba Adjunta:</p>
-                              <img 
-                                src={control.proof_image_url} 
-                                alt="Prueba" 
-                                className="max-w-full h-auto rounded-lg border"
+                            <div className="mt-3 flex items-center gap-2">
+                              <EvidenceViewer 
+                                evidenceUrl={control.proof_image_url}
+                                controlName={`${control.control_code} - ${control.control_name}`}
                               />
                             </div>
                           )}
