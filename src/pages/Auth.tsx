@@ -10,7 +10,14 @@ import { Shield, Lock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 
-const authSchema = z.object({
+// Schema for login (only email and password)
+const loginSchema = z.object({
+  email: z.string().trim().email({ message: "Correo electrónico inválido" }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+});
+
+// Schema for signup (includes name and dni)
+const signupSchema = z.object({
   email: z.string().trim().email({ message: "Correo electrónico inválido" }),
   password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
   name: z.string().trim().min(2, { message: "El nombre debe tener al menos 2 caracteres" }).optional(),
@@ -47,7 +54,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const validatedData = authSchema.parse(loginData);
+      const validatedData = loginSchema.parse(loginData);
 
       const { error } = await supabase.auth.signInWithPassword({
         email: validatedData.email,
@@ -154,7 +161,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const validatedData = authSchema.parse(signupData);
+      const validatedData = signupSchema.parse(signupData);
       const redirectUrl = `${window.location.origin}/`;
 
       const { data, error } = await supabase.auth.signUp({
