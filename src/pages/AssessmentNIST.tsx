@@ -193,13 +193,13 @@ const AssessmentNIST = () => {
         const fileName = `${assessmentId}/${controlId}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("avatars")
+          .from("evidencias")
           .upload(fileName, file, { upsert: true });
 
         if (!uploadError) {
           const {
             data: { publicUrl },
-          } = supabase.storage.from("avatars").getPublicUrl(fileName);
+          } = supabase.storage.from("evidencias").getPublicUrl(fileName);
           proofImageUrl = publicUrl;
           
           toast({
@@ -277,13 +277,13 @@ const AssessmentNIST = () => {
             const fileName = `${assessmentId}/${controlId}.${fileExt}`;
 
             const { error: uploadError } = await supabase.storage
-              .from("avatars")
+              .from("evidencias")
               .upload(fileName, file, { upsert: true });
 
             if (!uploadError) {
               const {
                 data: { publicUrl },
-              } = supabase.storage.from("avatars").getPublicUrl(fileName);
+              } = supabase.storage.from("evidencias").getPublicUrl(fileName);
 
               // Update the result with the proof image URL
               await supabase
