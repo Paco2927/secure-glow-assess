@@ -1,6 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Eye } from "lucide-react";
+import { FileText, Download, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+// Configurar worker de PDF.js
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface EvidenceViewerProps {
   evidenceUrl: string | null;
@@ -8,7 +15,15 @@ interface EvidenceViewerProps {
 }
 
 const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+
   if (!evidenceUrl) return null;
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setPageNumber(1);
+  };
 
   const getFileType = (url: string): "image" | "pdf" | "video" | "document" => {
     const extension = url.split(".").pop()?.toLowerCase() || "";
@@ -33,11 +48,61 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
         );
       case "pdf":
         return (
-          <iframe
-            src={evidenceUrl}
-            className="w-full h-[600px] rounded-lg"
-            title={`PDF de ${controlName}`}
-          />
+          <div className="flex flex-col items-center space-y-4">
+            <Document
+              file={evidenceUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              loading={
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-muted-foreground">Cargando PDF...</div>
+                </div>
+              }
+              error={
+                <div className="text-center p-8 space-y-4">
+                  <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Error al cargar el PDF
+                  </p>
+                  <Button onClick={() => window.open(evidenceUrl, '_blank')}>
+                    Abrir en nueva pestaña
+                  </Button>
+                </div>
+              }
+              className="max-w-full"
+            >
+              <Page 
+                pageNumber={pageNumber}
+                className="shadow-lg"
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+              />
+            </Document>
+            {numPages > 1 && (
+              <div className="flex items-center gap-4 bg-muted/50 px-4 py-2 rounded-lg">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  disabled={pageNumber <= 1}
+                  onClick={() => setPageNumber(p => p - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <span className="text-sm font-medium">
+                  Página {pageNumber} de {numPages}
+                </span>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  disabled={pageNumber >= numPages}
+                  onClick={() => setPageNumber(p => p + 1)}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         );
       case "video":
         return (
