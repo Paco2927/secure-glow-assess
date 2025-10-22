@@ -112,7 +112,7 @@ const AssessmentISO = () => {
         // Load existing results
         const { data: results } = await supabase
           .from("assessment_results")
-          .select("control_id, maturity_level_id, conformity_status, comments")
+          .select("control_id, maturity_level_id, conformity_status, comments, proof_image_url")
           .eq("assessment_id", pendingAssessment.id);
 
         if (results) {
@@ -147,7 +147,7 @@ const AssessmentISO = () => {
   }, [selectedOrganization, user]);
 
   // Auto-save progress when answering questions
-  const saveProgress = async (controlId: string, levelId: string, data: ControlData) => {
+  const saveProgress = async (controlId: string, levelId: string, data: ControlData, uploadFile?: File) => {
     if (!selectedOrganization || !user) return;
 
     try {
@@ -187,17 +187,47 @@ const AssessmentISO = () => {
         });
       }
 
+      // Upload file if provided
+      let proofImageUrl: string | null = null;
+      if (uploadFile) {
+        const file = uploadFile;
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${assessmentId}/${controlId}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(fileName, file, { upsert: true });
+
+        if (!uploadError) {
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("avatars").getPublicUrl(fileName);
+          proofImageUrl = publicUrl;
+          
+          toast({
+            title: "Evidencia guardada",
+            description: "La evidencia se ha guardado automáticamente",
+          });
+        }
+      }
+
       // Upsert the result
+      const resultData: any = {
+        assessment_id: assessmentId,
+        control_id: controlId,
+        maturity_level_id: levelId,
+        conformity_status: data.conformityStatus,
+        comments: data.comments || null,
+        evidence: "",
+      };
+
+      if (proofImageUrl) {
+        resultData.proof_image_url = proofImageUrl;
+      }
+
       const { error: upsertError } = await supabase
         .from("assessment_results")
-        .upsert({
-          assessment_id: assessmentId,
-          control_id: controlId,
-          maturity_level_id: levelId,
-          conformity_status: data.conformityStatus,
-          comments: data.comments || null,
-          evidence: "",
-        }, {
+        .upsert(resultData, {
           onConflict: "assessment_id,control_id"
         });
 
@@ -480,17 +510,23 @@ const AssessmentISO = () => {
                       id={`proof-${control.id}`}
                       type="file"
                       accept="image/*,.pdf,.doc,.docx,video/mp4,video/webm,video/quicktime"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0] || null;
+                        const newData = {
+                          ...controlData[control.id],
+                          conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
+                          comments: controlData[control.id]?.comments || "",
+                          proofImage: file,
+                        };
                         setControlData({
                           ...controlData,
-                          [control.id]: {
-                            ...controlData[control.id],
-                            conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
-                            comments: controlData[control.id]?.comments || "",
-                            proofImage: file,
-                          },
+                          [control.id]: newData,
                         });
+                        
+                        // Auto-save with file upload
+                        if (file && selectedLevels[control.id]) {
+                          await saveProgress(control.id, selectedLevels[control.id], newData, file);
+                        }
                       }}
                       className="mt-2 w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                     />
