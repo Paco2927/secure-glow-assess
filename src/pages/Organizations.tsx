@@ -307,13 +307,13 @@ const Organizations = () => {
         const filePath = `organization-logos/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("avatars")
+          .from("organization-logos")
           .upload(filePath, logoFile, { upsert: true });
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-          .from("avatars")
+          .from("organization-logos")
           .getPublicUrl(filePath);
 
         logoUrl = publicUrl;
