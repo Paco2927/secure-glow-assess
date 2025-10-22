@@ -14,6 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Member {
   id: string;
@@ -39,6 +49,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
   const [inviteEmail, setInviteEmail] = useState("");
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [editRole, setEditRole] = useState("");
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
 
   useEffect(() => {
     loadMembers();
@@ -226,7 +237,7 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
                     >
                       Asignar puesto
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleRemoveMember(member.id)}>
+                    <Button variant="destructive" size="sm" onClick={() => setMemberToDelete(member)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -291,6 +302,31 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!memberToDelete} onOpenChange={() => setMemberToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará a {memberToDelete?.profiles.name} de la organización. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (memberToDelete) {
+                  handleRemoveMember(memberToDelete.id);
+                  setMemberToDelete(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
