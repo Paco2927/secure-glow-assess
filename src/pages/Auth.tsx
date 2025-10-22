@@ -270,7 +270,7 @@ const Auth = () => {
                       <Input
                         id="signup-dni"
                         type="text"
-                        placeholder="1-2345-6789"
+                        placeholder="1-2345-6789 o 123456789"
                         value={signupData.dni}
                         onChange={handleDniChange}
                         className={isDniValidated ? "pr-10 border-green-500" : ""}
