@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import EvidenceViewer from "@/components/EvidenceViewer";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Organization {
   id: string;
   name: string;
+  logo_url: string | null;
 }
 
 interface Assessment {
@@ -74,7 +76,7 @@ const ImprovementPlanManager = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("organizations")
-        .select("id, name")
+        .select("id, name, logo_url")
         .order("name");
 
       if (error) throw error;
@@ -204,7 +206,15 @@ const ImprovementPlanManager = () => {
                 <SelectContent>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.name}
+                      <div className="flex items-center gap-2">
+                        {org.logo_url && (
+                          <Avatar className="w-5 h-5">
+                            <AvatarImage src={org.logo_url} alt={org.name} />
+                            <AvatarFallback>{org.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <span>{org.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

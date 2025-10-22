@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -27,6 +28,7 @@ interface Assessment {
   status: string;
   average_score?: number;
   organization_name?: string;
+  organization_logo_url?: string;
 }
 
 interface DomainScore {
@@ -78,7 +80,7 @@ const Reportes = () => {
       // - Admins/moderators see all assessments
       const { data, error } = await supabase
         .from("assessments")
-        .select(`*, organizations(name)`)
+        .select(`*, organizations(name, logo_url)`)
         .order("assessment_date", { ascending: false });
 
       if (error) {
@@ -138,6 +140,7 @@ const Reportes = () => {
             ...assessment,
             average_score: averageScore,
             organization_name: assessment.organizations?.name || "Sin organización",
+            organization_logo_url: assessment.organizations?.logo_url,
           };
         }),
       );
@@ -359,8 +362,14 @@ const Reportes = () => {
                               <Calendar className="w-4 h-4" />
                               {formatDate(assessment.assessment_date)}
                             </div>
-                            <div className="font-medium text-foreground">
-                              Organización: {assessment.organization_name}
+                            <div className="flex items-center gap-2 font-medium text-foreground">
+                              {assessment.organization_logo_url && (
+                                <Avatar className="w-5 h-5">
+                                  <AvatarImage src={assessment.organization_logo_url} alt={assessment.organization_name} />
+                                  <AvatarFallback>{assessment.organization_name?.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              )}
+                              <span>Organización: {assessment.organization_name}</span>
                             </div>
                           </CardDescription>
                         </div>
