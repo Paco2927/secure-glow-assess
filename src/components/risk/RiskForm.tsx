@@ -9,6 +9,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+// Zod validation schemas
+const riskFormSchema = z.object({
+  organization_id: z.string().uuid('ID de organización inválido'),
+  asset: z.string()
+    .trim()
+    .min(1, 'El activo es requerido')
+    .max(500, 'Máximo 500 caracteres'),
+  threat: z.string()
+    .trim()
+    .min(1, 'La amenaza es requerida')
+    .max(1000, 'Máximo 1000 caracteres'),
+  vulnerability: z.string()
+    .trim()
+    .min(1, 'La vulnerabilidad es requerida')
+    .max(1000, 'Máximo 1000 caracteres'),
+  risk_description: z.string()
+    .trim()
+    .min(1, 'La descripción es requerida')
+    .max(2000, 'Máximo 2000 caracteres'),
+  control_reference: z.string()
+    .trim()
+    .max(100, 'Máximo 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+});
+
+const assessmentSchema = z.object({
+  likelihood: z.number().int().min(1).max(5),
+  impact: z.number().int().min(1).max(5),
+  existing_controls: z.string().trim().max(2000, 'Máximo 2000 caracteres').optional().or(z.literal('')),
+  residual_risk: z.string().trim().max(2000, 'Máximo 2000 caracteres').optional().or(z.literal('')),
+});
+
+const treatmentSchema = z.object({
+  treatment_plan: z.string().trim().max(2000, 'Máximo 2000 caracteres').optional().or(z.literal('')),
+  responsible_person: z.string().trim().max(200, 'Máximo 200 caracteres').optional().or(z.literal('')),
+  target_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido').optional().or(z.literal('')),
+  status: z.enum(['open', 'in_progress', 'closed', 'accepted']),
+  review_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido').optional().or(z.literal('')),
+  notes: z.string().trim().max(2000, 'Máximo 2000 caracteres').optional().or(z.literal('')),
+});
 
 interface RiskFormProps {
   riskId: string | null;
@@ -138,9 +181,16 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
   };
 
   const handleSubmit = async () => {
-    if (!formData.organization_id || !formData.asset || !formData.risk_description || !formData.threat || !formData.vulnerability) {
-      toast.error("Por favor complete los campos obligatorios");
-      return;
+    // Validate all form data using zod schemas
+    try {
+      riskFormSchema.parse(formData);
+      assessmentSchema.parse(assessment);
+      treatmentSchema.parse(treatment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     setLoading(true);
