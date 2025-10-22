@@ -200,10 +200,13 @@ const AssessmentNIST = () => {
           .upload(fileName, file, { upsert: true });
 
         if (!uploadError) {
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from("evidencias").getPublicUrl(fileName);
-          proofImageUrl = publicUrl;
+          const { data, error: signedUrlError } = await supabase.storage
+            .from("evidencias")
+            .createSignedUrl(fileName, 3600); // 1 hour expiry
+          
+          if (!signedUrlError && data) {
+            proofImageUrl = data.signedUrl;
+          }
           
           toast({
             title: "Evidencia guardada",
@@ -284,9 +287,11 @@ const AssessmentNIST = () => {
               .upload(fileName, file, { upsert: true });
 
             if (!uploadError) {
-              const {
-                data: { publicUrl },
-              } = supabase.storage.from("evidencias").getPublicUrl(fileName);
+              const { data, error: signedUrlError } = await supabase.storage
+                .from("evidencias")
+                .createSignedUrl(fileName, 3600); // 1 hour expiry
+              
+              const publicUrl = !signedUrlError && data ? data.signedUrl : null;
 
               // Update the result with the proof image URL
               await supabase
