@@ -148,7 +148,7 @@ const Admin = () => {
                 </TabsTrigger>
               )}
 
-              {/* Solo Admin puede ver Personalización de Tema */}
+              {/* Solo Admin puede ver Personalización de tema */}
               {userRole === "admin" && (
                 <TabsTrigger value="theme">
                   <Palette className="h-4 w-4 mr-2" />
