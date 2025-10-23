@@ -304,7 +304,7 @@ export const UserRoleManager = () => {
                         )}
                       </Button>
                     )}
-                    {isCurrentUserAdmin && profile.id !== currentUserId && (
+                    {isCurrentUserAdmin && profile.id !== currentUserId && !isAdmin(profile.id) && (
                       <Button
                         variant="destructive"
                         size="sm"
