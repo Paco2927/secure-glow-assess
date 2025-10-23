@@ -90,10 +90,10 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <img 
-                src={logoUrl || techSecureIcon} 
-                alt="Logo" 
-                className={logoUrl ? "w-10 h-10 object-contain" : "w-4.5 h-6"} 
+              <img
+                src={logoUrl || techSecureIcon}
+                alt="Logo"
+                className={logoUrl ? "w-10 h-10 object-contain" : "w-4.5 h-6"}
               />
             </div>
             <div>
@@ -150,7 +150,10 @@ const Dashboard = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 flex items-center justify-center">
           <img
-            src={dashboardBackgroundUrl || "https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"}
+            src={
+              dashboardBackgroundUrl ||
+              "https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"
+            }
             alt="Imagen a mostrar"
             width="250"
             height="200"
@@ -236,7 +239,9 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">Matriz de Riesgos</h2>
-                  <p className="text-sm text-muted-foreground">ISO 27001 Risk Matrix</p>
+                  <p className="text-sm text-muted-foreground">
+                    Revise los riesgos a los que está expuesta su organización
+                  </p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-destructive" />
               </div>
