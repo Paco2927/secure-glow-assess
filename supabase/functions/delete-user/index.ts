@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,16 +44,29 @@ serve(async (req) => {
       throw new Error('User is not an admin')
     }
 
-    // Get the user ID to delete from the request
-    const { userId } = await req.json()
-
-    if (!userId) {
-      throw new Error('User ID is required')
-    }
+    // Get the user ID to delete from the request and validate
+    const deleteUserSchema = z.object({
+      userId: z.string().uuid({ message: 'El ID de usuario debe ser un UUID válido' })
+    })
+    
+    const body = await req.json()
+    const { userId } = deleteUserSchema.parse(body)
 
     // Prevent self-deletion
     if (userId === user.id) {
       throw new Error('Cannot delete yourself')
+    }
+
+    // Check if the target user is an admin
+    const { data: targetRoles, error: targetRolesError } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (targetRoles && !targetRolesError) {
+      throw new Error('No se puede eliminar a otros administradores. Solo puede eliminar moderadores y usuarios.')
     }
 
     // Delete the user using admin API

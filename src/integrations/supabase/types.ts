@@ -120,6 +120,27 @@ export type Database = {
           },
         ]
       }
+      cedula_validation_log: {
+        Row: {
+          cedula: string
+          created_at: string | null
+          id: string
+          ip_address: string
+        }
+        Insert: {
+          cedula: string
+          created_at?: string | null
+          id?: string
+          ip_address: string
+        }
+        Update: {
+          cedula?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string
+        }
+        Relationships: []
+      }
       contact_settings: {
         Row: {
           company_location: string | null

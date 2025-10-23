@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { fullName, email, phone, companyName, message }: ContactRequest = await req.json();
 
-    console.log("Received contact form submission:", { fullName, email, companyName });
+    console.log("Contact form submission received at:", new Date().toISOString());
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
                      req.headers.get('x-real-ip') || 
                      'unknown';
 
-    console.log("Checking rate limit for IP:", ipAddress);
+    console.log("Rate limit check initiated");
 
     // Check submissions from this IP in the last hour
     const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Allow max 3 submissions per hour per IP
     if (recentSubmissions && recentSubmissions.length >= 3) {
-      console.log(`Rate limit exceeded for IP: ${ipAddress} (${recentSubmissions.length} submissions in last hour)`);
+      console.log('Rate limit exceeded');
       return new Response(
         JSON.stringify({ 
           error: 'Demasiados envíos. Por favor, intenta de nuevo más tarde.' 
@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const destinationEmail = settings?.destination_email || "info@techsecureai.com";
 
-    console.log("Sending email to:", destinationEmail);
+    console.log("Sending email");
 
     // Send email using Resend API directly
     const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -140,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailData = await emailResponse.json();
-    console.log("Email sent successfully:", emailData);
+    console.log("Email sent successfully");
 
     return new Response(JSON.stringify({ success: true, data: emailData }), {
       status: 200,
