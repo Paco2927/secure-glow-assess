@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ShieldOff, Trash2, Search } from "lucide-react";
+import { Shield, ShieldOff, Trash2, Search, UserPlus, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,7 +22,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { z } from "zod";
+
+// Schema for signup (includes name and dni)
+const signupSchema = z.object({
+  email: z.string().trim().email({ message: "Correo electrónico inválido" }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+  name: z.string().trim().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
+  dni: z.string().trim().min(9, { message: "La cédula debe tener al menos 9 dígitos" }),
+});
 
 interface Profile {
   id: string;
@@ -44,6 +63,18 @@ export const UserRoleManager = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "moderator" | "user">("all");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [signupData, setSignupData] = useState({
+    email: "",
+    password: "",
+    dni: "",
+    name: "",
+  });
+  const [isValidatingDni, setIsValidatingDni] = useState(false);
+  const [dniValidationMessage, setDniValidationMessage] = useState("");
+  const [isDniValidated, setIsDniValidated] = useState(false);
+  const dniTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -136,6 +167,127 @@ export const UserRoleManager = () => {
         description: error.message || "No se pudo actualizar el rol",
         variant: "destructive"
       });
+    }
+  };
+
+  const validateCedulaCR = useCallback(async (cedula: string) => {
+    if (!cedula.trim()) {
+      setDniValidationMessage("");
+      setIsDniValidated(false);
+      return;
+    }
+
+    setIsValidatingDni(true);
+    setDniValidationMessage("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("validate-cedula-cr", {
+        body: { cedula },
+      });
+
+      if (error) {
+        console.error("Error calling validate-cedula-cr:", error);
+        setDniValidationMessage("Error al validar cédula. Puedes ingresar el nombre manualmente.");
+        setIsDniValidated(false);
+        return;
+      }
+
+      if (data.success && data.name) {
+        setSignupData((prev) => ({ ...prev, name: data.name }));
+        setDniValidationMessage(`✓ Nombre encontrado: ${data.name}`);
+        setIsDniValidated(true);
+      } else {
+        setDniValidationMessage(data.error || "Cédula no encontrada. Ingresa el nombre manualmente.");
+        setIsDniValidated(false);
+      }
+    } catch (error) {
+      console.error("Error validating cedula:", error);
+      setDniValidationMessage("Error de conexión. Puedes ingresar el nombre manualmente.");
+      setIsDniValidated(false);
+    } finally {
+      setIsValidatingDni(false);
+    }
+  }, []);
+
+  const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDni = e.target.value;
+    setSignupData({ ...signupData, dni: newDni });
+
+    // Clear previous validation
+    setDniValidationMessage("");
+    setIsDniValidated(false);
+
+    // Clear existing timeout
+    if (dniTimeoutRef.current) {
+      clearTimeout(dniTimeoutRef.current);
+    }
+
+    // Set new timeout for validation
+    if (newDni.trim()) {
+      dniTimeoutRef.current = setTimeout(() => {
+        validateCedulaCR(newDni);
+      }, 800);
+    }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreatingUser(true);
+
+    try {
+      const validatedData = signupSchema.parse(signupData);
+      const redirectUrl = `${window.location.origin}/`;
+
+      const { data, error } = await supabase.auth.signUp({
+        email: validatedData.email,
+        password: validatedData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name: validatedData.name,
+            dni: validatedData.dni,
+          },
+        },
+      });
+
+      if (error) {
+        if (error.message.includes("User already registered")) {
+          toast({
+            title: "Usuario existente",
+            description: "Este correo ya está registrado.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "¡Usuario creado!",
+          description: "El usuario ha sido creado exitosamente.",
+        });
+        setSignupData({ email: "", password: "", name: "", dni: "" });
+        setDniValidationMessage("");
+        setIsDniValidated(false);
+        setCreateDialogOpen(false);
+        fetchData();
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Error de validación",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsCreatingUser(false);
     }
   };
 
@@ -238,6 +390,116 @@ export const UserRoleManager = () => {
             <SelectItem value="user">Usuarios</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Crear Usuario
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+              <DialogDescription>
+                Complete el formulario para crear una nueva cuenta de usuario.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="signup-dni">Cédula</Label>
+                <div className="relative">
+                  <Input
+                    id="signup-dni"
+                    type="text"
+                    placeholder="Introduce la cédula"
+                    value={signupData.dni}
+                    onChange={handleDniChange}
+                    className={isDniValidated ? "pr-10 border-green-500" : ""}
+                    required
+                  />
+                  {isValidatingDni && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
+                  {isDniValidated && (
+                    <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                  )}
+                </div>
+                {dniValidationMessage && (
+                  <p
+                    className={`text-sm flex items-center gap-1 ${
+                      isDniValidated ? "text-green-600" : "text-muted-foreground"
+                    }`}
+                  >
+                    {isDniValidated ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                    {dniValidationMessage}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-name">Nombre Completo</Label>
+                <Input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Ingresa el nombre"
+                  value={signupData.name}
+                  onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                  required
+                  className={isDniValidated ? "bg-muted/50" : ""}
+                />
+                {isDniValidated && (
+                  <p className="text-xs text-muted-foreground">Puedes editar el nombre si es necesario</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">Correo Electrónico</Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="usuario@email.com"
+                  value={signupData.email}
+                  onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-password">Contraseña</Label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={signupData.password}
+                  onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setCreateDialogOpen(false);
+                    setSignupData({ email: "", password: "", name: "", dni: "" });
+                    setDniValidationMessage("");
+                    setIsDniValidated(false);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isCreatingUser}>
+                  {isCreatingUser ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creando...
+                    </>
+                  ) : (
+                    "Crear Usuario"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="border rounded-lg">
