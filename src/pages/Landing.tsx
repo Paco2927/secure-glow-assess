@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, FileCheck, Award, TrendingUp, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
 import IsoIcon from "@/assets/IsoIcon.png";
 const Landing = () => {
   const navigate = useNavigate();
+  const { logoUrl } = useThemeSettings();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   useEffect(() => {
     supabase.auth.getSession().then(({
@@ -59,7 +61,11 @@ const Landing = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <img src={techSecureIcon} alt="TechSecureIA" className="w-4.5 h-6" />
+              <img
+                src={logoUrl || techSecureIcon}
+                alt="TechSecureIA"
+                className={logoUrl ? "w-10 h-10 object-contain" : "w-4.5 h-6"}
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold">TechSecureIA</h1>
