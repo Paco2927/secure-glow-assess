@@ -239,9 +239,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold">Matriz de Riesgos</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Revise los riesgos a los que está expuesta su organización
-                  </p>
+                  <p className="text-sm text-muted-foreground">Controle sus riesgos</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-destructive" />
               </div>
