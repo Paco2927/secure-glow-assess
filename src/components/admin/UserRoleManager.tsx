@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ShieldOff, Trash2 } from "lucide-react";
+import { Shield, ShieldOff, Trash2, Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +42,8 @@ export const UserRoleManager = () => {
   const [loading, setLoading] = useState(true);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "moderator" | "user">("all");
 
   useEffect(() => {
     fetchData();
@@ -163,6 +173,40 @@ export const UserRoleManager = () => {
     }
   };
 
+  const getRolePriority = (userId: string) => {
+    if (isAdmin(userId)) return 1;
+    if (isModerator(userId)) return 2;
+    return 3;
+  };
+
+  const filteredAndSortedProfiles = profiles
+    .filter((profile) => {
+      // Filter by search term
+      const matchesSearch = 
+        profile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filter by role
+      if (roleFilter === "all") return matchesSearch;
+      if (roleFilter === "admin") return matchesSearch && isAdmin(profile.id);
+      if (roleFilter === "moderator") return matchesSearch && isModerator(profile.id);
+      if (roleFilter === "user") return matchesSearch && !isAdmin(profile.id) && !isModerator(profile.id);
+      
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      // Sort by role priority
+      const priorityA = getRolePriority(a.id);
+      const priorityB = getRolePriority(b.id);
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // If same role, sort by name
+      return a.name.localeCompare(b.name);
+    });
+
   if (loading) {
     return <div className="text-center py-8">Cargando usuarios...</div>;
   }
@@ -171,6 +215,29 @@ export const UserRoleManager = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Gestión de Usuarios y Roles</h2>
+      </div>
+
+      <div className="flex gap-4 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nombre o email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={roleFilter} onValueChange={(value: any) => setRoleFilter(value)}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrar por rol" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los roles</SelectItem>
+            <SelectItem value="admin">Administradores</SelectItem>
+            <SelectItem value="moderator">Moderadores</SelectItem>
+            <SelectItem value="user">Usuarios</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="border rounded-lg">
@@ -184,7 +251,14 @@ export const UserRoleManager = () => {
             </tr>
           </thead>
           <tbody>
-            {profiles.map((profile) => (
+            {filteredAndSortedProfiles.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                  No se encontraron usuarios
+                </td>
+              </tr>
+            ) : (
+              filteredAndSortedProfiles.map((profile) => (
               <tr key={profile.id} className="border-b last:border-0">
                 <td className="p-4">{profile.name}</td>
                 <td className="p-4">{profile.email}</td>
@@ -243,7 +317,7 @@ export const UserRoleManager = () => {
                   </div>
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>
