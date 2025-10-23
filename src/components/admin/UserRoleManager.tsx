@@ -133,33 +133,16 @@ export const UserRoleManager = () => {
     if (!deleteUserId) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast({
-          title: "Error",
-          description: "No hay sesión activa",
-          variant: "destructive"
-        });
-        return;
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId: deleteUserId }
+      });
+
+      if (error) {
+        throw error;
       }
 
-      const response = await fetch(
-        'https://cqpfwdxfmemwegkrxkre.supabase.co/functions/v1/delete-user',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ userId: deleteUserId }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al eliminar usuario');
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
