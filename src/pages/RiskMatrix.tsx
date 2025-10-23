@@ -31,11 +31,8 @@ export default function RiskMatrix() {
   }, [selectedOrgId]);
 
   const fetchOrganizations = async () => {
-    const { data } = await supabase
-      .from("organizations")
-      .select("*")
-      .order("name");
-    
+    const { data } = await supabase.from("organizations").select("*").order("name");
+
     if (data && data.length > 0) {
       setOrganizations(data);
       if (!selectedOrgId) {
@@ -46,13 +43,9 @@ export default function RiskMatrix() {
 
   const fetchOrganizationInfo = async () => {
     if (!selectedOrgId) return;
-    
-    const { data } = await supabase
-      .from("organizations")
-      .select("*")
-      .eq("id", selectedOrgId)
-      .single();
-    
+
+    const { data } = await supabase.from("organizations").select("*").eq("id", selectedOrgId).single();
+
     if (data) {
       setOrganizationInfo(data);
     }
@@ -73,31 +66,20 @@ export default function RiskMatrix() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/dashboard")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex-1">
               <h1 className="text-3xl font-bold">Matriz de Riesgos</h1>
-              <p className="text-muted-foreground">
-                Gestión integral de riesgos de seguridad de la información para ISO 27001 y NIST
-              </p>
+              <p className="text-muted-foreground">Gestión integral de riesgos de seguridad de la información</p>
               {organizationInfo && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Organización: {organizationInfo.name}
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">Organización: {organizationInfo.name}</p>
               )}
             </div>
           </div>
           <div className="flex gap-2 items-center">
             {organizations.length > 0 && (
-              <Select
-                value={selectedOrgId || ""}
-                onValueChange={setSelectedOrgId}
-              >
+              <Select value={selectedOrgId || ""} onValueChange={setSelectedOrgId}>
                 <SelectTrigger className="w-[250px]">
                   <SelectValue placeholder="Seleccionar organización" />
                 </SelectTrigger>
@@ -138,11 +120,7 @@ export default function RiskMatrix() {
         </Tabs>
 
         {showRiskForm && (
-          <RiskForm
-            riskId={editingRiskId}
-            onClose={handleCloseForm}
-            organizationId={selectedOrgId || undefined}
-          />
+          <RiskForm riskId={editingRiskId} onClose={handleCloseForm} organizationId={selectedOrgId || undefined} />
         )}
       </div>
     </div>
