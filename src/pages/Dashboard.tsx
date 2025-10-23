@@ -3,7 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle, ClipboardList } from "lucide-react";
+import {
+  Shield,
+  LogOut,
+  ArrowRight,
+  Users,
+  FileText,
+  Building2,
+  User,
+  AlertTriangle,
+  ClipboardList,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -185,9 +195,7 @@ const Dashboard = () => {
                     <img src={IsoIcon} alt="ISO 27001" className="w-28 h-28" />
                   </div>
                   <CardTitle className="text-3xl mb-2">ISO 27001</CardTitle>
-                  <CardDescription className="text-base">
-                    Gestión de Seguridad de la Información
-                  </CardDescription>
+                  <CardDescription className="text-base">Gestión de Seguridad de la Información</CardDescription>
                 </CardContent>
               </Card>
 
@@ -201,9 +209,7 @@ const Dashboard = () => {
                     <img src={NistIcon} alt="NIST CSF" className="w-28 h-28" />
                   </div>
                   <CardTitle className="text-3xl mb-2">NIST CSF</CardTitle>
-                  <CardDescription className="text-base">
-                    Cybersecurity Framework
-                  </CardDescription>
+                  <CardDescription className="text-base">Cybersecurity Framework</CardDescription>
                 </CardContent>
               </Card>
             </div>
@@ -276,7 +282,7 @@ const Dashboard = () => {
                     <FileText className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold">Mis Reportes</h2>
+                    <h2 className="text-xl font-bold">Ver evaluaciones</h2>
                     <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores</p>
                   </div>
                   <ArrowRight className="w-5 h-5" />
