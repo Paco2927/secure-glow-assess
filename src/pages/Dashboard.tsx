@@ -225,24 +225,22 @@ const Dashboard = () => {
               </div>
             </Card>
 
-            {/* Matriz de Riesgos - Para Admin y Moderador */}
-            {(isAdmin || isModerator) && (
-              <Card
-                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-destructive/20"
-                onClick={() => navigate("/risk-matrix")}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
-                    <AlertTriangle className="w-6 h-6 text-destructive" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold">Matriz de Riesgos</h2>
-                    <p className="text-sm text-muted-foreground">ISO 27001 Risk Matrix</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-destructive" />
+            {/* Matriz de Riesgos - Para todos los usuarios */}
+            <Card
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-destructive/20"
+              onClick={() => navigate("/risk-matrix")}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-destructive" />
                 </div>
-              </Card>
-            )}
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold">Matriz de Riesgos</h2>
+                  <p className="text-sm text-muted-foreground">ISO 27001 Risk Matrix</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-destructive" />
+              </div>
+            </Card>
 
             {/* Mis Reportes - Para todos los usuarios */}
             <Card
@@ -272,7 +270,7 @@ const Dashboard = () => {
                   {isModerator &&
                     !isAdmin &&
                     "Tienes acceso a herramientas de moderación y evaluación NIST e ISO27001."}
-                  {!isAdmin && !isModerator && "Accede a las herramientas básicas de evaluación y reportes."}
+                  {!isAdmin && !isModerator && "Accede a organizaciones, matriz de riesgos y reportes."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
