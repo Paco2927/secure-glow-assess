@@ -407,13 +407,13 @@ const Reportes = () => {
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</p>
                         <div className="flex gap-2">
-                          {assessment.standard === "ISO27001" && (
+                          {assessment.organization_id && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/risk-matrix?assessment=${assessment.id}`);
+                                navigate(`/risk-matrix?organization=${assessment.organization_id}`);
                               }}
                             >
                               <AlertTriangle className="w-4 h-4 mr-1" />
