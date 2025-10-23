@@ -127,7 +127,7 @@ export function RiskMatrixGrid({ onEditRisk, organizationId }: RiskMatrixGridPro
                         style={{ backgroundColor: color + "20" }}
                       >
                         <div className="text-xs font-semibold mb-1" style={{ color }}>
-                          Score: {score}
+                          Puntaje: {score}
                         </div>
                         <div className="space-y-1">
                           {cellRisks.map((risk) => (

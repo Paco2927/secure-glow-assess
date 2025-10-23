@@ -104,6 +104,26 @@ export function RiskList({ onEditRisk, organizationId }: RiskListProps) {
     }
   };
 
+  const getRiskLevelText = (level?: string) => {
+    switch (level) {
+      case "low": return "Bajo";
+      case "medium": return "Medio";
+      case "high": return "Alto";
+      case "extreme": return "Extremo";
+      default: return level;
+    }
+  };
+
+  const getTreatmentStatusText = (status?: string) => {
+    switch (status) {
+      case "pending": return "Pendiente";
+      case "in_progress": return "En Progreso";
+      case "completed": return "Completado";
+      case "cancelled": return "Cancelado";
+      default: return status || "Sin plan";
+    }
+  };
+
   if (loading) {
     return <Skeleton className="w-full h-96" />;
   }
@@ -144,7 +164,7 @@ export function RiskList({ onEditRisk, organizationId }: RiskListProps) {
                     <TableCell>
                       {risk.assessment ? (
                         <Badge variant={getRiskLevelColor(risk.assessment.risk_level)}>
-                          {risk.assessment.risk_level} ({risk.assessment.risk_score})
+                          {getRiskLevelText(risk.assessment.risk_level)} ({risk.assessment.risk_score})
                         </Badge>
                       ) : (
                         <Badge variant="outline">Sin evaluar</Badge>
@@ -152,7 +172,7 @@ export function RiskList({ onEditRisk, organizationId }: RiskListProps) {
                     </TableCell>
                     <TableCell>
                       {risk.treatment ? (
-                        <Badge variant="outline">{risk.treatment.status}</Badge>
+                        <Badge variant="outline">{getTreatmentStatusText(risk.treatment.status)}</Badge>
                       ) : (
                         <Badge variant="outline">Sin plan</Badge>
                       )}
