@@ -10,11 +10,13 @@ import { RiskMatrixGrid } from "@/components/risk/RiskMatrixGrid";
 import { RiskList } from "@/components/risk/RiskList";
 import { RiskForm } from "@/components/risk/RiskForm";
 import { MatrixConfig } from "@/components/risk/MatrixConfig";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 export default function RiskMatrix() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const organizationIdParam = searchParams.get("organization");
+  const { isAdmin, isModerator } = useAdminRole();
   const [showRiskForm, setShowRiskForm] = useState(false);
   const [editingRiskId, setEditingRiskId] = useState<string | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<any>(null);
@@ -123,10 +125,12 @@ export default function RiskMatrix() {
         </div>
 
         <Tabs defaultValue="matrix" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full ${isAdmin || isModerator ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="matrix">Matriz Visual</TabsTrigger>
             <TabsTrigger value="list">Lista de Riesgos</TabsTrigger>
-            <TabsTrigger value="config">Configuración</TabsTrigger>
+            {(isAdmin || isModerator) && (
+              <TabsTrigger value="config">Configuración</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="matrix" className="space-y-4">
@@ -137,9 +141,11 @@ export default function RiskMatrix() {
             <RiskList onEditRisk={handleEditRisk} organizationId={selectedOrgId} />
           </TabsContent>
 
-          <TabsContent value="config" className="space-y-4">
-            <MatrixConfig />
-          </TabsContent>
+          {(isAdmin || isModerator) && (
+            <TabsContent value="config" className="space-y-4">
+              <MatrixConfig />
+            </TabsContent>
+          )}
         </Tabs>
 
         {showRiskForm && (
