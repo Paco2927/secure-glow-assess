@@ -152,7 +152,7 @@ const Admin = () => {
               {userRole === "admin" && (
                 <TabsTrigger value="theme">
                   <Palette className="h-4 w-4 mr-2" />
-                  Colores
+                  Personalización
                 </TabsTrigger>
               )}
             </TabsList>
