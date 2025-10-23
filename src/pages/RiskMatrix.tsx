@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { RiskMatrixGrid } from "@/components/risk/RiskMatrixGrid";
 import { RiskList } from "@/components/risk/RiskList";
 import { RiskForm } from "@/components/risk/RiskForm";
@@ -31,7 +32,7 @@ export default function RiskMatrix() {
   }, [selectedOrgId]);
 
   const fetchOrganizations = async () => {
-    const { data } = await supabase.from("organizations").select("*").order("name");
+    const { data } = await supabase.from("organizations").select("id, name, logo_url").order("name");
 
     if (data && data.length > 0) {
       setOrganizations(data);
@@ -61,6 +62,8 @@ export default function RiskMatrix() {
     setEditingRiskId(null);
   };
 
+  const selectedOrg = organizations.find(org => org.id === selectedOrgId);
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -81,12 +84,32 @@ export default function RiskMatrix() {
             {organizations.length > 0 && (
               <Select value={selectedOrgId || ""} onValueChange={setSelectedOrgId}>
                 <SelectTrigger className="w-[250px]">
-                  <SelectValue placeholder="Seleccionar organización" />
+                  <SelectValue placeholder="Seleccionar organización">
+                    {selectedOrg && (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={selectedOrg.logo_url || undefined} alt={selectedOrg.name} />
+                          <AvatarFallback>
+                            <Building2 className="h-3 w-3" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{selectedOrg.name}</span>
+                      </div>
+                    )}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.name}
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={org.logo_url || undefined} alt={org.name} />
+                          <AvatarFallback>
+                            <Building2 className="h-3 w-3" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{org.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
