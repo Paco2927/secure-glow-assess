@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Lock, Loader2, CheckCircle2, AlertCircle, Home } from "lucide-react";
+import { Shield, Lock, Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 
@@ -219,10 +219,10 @@ const Auth = () => {
         variant="ghost"
         size="icon"
         onClick={() => navigate("/")}
-        className="absolute top-4 right-4"
+        className="absolute top-4 left-4"
         aria-label="Volver al inicio"
       >
-        <Home className="w-5 h-5" />
+        <ArrowLeft className="w-5 h-5" />
       </Button>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
