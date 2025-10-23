@@ -20,30 +20,29 @@ import {
 
 interface RiskListProps {
   onEditRisk: (riskId: string) => void;
-  assessmentId: string | null;
+  organizationId: string | null;
 }
 
-export function RiskList({ onEditRisk, assessmentId }: RiskListProps) {
+export function RiskList({ onEditRisk, organizationId }: RiskListProps) {
   const [risks, setRisks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchRisks();
-  }, [assessmentId]);
+    if (organizationId) {
+      fetchRisks();
+    }
+  }, [organizationId]);
 
   const fetchRisks = async () => {
+    if (!organizationId) return;
+    
     try {
-      let query = supabase
+      const { data: risksData, error } = await supabase
         .from("risks")
         .select("*")
+        .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
-      
-      if (assessmentId) {
-        query = query.eq("assessment_id", assessmentId);
-      }
-
-      const { data: risksData, error } = await query;
 
       if (error) throw error;
 

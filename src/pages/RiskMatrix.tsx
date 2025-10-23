@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RiskMatrixGrid } from "@/components/risk/RiskMatrixGrid";
 import { RiskList } from "@/components/risk/RiskList";
 import { RiskForm } from "@/components/risk/RiskForm";
@@ -12,28 +13,48 @@ import { MatrixConfig } from "@/components/risk/MatrixConfig";
 export default function RiskMatrix() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const assessmentId = searchParams.get("assessment");
+  const organizationIdParam = searchParams.get("organization");
   const [showRiskForm, setShowRiskForm] = useState(false);
   const [editingRiskId, setEditingRiskId] = useState<string | null>(null);
-  const [assessmentInfo, setAssessmentInfo] = useState<any>(null);
+  const [organizationInfo, setOrganizationInfo] = useState<any>(null);
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(organizationIdParam);
 
   useEffect(() => {
-    if (assessmentId) {
-      fetchAssessmentInfo();
-    }
-  }, [assessmentId]);
+    fetchOrganizations();
+  }, []);
 
-  const fetchAssessmentInfo = async () => {
-    if (!assessmentId) return;
+  useEffect(() => {
+    if (selectedOrgId) {
+      fetchOrganizationInfo();
+    }
+  }, [selectedOrgId]);
+
+  const fetchOrganizations = async () => {
+    const { data } = await supabase
+      .from("organizations")
+      .select("*")
+      .order("name");
+    
+    if (data && data.length > 0) {
+      setOrganizations(data);
+      if (!selectedOrgId) {
+        setSelectedOrgId(data[0].id);
+      }
+    }
+  };
+
+  const fetchOrganizationInfo = async () => {
+    if (!selectedOrgId) return;
     
     const { data } = await supabase
-      .from("assessments")
-      .select("*, organizations(name)")
-      .eq("id", assessmentId)
+      .from("organizations")
+      .select("*")
+      .eq("id", selectedOrgId)
       .single();
     
     if (data) {
-      setAssessmentInfo(data);
+      setOrganizationInfo(data);
     }
   };
 
@@ -59,20 +80,41 @@ export default function RiskMatrix() {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Matriz de Riesgos ISO 27001</h1>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold">Matriz de Riesgos</h1>
               <p className="text-muted-foreground">
-                {assessmentInfo 
-                  ? `Evaluación: ${assessmentInfo.organizations?.name || 'Sin organización'} - ${assessmentInfo.standard}`
-                  : "Gestión integral de riesgos de seguridad de la información"
-                }
+                Gestión integral de riesgos de seguridad de la información para ISO 27001 y NIST
               </p>
+              {organizationInfo && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Organización: {organizationInfo.name}
+                </p>
+              )}
             </div>
           </div>
-          <Button onClick={() => setShowRiskForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Riesgo
-          </Button>
+          <div className="flex gap-2 items-center">
+            {organizations.length > 0 && (
+              <Select
+                value={selectedOrgId || ""}
+                onValueChange={setSelectedOrgId}
+              >
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Seleccionar organización" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button onClick={() => setShowRiskForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Riesgo
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="matrix" className="w-full">
@@ -83,11 +125,11 @@ export default function RiskMatrix() {
           </TabsList>
 
           <TabsContent value="matrix" className="space-y-4">
-            <RiskMatrixGrid onEditRisk={handleEditRisk} assessmentId={assessmentId} />
+            <RiskMatrixGrid onEditRisk={handleEditRisk} organizationId={selectedOrgId} />
           </TabsContent>
 
           <TabsContent value="list" className="space-y-4">
-            <RiskList onEditRisk={handleEditRisk} assessmentId={assessmentId} />
+            <RiskList onEditRisk={handleEditRisk} organizationId={selectedOrgId} />
           </TabsContent>
 
           <TabsContent value="config" className="space-y-4">
@@ -99,8 +141,7 @@ export default function RiskMatrix() {
           <RiskForm
             riskId={editingRiskId}
             onClose={handleCloseForm}
-            assessmentId={assessmentId}
-            organizationId={assessmentInfo?.organization_id}
+            organizationId={selectedOrgId || undefined}
           />
         )}
       </div>
