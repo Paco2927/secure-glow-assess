@@ -118,7 +118,7 @@ const countries = [
 ];
 
 // 🏭 Lista de sectores predefinidos
-const sectores = [
+const sectors = [
   "Agricultura",
   "Alimentación y Bebidas",
   "Arte y Cultura",
@@ -312,9 +312,9 @@ const Organizations = () => {
 
         if (uploadError) throw uploadError;
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("organization-logos").getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage
+          .from("organization-logos")
+          .getPublicUrl(filePath);
 
         logoUrl = publicUrl;
       }
@@ -437,32 +437,17 @@ const Organizations = () => {
                 <CardContent className="flex-1 flex flex-col justify-between pt-0">
                   {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
                   <div className="flex flex-wrap gap-2 mt-auto">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedOrgForMembers(org.id)}
-                      className="flex-1 min-w-[100px]"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSelectedOrgForMembers(org.id)} className="flex-1 min-w-[100px]">
                       <Users className="h-4 w-4 mr-2" />
                       Miembros
                     </Button>
                     {isAdmin && (
                       <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenDialog(org)}
-                          className="flex-1 min-w-[100px]"
-                        >
+                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(org)} className="flex-1 min-w-[100px]">
                           <Pencil className="h-4 w-4 mr-2" />
                           Editar
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => setDeleteOrgId(org.id)}
-                          className="flex-1 min-w-[100px]"
-                        >
+                        <Button variant="destructive" size="sm" onClick={() => setDeleteOrgId(org.id)} className="flex-1 min-w-[100px]">
                           <Trash2 className="h-4 w-4 mr-2" />
                           Eliminar
                         </Button>
@@ -504,7 +489,9 @@ const Organizations = () => {
                       onChange={handleLogoChange}
                       className="cursor-pointer"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, GIF (máx. 5MB)</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formatos: JPG, PNG, GIF (máx. 5MB)
+                    </p>
                   </div>
                 </div>
               </div>
