@@ -193,7 +193,7 @@ const Dashboard = () => {
                   <div className="w-32 h-32 rounded-full gradient-hero flex items-center justify-center mb-6">
                     <img src={IsoIcon} alt="ISO 27001" className="w-28 h-28" />
                   </div>
-                  <CardTitle className="text-3xl mb-2">ISO 27001</CardTitle>
+                  <CardTitle className="text-3xl mb-2">EVALUACIÓN ISO 27001</CardTitle>
                   <CardDescription className="text-base">Gestión de Seguridad de la Información</CardDescription>
                 </CardContent>
               </Card>
@@ -207,7 +207,7 @@ const Dashboard = () => {
                   <div className="w-32 h-32 rounded-full bg-secondary/20 flex items-center justify-center mb-6">
                     <img src={NistIcon} alt="NIST CSF" className="w-28 h-28" />
                   </div>
-                  <CardTitle className="text-3xl mb-2">NIST CSF</CardTitle>
+                  <CardTitle className="text-3xl mb-2">EVALUACIÓN NIST CSF</CardTitle>
                   <CardDescription className="text-base">Cybersecurity Framework</CardDescription>
                 </CardContent>
               </Card>
