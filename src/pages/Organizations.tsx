@@ -155,7 +155,7 @@ interface Organization {
 const Organizations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAdmin, loading: adminLoading } = useAdminRole();
+  const { isAdmin, canManageOrganizations, loading: adminLoading } = useAdminRole();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -203,10 +203,10 @@ const Organizations = () => {
   };
 
   const handleOpenDialog = (org?: Organization) => {
-    if (!isAdmin && !org) {
+    if (!canManageOrganizations && !org) {
       toast({
         title: "Permiso denegado",
-        description: "Solo los administradores pueden crear organizaciones",
+        description: "Solo los administradores y moderadores pueden crear organizaciones",
         variant: "destructive",
       });
       return;
@@ -361,7 +361,7 @@ const Organizations = () => {
               <p className="text-muted-foreground mt-2">Gestiona las organizaciones para tus evaluaciones</p>
             </div>
           </div>
-          {isAdmin && (
+          {canManageOrganizations && (
             <Button onClick={() => handleOpenDialog()}>
               <Plus className="mr-2 h-4 w-4" />
               Nueva Organización
