@@ -150,14 +150,16 @@ interface Organization {
   country: string | null;
   created_at: string;
   logo_url: string | null;
+  user_id: string | null;
 }
 
 const Organizations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAdmin, canManageOrganizations, loading: adminLoading } = useAdminRole();
+  const { isAdmin, isModerator, canManageOrganizations, loading: adminLoading } = useAdminRole();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [deleteOrgId, setDeleteOrgId] = useState<string | null>(null);
@@ -180,7 +182,11 @@ const Organizations = () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) navigate("/auth");
+    if (!user) {
+      navigate("/auth");
+    } else {
+      setCurrentUserId(user.id);
+    }
   };
 
   const loadOrganizations = async () => {
@@ -415,7 +421,7 @@ const Organizations = () => {
                       <Users className="h-4 w-4 mr-2" />
                       Miembros
                     </Button>
-                    {isAdmin && (
+                    {(isAdmin || (isModerator && org.user_id === currentUserId)) && (
                       <>
                         <Button
                           variant="outline"
