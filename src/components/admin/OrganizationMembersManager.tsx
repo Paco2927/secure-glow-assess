@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus, Trash2, Mail, User } from "lucide-react";
+import { UserPlus, Trash2, Mail, User, Search } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,13 @@ interface Member {
   };
 }
 
+interface AvailableUser {
+  id: string;
+  name: string;
+  email: string;
+  dni: string | null;
+}
+
 interface OrganizationMembersManagerProps {
   organizationId: string;
   isOwner: boolean;
@@ -46,7 +54,9 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
+  const [availableUsers, setAvailableUsers] = useState<AvailableUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [editRole, setEditRole] = useState("");
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
@@ -54,6 +64,12 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
   useEffect(() => {
     loadMembers();
   }, [organizationId]);
+
+  useEffect(() => {
+    if (showInviteDialog) {
+      loadAvailableUsers();
+    }
+  }, [showInviteDialog, organizationId]);
 
   const loadMembers = async () => {
     try {
@@ -84,35 +100,47 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
     }
   };
 
+  const loadAvailableUsers = async () => {
+    try {
+      const { data: allProfiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, name, email, dni");
+
+      if (profilesError) throw profilesError;
+
+      // Filter out users who are already members
+      const memberIds = members.map((m) => m.user_id);
+      const available = (allProfiles || []).filter((profile) => !memberIds.includes(profile.id));
+
+      setAvailableUsers(available);
+    } catch (error) {
+      console.error("Error loading available users:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los usuarios disponibles",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleInviteMember = async () => {
-    if (!inviteEmail) return;
+    if (!selectedUserId) {
+      toast({
+        title: "Error",
+        description: "Por favor selecciona un usuario",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // Check if user exists
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", inviteEmail)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-
-      if (!profileData) {
-        toast({
-          title: "Usuario no encontrado",
-          description: "No existe un usuario con ese correo electrónico",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Add member to organization
       const {
         data: { user },
       } = await supabase.auth.getUser();
       const { error } = await supabase.from("organization_members").insert({
         organization_id: organizationId,
-        user_id: profileData.id,
+        user_id: selectedUserId,
         invited_by: user?.id,
         status: "accepted",
       });
@@ -125,7 +153,8 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
       });
 
       setShowInviteDialog(false);
-      setInviteEmail("");
+      setSelectedUserId(null);
+      setSearchQuery("");
       loadMembers();
     } catch (error: any) {
       console.error("Error inviting member:", error);
@@ -248,31 +277,106 @@ export const OrganizationMembersManager = ({ organizationId, isOwner }: Organiza
         </div>
       </CardContent>
 
-      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-        <DialogContent>
+      <Dialog open={showInviteDialog} onOpenChange={(open) => {
+        setShowInviteDialog(open);
+        if (!open) {
+          setSelectedUserId(null);
+          setSearchQuery("");
+        }
+      }}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Invitar Miembro</DialogTitle>
             <DialogDescription>
-              Ingresa el correo electrónico del usuario que deseas agregar a la organización
+              Busca y selecciona el usuario que deseas agregar a la organización
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="usuario@ejemplo.com"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-              />
+              <Label htmlFor="search">Buscar por correo o cédula</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Buscar usuario..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Usuarios disponibles ({availableUsers.filter((user) => {
+                const query = searchQuery.toLowerCase();
+                return (
+                  user.email.toLowerCase().includes(query) ||
+                  user.name.toLowerCase().includes(query) ||
+                  (user.dni && user.dni.toLowerCase().includes(query))
+                );
+              }).length})</Label>
+              <ScrollArea className="h-[300px] border rounded-md">
+                <div className="p-2 space-y-2">
+                  {availableUsers
+                    .filter((user) => {
+                      const query = searchQuery.toLowerCase();
+                      return (
+                        user.email.toLowerCase().includes(query) ||
+                        user.name.toLowerCase().includes(query) ||
+                        (user.dni && user.dni.toLowerCase().includes(query))
+                      );
+                    })
+                    .map((user) => (
+                      <button
+                        key={user.id}
+                        onClick={() => setSelectedUserId(user.id)}
+                        className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                          selectedUserId === user.id
+                            ? "bg-primary/10 border-primary"
+                            : "bg-background hover:bg-muted/50 border-border"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">{user.name}</div>
+                            <div className="text-sm text-muted-foreground truncate flex items-center gap-1">
+                              <Mail className="h-3 w-3 flex-shrink-0" />
+                              {user.email}
+                            </div>
+                            {user.dni && (
+                              <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                <span className="font-medium">Cédula:</span>
+                                <span>{user.dni}</span>
+                                <span className="text-[10px] text-muted-foreground/70">({user.name})</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  {availableUsers.filter((user) => {
+                    const query = searchQuery.toLowerCase();
+                    return (
+                      user.email.toLowerCase().includes(query) ||
+                      user.name.toLowerCase().includes(query) ||
+                      (user.dni && user.dni.toLowerCase().includes(query))
+                    );
+                  }).length === 0 && (
+                    <div className="text-center text-sm text-muted-foreground py-8">
+                      {searchQuery ? "No se encontraron usuarios con ese criterio" : "No hay usuarios disponibles"}
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleInviteMember}>Agregar Miembro</Button>
+            <Button onClick={handleInviteMember} disabled={!selectedUserId}>
+              Agregar Miembro
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
