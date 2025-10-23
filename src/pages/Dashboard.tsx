@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle } from "lucide-react";
+import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle, ClipboardList } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -244,6 +244,25 @@ const Dashboard = () => {
                 <ArrowRight className="w-5 h-5 text-destructive" />
               </div>
             </Card>
+
+            {/* Planes de Mejora - Para admin y moderador */}
+            {(isAdmin || isModerator) && (
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
+                onClick={() => navigate("/improvement-plans")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <ClipboardList className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">Planes de Mejora</h2>
+                    <p className="text-sm text-muted-foreground">Gestionar acciones de mejora</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-primary" />
+                </div>
+              </Card>
+            )}
 
             {/* Mis Reportes - Para todos los usuarios */}
             <Card
