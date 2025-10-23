@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle, ClipboardList } from "lucide-react";
+import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle, ClipboardList, CheckCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -172,114 +172,214 @@ const Dashboard = () => {
       {/* Main Content */}
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* ISO 27001 - Solo para Admin y moderador*/}
-            {(isAdmin || isModerator) && (
+          {/* Evaluaciones principales - ISO 27001 y NIST CSF */}
+          {(isAdmin || isModerator) && (
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              {/* ISO 27001 */}
               <Card
-                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
+                className="cursor-pointer hover:shadow-xl transition-all shadow-strong border-primary/20"
                 onClick={() => navigate("/assessment/iso27001")}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center">
-                    <img src={IsoIcon} alt="IsoIcon" className="w-11 h-11" />
+                <CardHeader className="pb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center flex-shrink-0">
+                      <img src={IsoIcon} alt="IsoIcon" className="w-12 h-12" />
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-2xl mb-1">ISO 27001</CardTitle>
+                      <CardDescription className="text-base">
+                        Gestión de Seguridad de la Información
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold">ISO 27001</h2>
-                    <p className="text-sm text-muted-foreground">Seguridad de la Información</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    ISO 27001 es el estándar internacional para sistemas de gestión de seguridad de la información (SGSI). Evaluamos las siguientes categorías:
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Políticas de Seguridad</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Organización de la Seguridad</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Gestión de Activos</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Control de Acceso</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Criptografía</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Seguridad Física</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Seguridad Operacional</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Seguridad en las Comunicaciones</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Adquisición y Desarrollo</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Relaciones con Proveedores</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Gestión de Incidentes</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Continuidad del Negocio</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>Cumplimiento Legal</span>
+                    </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-primary" />
-                </div>
+                </CardContent>
               </Card>
-            )}
 
-            {/* NIST CSF - Para Admin y Moderador */}
-            {(isAdmin || isModerator) && (
+              {/* NIST CSF */}
               <Card
-                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-secondary/20"
+                className="cursor-pointer hover:shadow-xl transition-all shadow-strong border-secondary/20"
                 onClick={() => navigate("/assessment/nist")}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-                    <img src={NistIcon} alt="NistIcon" className="w-10 h-10" />
+                <CardHeader className="pb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                      <img src={NistIcon} alt="NistIcon" className="w-12 h-12" />
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-2xl mb-1">NIST CSF</CardTitle>
+                      <CardDescription className="text-base">
+                        Cybersecurity Framework
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold">NIST CSF</h2>
-                    <p className="text-sm text-muted-foreground">Cybersecurity Framework</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    El NIST Cybersecurity Framework proporciona un enfoque flexible para gestionar riesgos de ciberseguridad. Evaluamos las cinco funciones principales:
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
+                      <span>Identificar (Identify)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
+                      <span>Proteger (Protect)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
+                      <span>Detectar (Detect)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
+                      <span>Responder (Respond)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
+                      <span>Recuperar (Recover)</span>
+                    </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-secondary" />
-                </div>
+                  <p className="text-sm text-muted-foreground pt-2">
+                    Cada función contiene múltiples categorías que evaluamos en detalle para proporcionarte un panorama completo de tu madurez en ciberseguridad.
+                  </p>
+                </CardContent>
               </Card>
-            )}
+            </div>
+          )}
 
-            {/* Organizaciones - Para todos los usuarios */}
-            <Card
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
-              onClick={() => navigate("/organizations")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-accent" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">Organizaciones</h2>
-                  <p className="text-sm text-muted-foreground">Gestionar empresas</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-accent" />
-              </div>
-            </Card>
-
-            {/* Matriz de Riesgos - Para todos los usuarios */}
-            <Card
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-destructive/20"
-              onClick={() => navigate("/risk-matrix")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-destructive" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">Matriz de Riesgos</h2>
-                  <p className="text-sm text-muted-foreground">Controle sus riesgos</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-destructive" />
-              </div>
-            </Card>
-
-            {/* Planes de Mejora - Para admin y moderador */}
-            {(isAdmin || isModerator) && (
+          {/* Otras opciones del dashboard */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold">Herramientas Adicionales</h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Organizaciones - Para todos los usuarios */}
               <Card
-                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
-                onClick={() => navigate("/improvement-plans")}
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-accent/20"
+                onClick={() => navigate("/organizations")}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <ClipboardList className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-accent" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold">Planes de Mejora</h2>
-                    <p className="text-sm text-muted-foreground">Gestionar acciones de mejora</p>
+                    <h2 className="text-xl font-bold">Organizaciones</h2>
+                    <p className="text-sm text-muted-foreground">Gestionar empresas</p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-primary" />
+                  <ArrowRight className="w-5 h-5 text-accent" />
                 </div>
               </Card>
-            )}
 
-            {/* Mis Reportes - Para todos los usuarios */}
-            <Card
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-muted/40"
-              onClick={() => navigate("/reportes")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center">
-                  <FileText className="w-6 h-6" />
+              {/* Matriz de Riesgos - Para todos los usuarios */}
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-destructive/20"
+                onClick={() => navigate("/risk-matrix")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-destructive" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">Matriz de Riesgos</h2>
+                    <p className="text-sm text-muted-foreground">Controle sus riesgos</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-destructive" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">Mis Reportes</h2>
-                  <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores</p>
+              </Card>
+
+              {/* Planes de Mejora - Para admin y moderador */}
+              {(isAdmin || isModerator) && (
+                <Card
+                  className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
+                  onClick={() => navigate("/improvement-plans")}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <ClipboardList className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-xl font-bold">Planes de Mejora</h2>
+                      <p className="text-sm text-muted-foreground">Gestionar acciones de mejora</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-primary" />
+                  </div>
+                </Card>
+              )}
+
+              {/* Mis Reportes - Para todos los usuarios */}
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-muted/40"
+                onClick={() => navigate("/reportes")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-muted/40 flex items-center justify-center">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">Mis Reportes</h2>
+                    <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5" />
                 </div>
-                <ArrowRight className="w-5 h-5" />
-              </div>
-            </Card>
+              </Card>
+            </div>
           </div>
 
           {/* Additional Features */}
