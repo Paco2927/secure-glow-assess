@@ -180,6 +180,15 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
     return "extreme";
   };
 
+  const getRiskLevelText = (level: "low" | "medium" | "high" | "extreme") => {
+    switch (level) {
+      case "low": return "Bajo";
+      case "medium": return "Medio";
+      case "high": return "Alto";
+      case "extreme": return "Extremo";
+    }
+  };
+
   const handleSubmit = async () => {
     // Validate all form data using zod schemas
     try {
@@ -408,7 +417,7 @@ export function RiskForm({ riskId, onClose, assessmentId, organizationId }: Risk
             <div className="p-4 border rounded-lg bg-muted">
               <p className="font-semibold">Puntuación de Riesgo: {assessment.likelihood * assessment.impact}</p>
               <p className="text-sm text-muted-foreground">
-                Nivel: {calculateRiskLevel(assessment.likelihood, assessment.impact).toUpperCase()}
+                Nivel: {getRiskLevelText(calculateRiskLevel(assessment.likelihood, assessment.impact))}
               </p>
             </div>
 
