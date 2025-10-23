@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle, ClipboardList, CheckCircle } from "lucide-react";
+import { Shield, LogOut, ArrowRight, Users, FileText, Building2, User, AlertTriangle, ClipboardList } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -180,77 +180,14 @@ const Dashboard = () => {
                 className="cursor-pointer hover:shadow-xl transition-all shadow-strong border-primary/20"
                 onClick={() => navigate("/assessment/iso27001")}
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center flex-shrink-0">
-                      <img src={IsoIcon} alt="IsoIcon" className="w-12 h-12" />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-2xl mb-1">ISO 27001</CardTitle>
-                      <CardDescription className="text-base">
-                        Gestión de Seguridad de la Información
-                      </CardDescription>
-                    </div>
+                <CardContent className="pt-8 pb-8 flex flex-col items-center text-center">
+                  <div className="w-32 h-32 rounded-full gradient-hero flex items-center justify-center mb-6">
+                    <img src={IsoIcon} alt="ISO 27001" className="w-28 h-28" />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    ISO 27001 es el estándar internacional para sistemas de gestión de seguridad de la información (SGSI). Evaluamos las siguientes categorías:
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Políticas de Seguridad</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Organización de la Seguridad</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Gestión de Activos</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Control de Acceso</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Criptografía</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Seguridad Física</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Seguridad Operacional</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Seguridad en las Comunicaciones</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Adquisición y Desarrollo</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Relaciones con Proveedores</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Gestión de Incidentes</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Continuidad del Negocio</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>Cumplimiento Legal</span>
-                    </div>
-                  </div>
+                  <CardTitle className="text-3xl mb-2">ISO 27001</CardTitle>
+                  <CardDescription className="text-base">
+                    Gestión de Seguridad de la Información
+                  </CardDescription>
                 </CardContent>
               </Card>
 
@@ -259,48 +196,14 @@ const Dashboard = () => {
                 className="cursor-pointer hover:shadow-xl transition-all shadow-strong border-secondary/20"
                 onClick={() => navigate("/assessment/nist")}
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
-                      <img src={NistIcon} alt="NistIcon" className="w-12 h-12" />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-2xl mb-1">NIST CSF</CardTitle>
-                      <CardDescription className="text-base">
-                        Cybersecurity Framework
-                      </CardDescription>
-                    </div>
+                <CardContent className="pt-8 pb-8 flex flex-col items-center text-center">
+                  <div className="w-32 h-32 rounded-full bg-secondary/20 flex items-center justify-center mb-6">
+                    <img src={NistIcon} alt="NIST CSF" className="w-28 h-28" />
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    El NIST Cybersecurity Framework proporciona un enfoque flexible para gestionar riesgos de ciberseguridad. Evaluamos las cinco funciones principales:
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
-                      <span>Identificar (Identify)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
-                      <span>Proteger (Protect)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
-                      <span>Detectar (Detect)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
-                      <span>Responder (Respond)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0" />
-                      <span>Recuperar (Recover)</span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground pt-2">
-                    Cada función contiene múltiples categorías que evaluamos en detalle para proporcionarte un panorama completo de tu madurez en ciberseguridad.
-                  </p>
+                  <CardTitle className="text-3xl mb-2">NIST CSF</CardTitle>
+                  <CardDescription className="text-base">
+                    Cybersecurity Framework
+                  </CardDescription>
                 </CardContent>
               </Card>
             </div>
