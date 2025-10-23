@@ -20,25 +20,21 @@ export const useAdminRole = () => {
         return;
       }
 
-      const { data: adminData, error: adminError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      const { data: isAdmin, error: adminError } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
 
-      const { data: moderatorData, error: moderatorError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "moderator")
-        .maybeSingle();
+      const { data: isModerator, error: moderatorError } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "moderator",
+      });
 
       if (adminError) throw adminError;
       if (moderatorError) throw moderatorError;
       
-      setIsAdmin(!!adminData);
-      setIsModerator(!!moderatorData);
+      setIsAdmin(!!isAdmin);
+      setIsModerator(!!isModerator);
     } catch (error) {
       console.error("Error checking admin role:", error);
       setIsAdmin(false);
