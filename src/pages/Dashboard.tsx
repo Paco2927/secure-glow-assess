@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -24,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
-import { useAuth } from "@/contexts/AuthContext";
+import heroImage from "@/assets/hero-security.jpg";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
 import IsoIcon from "@/assets/IsoIcon.png";
@@ -32,16 +33,57 @@ import IsoIcon from "@/assets/IsoIcon.png";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { logoUrl, dashboardBackgroundUrl } = useThemeSettings();
-  const { user, profile, isAdmin, isModerator, signOut, loading } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/");
-    }
-  }, [user, loading, navigate]);
+    const checkUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/");
+        return;
+      }
+      setUser(session.user);
+
+      // Fetch user profile
+      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+      setProfile(profileData);
+
+      // Check admin statusokk
+      const { data: adminCheck } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin",
+      });
+      setIsAdmin(adminCheck || false);
+
+      // Check moderator status - AGREGAR ESTA PARTE
+      const { data: moderatorCheck } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "moderator", // Asegúrate de que este rol exista en tu base de datos
+      });
+      setIsModerator(moderatorCheck || false);
+    };
+
+    checkUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        navigate("/auth");
+      }
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleLogout = async () => {
-    await signOut();
+    await supabase.auth.signOut();
     toast({
       title: "Sesión cerrada",
       description: "Has cerrado sesión exitosamente.",
@@ -49,8 +91,10 @@ const Dashboard = () => {
     navigate("/");
   };
 
+  if (!user) return null;
+
   return (
-    <div className="min-h-screen gradient-subtle animate-fade-in">
+    <div className="min-h-screen gradient-subtle">
       {/* Header */}
       <header className="bg-card border-b shadow-soft">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">

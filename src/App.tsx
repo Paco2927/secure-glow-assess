@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
-import { AuthProvider } from "@/contexts/AuthContext";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -26,7 +25,6 @@ const AppContent = () => {
   
   return (
     <BrowserRouter>
-      <AuthProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -43,8 +41,7 @@ const AppContent = () => {
           <Route path="/improvement-plans" element={<ImprovementPlans />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
   );
 };
 
