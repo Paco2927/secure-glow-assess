@@ -300,22 +300,29 @@ export const UserRoleManager = () => {
 
     try {
       const validatedData = signupSchema.parse(signupData);
-      const redirectUrl = `${window.location.origin}/`;
 
-      const { data, error } = await supabase.auth.signUp({
-        email: validatedData.email,
-        password: validatedData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            name: validatedData.name,
-            dni: validatedData.dni,
-          },
-        },
+      // Use edge function to create user with auto-confirmed email
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: validatedData.email,
+          password: validatedData.password,
+          name: validatedData.name,
+          dni: validatedData.dni,
+        }
       });
 
       if (error) {
-        if (error.message.includes("User already registered")) {
+        console.error("Error calling create-user function:", error);
+        toast({
+          title: "Error",
+          description: error.message || "No se pudo crear el usuario",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.error) {
+        if (data.error.includes("already registered") || data.error.includes("User already registered")) {
           toast({
             title: "Usuario existente",
             description: "Este correo ya está registrado.",
@@ -324,17 +331,17 @@ export const UserRoleManager = () => {
         } else {
           toast({
             title: "Error",
-            description: error.message,
+            description: data.error,
             variant: "destructive",
           });
         }
         return;
       }
 
-      if (data.user) {
+      if (data?.user) {
         toast({
           title: "¡Usuario creado!",
-          description: "El usuario ha sido creado exitosamente.",
+          description: "El usuario ha sido creado exitosamente y puede iniciar sesión de inmediato.",
         });
         setSignupData({ email: "", password: "", name: "", dni: "" });
         setDniValidationMessage("");
@@ -347,6 +354,13 @@ export const UserRoleManager = () => {
         toast({
           title: "Error de validación",
           description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        console.error("Error creating user:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo crear el usuario",
           variant: "destructive",
         });
       }
