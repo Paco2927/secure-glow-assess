@@ -39,7 +39,7 @@ interface DomainScore {
 
 const Reportes = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAdminRole();
+  const { isAdmin, isModerator, canManageOrganizations } = useAdminRole();
   const [user, setUser] = useState<any>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -441,7 +441,7 @@ const Reportes = () => {
                           <Button variant="outline" size="sm">
                             Ver Detalles
                           </Button>
-                          {isAdmin && (
+                          {canManageOrganizations && (
                             <>
                               <Button
                                 variant="outline"
