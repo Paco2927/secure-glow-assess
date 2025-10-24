@@ -270,9 +270,6 @@ const Landing = () => {
             Comienza hoy mismo a fortalecer la seguridad de tu organización con evaluaciones basadas en estándares
             internacionales
           </p>
-          <Button size="lg" onClick={() => navigate("/auth")} className="shadow-medium text-lg px-10 py-6">
-            Crear Cuenta Gratis
-          </Button>
         </div>
       </section>
 
