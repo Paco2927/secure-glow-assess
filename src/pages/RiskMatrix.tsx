@@ -16,6 +16,7 @@ export default function RiskMatrix() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const organizationIdParam = searchParams.get("organization");
+  const fromParam = searchParams.get("from");
   const { isAdmin, isModerator } = useAdminRole();
   const [showRiskForm, setShowRiskForm] = useState(false);
   const [editingRiskId, setEditingRiskId] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export default function RiskMatrix() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(fromParam === "reportes" ? "/reportes" : "/dashboard")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex-1">

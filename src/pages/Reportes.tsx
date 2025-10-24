@@ -431,7 +431,7 @@ const Reportes = () => {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/risk-matrix?organization=${assessment.organization_id}`);
+                                navigate(`/risk-matrix?organization=${assessment.organization_id}&from=reportes`);
                               }}
                             >
                               <AlertTriangle className="w-4 h-4 mr-1" />

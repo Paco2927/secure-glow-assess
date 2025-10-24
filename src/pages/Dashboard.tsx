@@ -240,7 +240,7 @@ const Dashboard = () => {
               {/* Matriz de Riesgos - Para todos los usuarios */}
               <Card
                 className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-destructive/20"
-                onClick={() => navigate("/risk-matrix")}
+                onClick={() => navigate("/risk-matrix?from=dashboard")}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
