@@ -284,7 +284,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-xl font-bold">Ver evaluaciones</h2>
-                    <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores</p>
+                    <p className="text-sm text-muted-foreground">Ver evaluaciones anteriores y en progreso</p>
                   </div>
                   <ArrowRight className="w-5 h-5" />
                 </div>
