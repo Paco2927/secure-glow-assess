@@ -17,7 +17,7 @@ export default function RiskMatrix() {
   const [searchParams] = useSearchParams();
   const organizationIdParam = searchParams.get("organization");
   const fromParam = searchParams.get("from");
-  const { isAdmin, isModerator } = useAdminRole();
+  const { isAdmin, isAuditor } = useAdminRole();
   const [showRiskForm, setShowRiskForm] = useState(false);
   const [editingRiskId, setEditingRiskId] = useState<string | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<any>(null);

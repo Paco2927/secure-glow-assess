@@ -16,7 +16,7 @@ import { ThemeSettingsManager } from "@/components/admin/ThemeSettingsManager";
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [userRole, setUserRole] = useState<"admin" | "moderator" | null>(null);
+  const [userRole, setUserRole] = useState<"admin" | "auditor" | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,25 +42,25 @@ const Admin = () => {
 
       if (adminError) throw adminError;
 
-      // Check if user is moderator
-      const { data: isModerator, error: moderatorError } = await supabase.rpc("has_role", {
+      // Check if user is auditor
+      const { data: isAuditor, error: auditorError } = await supabase.rpc("has_role", {
         _user_id: user.id,
-        _role: "moderator",
+        _role: "auditor",
       });
 
-      if (moderatorError) throw moderatorError;
+      if (auditorError) throw auditorError;
 
-      if (!isAdmin && !isModerator) {
+      if (!isAdmin && !isAuditor) {
         toast({
           title: "Acceso denegado",
-          description: "No tienes permisos de administrador o moderador",
+          description: "No tienes permisos de administrador o auditor",
           variant: "destructive",
         });
         navigate("/dashboard");
         return;
       }
 
-      setUserRole(isAdmin ? "admin" : "moderator");
+      setUserRole(isAdmin ? "admin" : "auditor");
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast({
@@ -99,9 +99,9 @@ const Admin = () => {
               Volver
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">Panel de {userRole === "admin" ? "Administración" : "Moderación"}</h1>
+              <h1 className="text-3xl font-bold">Panel de {userRole === "admin" ? "Administración" : "Auditoría"}</h1>
               <p className="text-sm text-muted-foreground">
-                {userRole === "admin" ? "Acceso completo al sistema" : "Acceso a funciones de gestión y moderación"}
+                {userRole === "admin" ? "Acceso completo al sistema" : "Acceso a funciones de gestión y auditoría"}
               </p>
             </div>
           </div>

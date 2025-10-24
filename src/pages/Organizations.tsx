@@ -156,7 +156,7 @@ interface Organization {
 const Organizations = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAdmin, isModerator, canManageOrganizations, loading: adminLoading } = useAdminRole();
+  const { isAdmin, isAuditor, canManageOrganizations, loading: adminLoading } = useAdminRole();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -212,7 +212,7 @@ const Organizations = () => {
     if (!canManageOrganizations && !org) {
       toast({
         title: "Permiso denegado",
-        description: "Solo los administradores y moderadores pueden crear organizaciones",
+        description: "Solo los administradores y auditores pueden crear organizaciones",
         variant: "destructive",
       });
       return;
@@ -421,7 +421,7 @@ const Organizations = () => {
                       <Users className="h-4 w-4 mr-2" />
                       Miembros
                     </Button>
-                    {(isAdmin || (isModerator && org.user_id === currentUserId)) && (
+                    {(isAdmin || (isAuditor && org.user_id === currentUserId)) && (
                       <>
                         <Button
                           variant="outline"

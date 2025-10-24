@@ -36,7 +36,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isModerator, setIsModerator] = useState(false);
+  const [isAuditor, setIsAuditor] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -60,12 +60,12 @@ const Dashboard = () => {
       });
       setIsAdmin(adminCheck || false);
 
-      // Check moderator status - AGREGAR ESTA PARTE
-      const { data: moderatorCheck } = await supabase.rpc("has_role", {
+      // Check auditor status
+      const { data: auditorCheck } = await supabase.rpc("has_role", {
         _user_id: session.user.id,
-        _role: "moderator", // Asegúrate de que este rol exista en tu base de datos
+        _role: "auditor",
       });
-      setIsModerator(moderatorCheck || false);
+      setIsAuditor(auditorCheck || false);
     };
 
     checkUser();
@@ -112,10 +112,10 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {(isAdmin || isModerator) && (
+            {(isAdmin || isAuditor) && (
               <Button variant="secondary" size="sm" onClick={() => navigate("/admin")}>
                 <Shield className="w-4 h-4 mr-2" />
-                {isAdmin ? "Admin" : "Moderador"}
+                {isAdmin ? "Admin" : "Auditor"}
               </Button>
             )}
 
@@ -135,8 +135,8 @@ const Dashboard = () => {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{profile?.name || "Usuario"}</p>
                     <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                    {(isAdmin || isModerator) && (
-                      <p className="text-xs leading-none text-primary">{isAdmin ? "Administrador" : "Moderador"}</p>
+                    {(isAdmin || isAuditor) && (
+                      <p className="text-xs leading-none text-primary">{isAdmin ? "Administrador" : "Auditor"}</p>
                     )}
                   </div>
                 </DropdownMenuLabel>
@@ -182,7 +182,7 @@ const Dashboard = () => {
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           {/* Evaluaciones principales - ISO 27001 y NIST CSF */}
-          {(isAdmin || isModerator) && (
+          {(isAdmin || isAuditor) && (
             <div className="grid md:grid-cols-2 gap-6 mb-12">
               {/* ISO 27001 */}
               <Card
@@ -217,7 +217,7 @@ const Dashboard = () => {
           {/* Otras opciones del dashboard */}
           <div className="space-y-6">
             <h3 className="text-2xl font-bold">
-              {isAdmin || isModerator ? "Herramientas Adicionales" : "Herramientas"}
+              {isAdmin || isAuditor ? "Herramientas Adicionales" : "Herramientas"}
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Organizaciones - Para todos los usuarios */}
@@ -254,8 +254,8 @@ const Dashboard = () => {
                 </div>
               </Card>
 
-              {/* Planes de Mejora - Para admin y moderador */}
-              {(isAdmin || isModerator) && (
+              {/* Planes de Mejora - Para admin y auditor */}
+              {(isAdmin || isAuditor) && (
                 <Card
                   className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-primary/20"
                   onClick={() => navigate("/improvement-plans")}
@@ -299,10 +299,10 @@ const Dashboard = () => {
                 <CardTitle>Funcionalidades Disponibles</CardTitle>
                 <CardDescription>
                   {isAdmin && "Tienes acceso completo a todas las herramientas de administración."}
-                  {isModerator &&
+                  {isAuditor &&
                     !isAdmin &&
-                    "Tienes acceso a herramientas de moderación y evaluación NIST e ISO27001."}
-                  {!isAdmin && !isModerator && "Accede a organizaciones, matriz de riesgos y reportes."}
+                    "Tienes acceso a herramientas de auditoría y evaluación NIST e ISO27001."}
+                  {!isAdmin && !isAuditor && "Accede a organizaciones, matriz de riesgos y reportes."}
                 </CardDescription>
               </CardHeader>
               <CardContent>

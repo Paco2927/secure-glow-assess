@@ -39,7 +39,7 @@ interface DomainScore {
 
 const Reportes = () => {
   const navigate = useNavigate();
-  const { isAdmin, isModerator, canManageOrganizations } = useAdminRole();
+  const { isAdmin, isAuditor, canManageOrganizations } = useAdminRole();
   const [user, setUser] = useState<any>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ const Reportes = () => {
       // RLS policies handle access control:
       // - Users see all assessments
       // - Organization members see their org's assessments
-      // - Admins/moderators see all assessments
+      // - Admins/auditors see all assessments
       const { data, error } = await supabase
         .from("assessments")
         .select(`*, organizations(name, logo_url)`)

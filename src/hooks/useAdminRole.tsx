@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const useAdminRole = () => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isModerator, setIsModerator] = useState(false);
+  const [isAuditor, setIsAuditor] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export const useAdminRole = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsAdmin(false);
-        setIsModerator(false);
+        setIsAuditor(false);
         setLoading(false);
         return;
       }
@@ -25,20 +25,20 @@ export const useAdminRole = () => {
         _role: "admin",
       });
 
-      const { data: isModerator, error: moderatorError } = await supabase.rpc("has_role", {
+      const { data: isAuditor, error: auditorError } = await supabase.rpc("has_role", {
         _user_id: user.id,
-        _role: "moderator",
+        _role: "auditor",
       });
 
       if (adminError) throw adminError;
-      if (moderatorError) throw moderatorError;
+      if (auditorError) throw auditorError;
       
       setIsAdmin(!!isAdmin);
-      setIsModerator(!!isModerator);
+      setIsAuditor(!!isAuditor);
     } catch (error) {
       console.error("Error checking admin role:", error);
       setIsAdmin(false);
-      setIsModerator(false);
+      setIsAuditor(false);
     } finally {
       setLoading(false);
     }
@@ -46,8 +46,8 @@ export const useAdminRole = () => {
 
   return { 
     isAdmin, 
-    isModerator, 
-    canManageOrganizations: isAdmin || isModerator, 
+    isAuditor, 
+    canManageOrganizations: isAdmin || isAuditor, 
     loading 
   };
 };

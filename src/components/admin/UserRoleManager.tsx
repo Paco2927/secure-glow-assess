@@ -50,7 +50,7 @@ interface Profile {
 
 interface UserRole {
   user_id: string;
-  role: 'admin' | 'user' | 'moderator';
+  role: 'admin' | 'user' | 'auditor' | 'moderator'; // moderator included for backward compatibility
 }
 
 export const UserRoleManager = () => {
@@ -62,7 +62,7 @@ export const UserRoleManager = () => {
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "moderator" | "user">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "auditor" | "user">("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [signupData, setSignupData] = useState({
     email: "",
@@ -119,43 +119,43 @@ export const UserRoleManager = () => {
     }
   };
 
-  const isModerator = (userId: string) => {
-    return userRoles.some(role => role.user_id === userId && role.role === 'moderator');
+  const isAuditor = (userId: string) => {
+    return userRoles.some(role => role.user_id === userId && role.role === 'auditor');
   };
 
   const isAdmin = (userId: string) => {
     return userRoles.some(role => role.user_id === userId && role.role === 'admin');
   };
 
-  const toggleModeratorRole = async (userId: string) => {
+  const toggleAuditorRole = async (userId: string) => {
     try {
-      const currentlyModerator = isModerator(userId);
+      const currentlyAuditor = isAuditor(userId);
 
-      if (currentlyModerator) {
-        // Remove moderator role
+      if (currentlyAuditor) {
+        // Remove auditor role
         const { error } = await supabase
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
-          .eq('role', 'moderator');
+          .eq('role', 'auditor');
 
         if (error) throw error;
 
         toast({
           title: "Rol actualizado",
-          description: "Se han removido los permisos de moderador"
+          description: "Se han removido los permisos de auditor"
         });
       } else {
-        // Add moderator role
+        // Add auditor role
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: userId, role: 'moderator' });
+          .insert({ user_id: userId, role: 'auditor' });
 
         if (error) throw error;
 
         toast({
           title: "Rol actualizado",
-          description: "Se han otorgado permisos de moderador"
+          description: "Se han otorgado permisos de auditor"
         });
       }
 
@@ -327,7 +327,7 @@ export const UserRoleManager = () => {
 
   const getRolePriority = (userId: string) => {
     if (isAdmin(userId)) return 1;
-    if (isModerator(userId)) return 2;
+    if (isAuditor(userId)) return 2;
     return 3;
   };
 
@@ -341,8 +341,8 @@ export const UserRoleManager = () => {
       // Filter by role
       if (roleFilter === "all") return matchesSearch;
       if (roleFilter === "admin") return matchesSearch && isAdmin(profile.id);
-      if (roleFilter === "moderator") return matchesSearch && isModerator(profile.id);
-      if (roleFilter === "user") return matchesSearch && !isAdmin(profile.id) && !isModerator(profile.id);
+      if (roleFilter === "auditor") return matchesSearch && isAuditor(profile.id);
+      if (roleFilter === "user") return matchesSearch && !isAdmin(profile.id) && !isAuditor(profile.id);
       
       return matchesSearch;
     })
@@ -386,7 +386,7 @@ export const UserRoleManager = () => {
           <SelectContent>
             <SelectItem value="all">Todos los roles</SelectItem>
             <SelectItem value="admin">Administradores</SelectItem>
-            <SelectItem value="moderator">Moderadores</SelectItem>
+            <SelectItem value="auditor">Auditores</SelectItem>
             <SelectItem value="user">Usuarios</SelectItem>
           </SelectContent>
         </Select>
@@ -532,13 +532,13 @@ export const UserRoleManager = () => {
                         Administrador
                       </span>
                     )}
-                    {isModerator(profile.id) && (
+                    {isAuditor(profile.id) && (
                       <span className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm">
                         <Shield className="h-4 w-4" />
-                        Moderador
+                        Auditor
                       </span>
                     )}
-                    {!isAdmin(profile.id) && !isModerator(profile.id) && (
+                    {!isAdmin(profile.id) && !isAuditor(profile.id) && (
                       <span className="inline-flex items-center gap-2 bg-muted px-3 py-1 rounded-full text-sm">
                         Usuario
                       </span>
@@ -549,19 +549,19 @@ export const UserRoleManager = () => {
                   <div className="flex gap-2">
                     {!isAdmin(profile.id) && (
                       <Button
-                        variant={isModerator(profile.id) ? "destructive" : "default"}
+                        variant={isAuditor(profile.id) ? "destructive" : "default"}
                         size="sm"
-                        onClick={() => toggleModeratorRole(profile.id)}
+                        onClick={() => toggleAuditorRole(profile.id)}
                       >
-                        {isModerator(profile.id) ? (
+                        {isAuditor(profile.id) ? (
                           <>
                             <ShieldOff className="h-4 w-4 mr-2" />
-                            Remover Moderador
+                            Remover Auditor
                           </>
                         ) : (
                           <>
                             <Shield className="h-4 w-4 mr-2" />
-                            Hacer Moderador
+                            Hacer Auditor
                           </>
                         )}
                       </Button>
