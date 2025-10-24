@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ArrowLeft, Save, FileText } from "lucide-react";
+import { Shield, ArrowLeft, Save, FileText, X, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,11 +21,17 @@ interface Control {
   };
 }
 
+interface EvidenceFile {
+  url: string;
+  fileName: string;
+  uploadedAt: string;
+}
+
 interface ControlData {
   conformityStatus: "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora";
   comments: string;
-  proofImage: File | null;
-  existingProofUrl?: string;
+  proofImages: File[];
+  existingProofUrls: EvidenceFile[];
 }
 
 interface MaturityLevel {
@@ -125,7 +131,7 @@ const AssessmentNIST = () => {
         // Load existing results
         const { data: results } = await supabase
           .from("assessment_results")
-          .select("control_id, maturity_level_id, conformity_status, comments, proof_image_url")
+          .select("control_id, maturity_level_id, conformity_status, comments, proof_images")
           .eq("assessment_id", assessment.id);
 
         if (results) {
@@ -134,11 +140,12 @@ const AssessmentNIST = () => {
           
           results.forEach((result) => {
             newSelectedLevels[result.control_id] = result.maturity_level_id;
+            const proofImages = Array.isArray(result.proof_images) ? result.proof_images as unknown as EvidenceFile[] : [];
             newControlData[result.control_id] = {
               conformityStatus: result.conformity_status,
               comments: result.comments || "",
-              proofImage: null,
-              existingProofUrl: result.proof_image_url || undefined,
+              proofImages: [],
+              existingProofUrls: proofImages,
             };
           });
           
@@ -171,7 +178,7 @@ const AssessmentNIST = () => {
         // Load existing results
         const { data: results } = await supabase
           .from("assessment_results")
-          .select("control_id, maturity_level_id, conformity_status, comments, proof_image_url")
+          .select("control_id, maturity_level_id, conformity_status, comments, proof_images")
           .eq("assessment_id", pendingAssessment.id);
 
         if (results) {
@@ -180,11 +187,12 @@ const AssessmentNIST = () => {
 
           results.forEach((result) => {
             newSelectedLevels[result.control_id] = result.maturity_level_id;
+            const proofImages = Array.isArray(result.proof_images) ? result.proof_images as unknown as EvidenceFile[] : [];
             newControlData[result.control_id] = {
               conformityStatus: result.conformity_status,
               comments: result.comments || "",
-              proofImage: null,
-              existingProofUrl: result.proof_image_url || undefined,
+              proofImages: [],
+              existingProofUrls: proofImages,
             };
           });
 
@@ -207,7 +215,7 @@ const AssessmentNIST = () => {
   }, [selectedOrganization, user, editAssessmentId]);
 
   // Auto-save progress when answering questions
-  const saveProgress = async (controlId: string, levelId: string, data: ControlData, uploadFile?: File) => {
+  const saveProgress = async (controlId: string, levelId: string, data: ControlData, uploadFiles?: File[]) => {
     if (!selectedOrganization || !user) return;
 
     try {
@@ -240,39 +248,49 @@ const AssessmentNIST = () => {
         assessmentId = newAssessment.id;
         setCurrentAssessmentId(assessmentId);
 
-        // Notify user that assessment was created
         toast({
           title: "Evaluación iniciada",
           description: "Tu progreso se guardará automáticamente",
         });
       }
 
-      // Upload file if provided
-      let proofImageUrl: string | null = null;
-      if (uploadFile) {
-        const file = uploadFile;
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${assessmentId}/${controlId}.${fileExt}`;
+      // Upload new files if provided
+      const newEvidences: EvidenceFile[] = [];
+      if (uploadFiles && uploadFiles.length > 0) {
+        for (const file of uploadFiles) {
+          const fileExt = file.name.split(".").pop();
+          const timestamp = Date.now();
+          const fileName = `${assessmentId}/${controlId}/${timestamp}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("evidencias")
-          .upload(fileName, file, { upsert: true });
-
-        if (!uploadError) {
-          const { data, error: signedUrlError } = await supabase.storage
+          const { error: uploadError } = await supabase.storage
             .from("evidencias")
-            .createSignedUrl(fileName, 3600); // 1 hour expiry
-          
-          if (!signedUrlError && data) {
-            proofImageUrl = data.signedUrl;
+            .upload(fileName, file, { upsert: false });
+
+          if (!uploadError) {
+            const { data, error: signedUrlError } = await supabase.storage
+              .from("evidencias")
+              .createSignedUrl(fileName, 31536000); // 1 year expiry
+            
+            if (!signedUrlError && data) {
+              newEvidences.push({
+                url: data.signedUrl,
+                fileName: file.name,
+                uploadedAt: new Date().toISOString(),
+              });
+            }
           }
-          
+        }
+        
+        if (newEvidences.length > 0) {
           toast({
-            title: "Evidencia guardada",
-            description: "La evidencia se ha guardado automáticamente",
+            title: "Evidencias guardadas",
+            description: `Se ${newEvidences.length === 1 ? 'ha' : 'han'} guardado ${newEvidences.length} evidencia${newEvidences.length > 1 ? 's' : ''}`,
           });
         }
       }
+
+      // Combine existing and new evidences
+      const allEvidences = [...data.existingProofUrls, ...newEvidences];
 
       // Upsert the result
       const resultData: any = {
@@ -282,11 +300,8 @@ const AssessmentNIST = () => {
         conformity_status: data.conformityStatus,
         comments: data.comments || null,
         evidence: "",
+        proof_images: JSON.parse(JSON.stringify(allEvidences)),
       };
-
-      if (proofImageUrl) {
-        resultData.proof_image_url = proofImageUrl;
-      }
 
       const { error: upsertError } = await supabase.from("assessment_results").upsert(
         resultData,
@@ -304,8 +319,60 @@ const AssessmentNIST = () => {
         });
         throw upsertError;
       }
+
+      // Update local state with new evidences
+      setControlData({
+        ...controlData,
+        [controlId]: {
+          ...data,
+          existingProofUrls: allEvidences,
+          proofImages: [],
+        },
+      });
     } catch (error) {
       console.error("Error saving progress:", error);
+    }
+  };
+
+  // Delete evidence function
+  const deleteEvidence = async (controlId: string, evidenceIndex: number) => {
+    if (!currentAssessmentId) return;
+
+    const data = controlData[controlId];
+    if (!data) return;
+
+    try {
+      const updatedEvidences = data.existingProofUrls.filter((_, index) => index !== evidenceIndex);
+
+      // Update database
+      const { error } = await supabase
+        .from("assessment_results")
+        .update({ proof_images: JSON.parse(JSON.stringify(updatedEvidences)) })
+        .eq("assessment_id", currentAssessmentId)
+        .eq("control_id", controlId);
+
+      if (error) throw error;
+
+      // Update local state
+      setControlData({
+        ...controlData,
+        [controlId]: {
+          ...data,
+          existingProofUrls: updatedEvidences,
+        },
+      });
+
+      toast({
+        title: "Evidencia eliminada",
+        description: "La evidencia se ha eliminado correctamente",
+      });
+    } catch (error) {
+      console.error("Error deleting evidence:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la evidencia",
+        variant: "destructive",
+      });
     }
   };
 
@@ -332,36 +399,6 @@ const AssessmentNIST = () => {
 
     try {
       const assessmentId = currentAssessmentId;
-
-      // Upload images for all controls
-      await Promise.all(
-        Object.entries(controlData).map(async ([controlId, data]) => {
-          if (data.proofImage) {
-            const file = data.proofImage;
-            const fileExt = file.name.split(".").pop();
-            const fileName = `${assessmentId}/${controlId}.${fileExt}`;
-
-            const { error: uploadError } = await supabase.storage
-              .from("evidencias")
-              .upload(fileName, file, { upsert: true });
-
-            if (!uploadError) {
-              const { data, error: signedUrlError } = await supabase.storage
-                .from("evidencias")
-                .createSignedUrl(fileName, 3600); // 1 hour expiry
-              
-              const publicUrl = !signedUrlError && data ? data.signedUrl : null;
-
-              // Update the result with the proof image URL
-              await supabase
-                .from("assessment_results")
-                .update({ proof_image_url: publicUrl })
-                .eq("assessment_id", assessmentId)
-                .eq("control_id", controlId);
-            }
-          }
-        }),
-      );
 
       // Update assessment status to completed
       await supabase.from("assessments").update({ status: "completed" }).eq("id", assessmentId);
@@ -478,7 +515,8 @@ const AssessmentNIST = () => {
                             const dataToSave = controlData[control.id] || {
                               conformityStatus: "conforme",
                               comments: "",
-                              proofImage: null,
+                              proofImages: [],
+                              existingProofUrls: [],
                             };
                             saveProgress(control.id, level.id, dataToSave);
                           }}
@@ -511,7 +549,8 @@ const AssessmentNIST = () => {
                                 | "no_conformidad_menor"
                                 | "punto_de_mejora",
                               comments: controlData[control.id]?.comments || "",
-                              proofImage: controlData[control.id]?.proofImage || null,
+                              proofImages: controlData[control.id]?.proofImages || [],
+                              existingProofUrls: controlData[control.id]?.existingProofUrls || [],
                             };
                             setControlData({
                               ...controlData,
@@ -543,7 +582,8 @@ const AssessmentNIST = () => {
                             ...controlData[control.id],
                             conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
                             comments: e.target.value,
-                            proofImage: controlData[control.id]?.proofImage || null,
+                            proofImages: controlData[control.id]?.proofImages || [],
+                            existingProofUrls: controlData[control.id]?.existingProofUrls || [],
                           },
                         })
                       }
@@ -558,84 +598,101 @@ const AssessmentNIST = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor={`proof-${control.id}`}>Evidencia (Opcional)</Label>
+                    <Label htmlFor={`proof-${control.id}`}>Evidencias (Opcional)</Label>
                     
-                    {/* Mostrar evidencia existente */}
-                    {controlData[control.id]?.existingProofUrl && !controlData[control.id]?.proofImage && (
-                      <div className="mt-2 mb-3 p-3 bg-muted/30 rounded-lg border border-border">
-                        <p className="text-xs font-medium mb-2">Evidencia guardada:</p>
-                        <EvidenceViewer 
-                          evidenceUrl={controlData[control.id].existingProofUrl!}
-                          controlName={control.name}
-                        />
+                    {/* Mostrar evidencias existentes */}
+                    {controlData[control.id]?.existingProofUrls && controlData[control.id].existingProofUrls.length > 0 && (
+                      <div className="mt-2 mb-3 space-y-2">
+                        <p className="text-xs font-medium">Evidencias guardadas:</p>
+                        {controlData[control.id].existingProofUrls.map((evidence, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border">
+                            <EvidenceViewer 
+                              evidenceUrl={evidence.url}
+                              controlName={control.name}
+                            />
+                            <span className="text-xs flex-1 truncate">{evidence.fileName}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteEvidence(control.id, index)}
+                              className="h-8 w-8 p-0 hover:bg-destructive/10"
+                            >
+                              <X className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
                     )}
                     
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {controlData[control.id]?.existingProofUrl 
-                        ? "Puedes reemplazar la evidencia subiendo un nuevo archivo"
-                        : "Puedes adjuntar imágenes, PDFs, documentos Word o videos cortos (máx. 20MB)"}
+                    {/* Mostrar vista previa de archivos pendientes de subir */}
+                    {controlData[control.id]?.proofImages && controlData[control.id].proofImages.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs font-medium text-foreground">Archivos pendientes de subir:</p>
+                        {controlData[control.id].proofImages.map((file, index) => (
+                          <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border">
+                            <p className="text-xs font-medium text-foreground mb-2">{file.name}</p>
+                            {file.type.startsWith('image/') && (
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt="Vista previa"
+                                className="max-w-full h-auto max-h-40 rounded border object-contain"
+                              />
+                            )}
+                            {file.type === 'application/pdf' && (
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <FileText className="h-6 w-6" />
+                                <span className="text-sm">Archivo PDF</span>
+                              </div>
+                            )}
+                            {file.type.startsWith('video/') && (
+                              <video
+                                src={URL.createObjectURL(file)}
+                                controls
+                                className="max-w-full h-auto max-h-40 rounded border"
+                              >
+                                Tu navegador no soporta la reproducción de videos.
+                              </video>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-muted-foreground mb-2 mt-2">
+                      Puedes adjuntar múltiples archivos (imágenes, PDFs, documentos Word o videos, máx. 20MB cada uno)
                     </p>
                     <input
                       id={`proof-${control.id}`}
                       type="file"
+                      multiple
                       accept="image/*,.pdf,.doc,.docx,video/mp4,video/webm,video/quicktime"
-                       onChange={async (e) => {
-                        const file = e.target.files?.[0] || null;
+                      onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length === 0) return;
+
                         const newData = {
                           ...controlData[control.id],
                           conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
                           comments: controlData[control.id]?.comments || "",
-                          proofImage: file,
+                          proofImages: [...(controlData[control.id]?.proofImages || []), ...files],
+                          existingProofUrls: controlData[control.id]?.existingProofUrls || [],
                         };
+                        
                         setControlData({
                           ...controlData,
                           [control.id]: newData,
                         });
                         
                         // Auto-save with file upload
-                        if (file && selectedLevels[control.id]) {
-                          await saveProgress(control.id, selectedLevels[control.id], newData, file);
+                        if (selectedLevels[control.id]) {
+                          await saveProgress(control.id, selectedLevels[control.id], newData, files);
                         }
+                        
+                        // Reset input
+                        e.target.value = '';
                       }}
                       className="mt-2 w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/90"
                     />
-                    {controlData[control.id]?.proofImage && (
-                      <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border">
-                        <p className="text-xs font-medium text-foreground mb-2">
-                          Vista previa: {controlData[control.id].proofImage.name}
-                        </p>
-                        {controlData[control.id].proofImage.type.startsWith('image/') && (
-                          <img
-                            src={URL.createObjectURL(controlData[control.id].proofImage)}
-                            alt="Vista previa"
-                            className="max-w-full h-auto max-h-60 rounded border object-contain"
-                          />
-                        )}
-                        {controlData[control.id].proofImage.type === 'application/pdf' && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <FileText className="h-8 w-8" />
-                            <span className="text-sm">Archivo PDF seleccionado</span>
-                          </div>
-                        )}
-                        {controlData[control.id].proofImage.type.startsWith('video/') && (
-                          <video
-                            src={URL.createObjectURL(controlData[control.id].proofImage)}
-                            controls
-                            className="max-w-full h-auto max-h-60 rounded border"
-                          >
-                            Tu navegador no soporta la reproducción de videos.
-                          </video>
-                        )}
-                        {(controlData[control.id].proofImage.type.includes('word') ||
-                          controlData[control.id].proofImage.type.includes('document')) && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <FileText className="h-8 w-8" />
-                            <span className="text-sm">Documento seleccionado</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>

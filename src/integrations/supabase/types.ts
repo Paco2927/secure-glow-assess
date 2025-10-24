@@ -25,6 +25,7 @@ export type Database = {
           improvement_action: string | null
           maturity_level_id: string | null
           proof_image_url: string | null
+          proof_images: Json | null
         }
         Insert: {
           assessment_id?: string | null
@@ -36,6 +37,7 @@ export type Database = {
           improvement_action?: string | null
           maturity_level_id?: string | null
           proof_image_url?: string | null
+          proof_images?: Json | null
         }
         Update: {
           assessment_id?: string | null
@@ -47,6 +49,7 @@ export type Database = {
           improvement_action?: string | null
           maturity_level_id?: string | null
           proof_image_url?: string | null
+          proof_images?: Json | null
         }
         Relationships: [
           {
