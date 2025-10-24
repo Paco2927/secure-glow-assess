@@ -32,13 +32,13 @@ import IsoIcon from "@/assets/IsoIcon.png";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { logoUrl, dashboardBackgroundUrl } = useThemeSettings();
-  const { user, profile, isAdmin, isModerator, signOut } = useAuth();
+  const { user, profile, isAdmin, isModerator, signOut, loading } = useAuth();
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleLogout = async () => {
     await signOut();
@@ -49,10 +49,8 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  if (!user) return null;
-
   return (
-    <div className="min-h-screen gradient-subtle">
+    <div className="min-h-screen gradient-subtle animate-fade-in">
       {/* Header */}
       <header className="bg-card border-b shadow-soft">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
