@@ -217,7 +217,7 @@ const Dashboard = () => {
           {/* Otras opciones del dashboard */}
           <div className="space-y-6">
             <h3 className="text-2xl font-bold">
-              {(isAdmin || isModerator) ? "Herramientas Adicionales" : "Herramientas"}
+              {isAdmin || isModerator ? "Herramientas Adicionales" : "Herramientas"}
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Organizaciones - Para todos los usuarios */}
@@ -231,7 +231,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-xl font-bold">Organizaciones</h2>
-                    <p className="text-sm text-muted-foreground">Gestionar empresas</p>
+                    <p className="text-sm text-muted-foreground">Ver empresa y miembros</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-accent" />
                 </div>
