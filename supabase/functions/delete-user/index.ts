@@ -69,6 +69,22 @@ serve(async (req) => {
       throw new Error('No se puede eliminar a otros administradores. Solo puede eliminar moderadores y usuarios.')
     }
 
+    // Log the deletion attempt for audit purposes
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+
+    await supabaseClient
+      .from('admin_actions_log')
+      .insert({
+        admin_id: user.id,
+        action: 'DELETE_USER',
+        target_user_id: userId,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      });
+
     // Delete the user using admin API
     const { error: deleteError } = await supabaseClient.auth.admin.deleteUser(userId)
 
