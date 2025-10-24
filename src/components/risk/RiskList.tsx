@@ -116,10 +116,10 @@ export function RiskList({ onEditRisk, organizationId }: RiskListProps) {
 
   const getTreatmentStatusText = (status?: string) => {
     switch (status) {
-      case "pending": return "Pendiente";
+      case "open": return "Abierto";
       case "in_progress": return "En Progreso";
-      case "completed": return "Completado";
-      case "cancelled": return "Cancelado";
+      case "closed": return "Cerrado";
+      case "accepted": return "Aceptado";
       default: return status || "Sin plan";
     }
   };
