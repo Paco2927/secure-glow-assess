@@ -36,6 +36,8 @@ export default function Profile() {
     email: "",
     avatar_url: "",
   });
+  const [currentEmail, setCurrentEmail] = useState("");
+  const [newEmail, setNewEmail] = useState("");
 
   useEffect(() => {
     getProfile();
@@ -61,6 +63,7 @@ export default function Profile() {
         email: data.email || "",
         avatar_url: data.avatar_url || "",
       });
+      setCurrentEmail(data.email || "");
     } catch (error: any) {
       console.error("Error loading profile:", error);
       toast({
@@ -106,8 +109,17 @@ export default function Profile() {
     }
   };
 
-  const updateEmail = async (newEmail: string) => {
+  const updateEmail = async () => {
     try {
+      if (!newEmail) {
+        toast({
+          title: "Error",
+          description: "Debes ingresar un nuevo correo electrónico",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (!currentPasswordForEmail) {
         toast({
           title: "Error",
@@ -121,7 +133,7 @@ export default function Profile() {
 
       // Reautenticar al usuario con su contraseña actual
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: profile.email,
+        email: currentEmail,
         password: currentPasswordForEmail,
       });
 
@@ -140,6 +152,7 @@ export default function Profile() {
       });
 
       setCurrentPasswordForEmail("");
+      setNewEmail("");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -340,12 +353,16 @@ export default function Profile() {
 
             {/* Email Section */}
             <div className="space-y-2">
+              <Label>Correo Actual:</Label>
+              <p className="text-sm text-muted-foreground">{currentEmail}</p>
+              
               <Label htmlFor="email">Nuevo Correo Electrónico</Label>
               <Input
                 id="email"
                 type="email"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                value={newEmail}
+                placeholder="Ingresa tu nuevo correo"
+                onChange={(e) => setNewEmail(e.target.value)}
               />
               <Label htmlFor="current-password-email">Contraseña Actual</Label>
               <div className="relative">
@@ -373,8 +390,8 @@ export default function Profile() {
                 </Button>
               </div>
               <Button 
-                onClick={() => updateEmail(profile.email)} 
-                disabled={!currentPasswordForEmail || loading}
+                onClick={updateEmail} 
+                disabled={!currentPasswordForEmail || !newEmail || loading}
               >
                 Actualizar Correo
               </Button>
