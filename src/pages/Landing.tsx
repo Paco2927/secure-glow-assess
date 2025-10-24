@@ -10,7 +10,7 @@ import NistIcon from "@/assets/NistShiel.png";
 import IsoIcon from "@/assets/IsoIcon.png";
 const Landing = () => {
   const navigate = useNavigate();
-  const { logoUrl } = useThemeSettings();
+  const { logoUrl, companyName } = useThemeSettings();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   useEffect(() => {
     supabase.auth.getSession().then(({
@@ -68,7 +68,7 @@ const Landing = () => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold">TechSecureIA</h1>
+              <h1 className="text-xl font-bold">{companyName}</h1>
               <p className="text-xs text-muted-foreground">Cybersecurity Assessment Platform</p>
             </div>
           </div>
@@ -116,7 +116,7 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              ¿Por qué Usar <span className="text-primary">TechSecureIA</span>?
+              ¿Por qué Usar <span className="text-primary">{companyName}</span>?
             </h2>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -276,7 +276,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p className="text-sm">© 2025 TechSecureIA. Plataforma profesional de evaluación de ciberseguridad.</p>
+          <p className="text-sm">© 2025 {companyName}. Plataforma profesional de evaluación de ciberseguridad.</p>
         </div>
       </footer>
     </div>;

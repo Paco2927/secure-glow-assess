@@ -32,7 +32,7 @@ import IsoIcon from "@/assets/IsoIcon.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logoUrl, dashboardBackgroundUrl, backgroundFit } = useThemeSettings();
+  const { logoUrl, dashboardBackgroundUrl, backgroundFit, companyName } = useThemeSettings();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -107,7 +107,7 @@ const Dashboard = () => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold">TechSecureIA</h1>
+              <h1 className="text-xl font-bold">{companyName}</h1>
               <p className="text-xs text-muted-foreground">Cybersecurity Assessment</p>
             </div>
           </div>

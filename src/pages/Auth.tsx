@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
 
 // Schema for login (only email and password)
 const loginSchema = z.object({
@@ -22,6 +23,7 @@ const loginSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { companyName } = useThemeSettings();
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -103,7 +105,7 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-hero shadow-glow mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">TechSecureIA</h1>
+          <h1 className="text-3xl font-bold mb-2">{companyName}</h1>
           <p className="text-muted-foreground">Evaluación de Ciberseguridad</p>
         </div>
 

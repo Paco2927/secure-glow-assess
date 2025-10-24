@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import techSecureIcon from "@/assets/techsecure_ai.png";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
 
 const contactSchema = z.object({
   fullName: z.string().trim().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
@@ -22,6 +23,7 @@ const contactSchema = z.object({
 const Contact = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { companyName } = useThemeSettings();
   const [loading, setLoading] = useState(false);
   const [contactSettings, setContactSettings] = useState({
     email: "tester7531yt@gmail.com",
@@ -112,7 +114,7 @@ const Contact = () => {
               <img src={techSecureIcon} alt="TechSecureIA" className="w-4.5 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">TechSecureIA</h1>
+              <h1 className="text-xl font-bold">{companyName}</h1>
               <p className="text-xs text-muted-foreground">Cybersecurity Assessment Platform</p>
             </div>
           </div>
@@ -129,7 +131,7 @@ const Contact = () => {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Contáctenos - <span className="text-primary">TechSecure AI</span>
+                Contáctenos - <span className="text-primary">{companyName}</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                 ¿Listo para fortalecer su postura de ciberseguridad? Nuestros expertos están aquí para ayudarle a
@@ -262,7 +264,7 @@ const Contact = () => {
       {/* Footer */}
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p className="text-sm">© 2025 TechSecureIA. Plataforma profesional de evaluación de ciberseguridad.</p>
+          <p className="text-sm">© 2025 {companyName}. Plataforma profesional de evaluación de ciberseguridad.</p>
         </div>
       </footer>
     </div>
