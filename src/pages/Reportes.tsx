@@ -29,6 +29,7 @@ interface Assessment {
   average_score?: number;
   organization_name?: string;
   organization_logo_url?: string;
+  assessor_display?: string;
 }
 
 interface DomainScore {
@@ -100,6 +101,13 @@ const Reportes = () => {
         (data || []).map(async (assessment) => {
           console.log(`📊 [Reportes] Calculando puntaje para evaluación ID: ${assessment.id}`);
 
+          // Get user profile data
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("name, email")
+            .eq("id", assessment.user_id)
+            .single();
+
           const { data: results, error: resultsError } = await supabase
             .from("assessment_results")
             .select(
@@ -141,6 +149,9 @@ const Reportes = () => {
             average_score: averageScore,
             organization_name: assessment.organizations?.name || "Sin organización",
             organization_logo_url: assessment.organizations?.logo_url,
+            assessor_display: profileData
+              ? `${profileData.name} (${profileData.email})`
+              : assessment.assessor_name,
           };
         }),
       );
@@ -412,7 +423,7 @@ const Reportes = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_name}</p>
+                        <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_display || assessment.assessor_name}</p>
                         <div className="flex gap-2">
                           {assessment.organization_id && (
                             <Button
