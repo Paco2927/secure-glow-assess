@@ -216,7 +216,9 @@ const Dashboard = () => {
 
           {/* Otras opciones del dashboard */}
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold">Herramientas Adicionales</h3>
+            <h3 className="text-2xl font-bold">
+              {(isAdmin || isModerator) ? "Herramientas Adicionales" : "Herramientas"}
+            </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Organizaciones - Para todos los usuarios */}
               <Card
