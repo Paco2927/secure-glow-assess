@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, Building2 } from "lucide-react";
+import { ArrowLeft, Plus, Building2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { exportRiskMatrixToPDF } from "@/utils/pdfExport";
+import { useThemeSettings } from "@/hooks/useThemeSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +26,8 @@ export default function RiskMatrix() {
   const [organizationInfo, setOrganizationInfo] = useState<any>(null);
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(organizationIdParam);
+  const [isExporting, setIsExporting] = useState(false);
+  const { logoUrl } = useThemeSettings();
 
   useEffect(() => {
     fetchOrganizations();
@@ -63,6 +68,61 @@ export default function RiskMatrix() {
   const handleCloseForm = () => {
     setShowRiskForm(false);
     setEditingRiskId(null);
+  };
+
+  const handleExportPDF = async () => {
+    if (!selectedOrgId || !organizationInfo) {
+      toast.error("Selecciona una organización primero");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      // Fetch risks with assessments and treatments
+      const { data: risksData, error } = await supabase
+        .from("risks")
+        .select("*")
+        .eq("organization_id", selectedOrgId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const risksWithDetails = await Promise.all(
+        (risksData || []).map(async (risk) => {
+          const { data: assessment } = await supabase
+            .from("risk_assessments")
+            .select("*")
+            .eq("risk_id", risk.id)
+            .eq("is_current", true)
+            .maybeSingle();
+
+          const { data: treatment } = await supabase
+            .from("risk_treatments")
+            .select("*")
+            .eq("risk_id", risk.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          return { ...risk, assessment, treatment };
+        })
+      );
+
+      await exportRiskMatrixToPDF({
+        risks: risksWithDetails,
+        organizationName: organizationInfo.name,
+        organizationLogo: organizationInfo.logo_url || undefined,
+        appLogo: logoUrl || undefined,
+        matrixSize: 5
+      });
+
+      toast.success("PDF generado exitosamente");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      toast.error("Error al generar el PDF");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const selectedOrg = organizations.find(org => org.id === selectedOrgId);
@@ -118,6 +178,14 @@ export default function RiskMatrix() {
                 </SelectContent>
               </Select>
             )}
+            <Button 
+              variant="outline" 
+              onClick={handleExportPDF}
+              disabled={isExporting || !selectedOrgId}
+            >
+              <FileDown className="h-4 w-4 mr-2" />
+              {isExporting ? "Generando..." : "Exportar PDF"}
+            </Button>
             <Button onClick={() => setShowRiskForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Riesgo

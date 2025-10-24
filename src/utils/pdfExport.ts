@@ -1,0 +1,213 @@
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+interface RiskData {
+  id: string;
+  asset: string;
+  risk_description: string;
+  threat: string;
+  control_reference: string | null;
+  assessment?: {
+    risk_score: number;
+    risk_level: string;
+    likelihood: number;
+    impact: number;
+  };
+  treatment?: {
+    status: string;
+  };
+}
+
+interface ExportOptions {
+  risks: RiskData[];
+  organizationName: string;
+  organizationLogo?: string;
+  appLogo?: string;
+  matrixSize: number;
+}
+
+const getRiskLevelText = (level?: string): string => {
+  switch (level) {
+    case "low": return "Bajo";
+    case "medium": return "Medio";
+    case "high": return "Alto";
+    case "extreme": return "Extremo";
+    default: return "Sin evaluar";
+  }
+};
+
+const getTreatmentStatusText = (status?: string): string => {
+  switch (status) {
+    case "pending": return "Pendiente";
+    case "in_progress": return "En Progreso";
+    case "completed": return "Completado";
+    case "cancelled": return "Cancelado";
+    default: return "Sin plan";
+  }
+};
+
+const getRiskColor = (score: number): [number, number, number] => {
+  if (score <= 6) return [34, 197, 94]; // green
+  if (score <= 12) return [234, 179, 8]; // yellow
+  if (score <= 20) return [249, 115, 22]; // orange
+  return [239, 68, 68]; // red
+};
+
+export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
+  const { risks, organizationName, organizationLogo, appLogo, matrixSize } = options;
+
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let yPosition = 20;
+
+  // Add logos
+  if (appLogo) {
+    try {
+      doc.addImage(appLogo, "PNG", 15, 10, 30, 30);
+    } catch (error) {
+      console.error("Error adding app logo:", error);
+    }
+  }
+
+  if (organizationLogo) {
+    try {
+      doc.addImage(organizationLogo, "PNG", pageWidth - 45, 10, 30, 30);
+    } catch (error) {
+      console.error("Error adding organization logo:", error);
+    }
+  }
+
+  yPosition = 45;
+
+  // Title
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.text("Matriz de Riesgos", pageWidth / 2, yPosition, { align: "center" });
+  yPosition += 15;
+
+  // Risk Matrix Grid
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
+  const cellSize = 30;
+  const startX = (pageWidth - (matrixSize + 1) * cellSize) / 2;
+  const startY = yPosition;
+
+  // Draw matrix headers and cells
+  for (let row = 0; row <= matrixSize; row++) {
+    for (let col = 0; col <= matrixSize; col++) {
+      const x = startX + col * cellSize;
+      const y = startY + row * cellSize;
+
+      // Header cells
+      if (row === 0 && col === 0) {
+        doc.setFillColor(240, 240, 240);
+        doc.rect(x, y, cellSize, cellSize, "F");
+        doc.text("X", x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
+      } else if (row === 0) {
+        doc.setFillColor(240, 240, 240);
+        doc.rect(x, y, cellSize, cellSize, "F");
+        doc.text(`Impacto ${col}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
+      } else if (col === 0) {
+        doc.setFillColor(240, 240, 240);
+        doc.rect(x, y, cellSize, cellSize, "F");
+        doc.text(`Prob ${matrixSize - row + 1}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
+      } else {
+        // Data cells
+        const likelihood = matrixSize - row + 1;
+        const impact = col;
+        const score = likelihood * impact;
+        const color = getRiskColor(score);
+
+        doc.setFillColor(color[0], color[1], color[2]);
+        doc.rect(x, y, cellSize, cellSize, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.text(`Puntaje: ${score}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+      }
+
+      // Draw border
+      doc.rect(x, y, cellSize, cellSize);
+    }
+  }
+
+  yPosition = startY + (matrixSize + 1) * cellSize + 10;
+
+  // Legend
+  doc.setFontSize(9);
+  const legendY = yPosition;
+  const legendItems = [
+    { text: "Bajo (1-6)", color: [34, 197, 94] },
+    { text: "Medio (7-12)", color: [234, 179, 8] },
+    { text: "Alto (13-20)", color: [249, 115, 22] },
+    { text: "Extremo (21-25)", color: [239, 68, 68] }
+  ];
+
+  let legendX = 20;
+  legendItems.forEach((item) => {
+    doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+    doc.circle(legendX, legendY, 2, "F");
+    doc.text(item.text, legendX + 5, legendY + 1);
+    legendX += 45;
+  });
+
+  yPosition = legendY + 15;
+
+  // Risk list title
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Lista de riesgos registrados de mayor a menor:", 15, yPosition);
+  yPosition += 10;
+
+  // Sort risks by score (highest first)
+  const sortedRisks = [...risks].sort((a, b) => {
+    const scoreA = a.assessment?.risk_score || 0;
+    const scoreB = b.assessment?.risk_score || 0;
+    return scoreB - scoreA;
+  });
+
+  // Risk table
+  const tableData = sortedRisks.map((risk) => [
+    risk.asset,
+    risk.risk_description,
+    risk.threat,
+    risk.control_reference || "—",
+    risk.assessment
+      ? `${getRiskLevelText(risk.assessment.risk_level)} (${risk.assessment.risk_score})`
+      : "Sin evaluar",
+    risk.treatment ? getTreatmentStatusText(risk.treatment.status) : "Sin plan"
+  ]);
+
+  autoTable(doc, {
+    startY: yPosition,
+    head: [["Activo", "Descripción del riesgo", "Amenaza", "Control", "Nivel de riesgo", "Estado de tratamiento"]],
+    body: tableData,
+    theme: "grid",
+    headStyles: { fillColor: [100, 100, 100], fontSize: 9 },
+    bodyStyles: { fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 35 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 30 },
+      5: { cellWidth: 30 }
+    },
+    margin: { left: 15, right: 15 }
+  });
+
+  // Add date at bottom
+  const finalY = (doc as any).lastAutoTable.finalY || yPosition + 50;
+  if (finalY < pageHeight - 20) {
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    const currentDate = new Date().toLocaleDateString("es-ES");
+    doc.text(`La última modificación de esta matriz de riesgos fue el día: ${currentDate}`, 15, finalY + 10);
+  }
+
+  // Save PDF
+  doc.save(`matriz_riesgos_${organizationName.replace(/\s+/g, "_")}_${Date.now()}.pdf`);
+};
