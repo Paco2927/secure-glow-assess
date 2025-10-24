@@ -91,9 +91,18 @@ export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
 
-  const cellSize = 30;
+  const cellSize = 28;
   const startX = (pageWidth - (matrixSize + 1) * cellSize) / 2;
   const startY = yPosition;
+
+  // Helper function to get risks in a cell
+  const getRisksInCell = (likelihood: number, impact: number) => {
+    return risks.filter(
+      (risk) =>
+        risk.assessment?.likelihood === likelihood &&
+        risk.assessment?.impact === impact
+    );
+  };
 
   // Draw matrix headers and cells
   for (let row = 0; row <= matrixSize; row++) {
@@ -105,32 +114,60 @@ export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
       if (row === 0 && col === 0) {
         doc.setFillColor(240, 240, 240);
         doc.rect(x, y, cellSize, cellSize, "F");
+        doc.setFontSize(8);
         doc.text("X", x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
       } else if (row === 0) {
         doc.setFillColor(240, 240, 240);
         doc.rect(x, y, cellSize, cellSize, "F");
+        doc.setFontSize(7);
         doc.text(`Impacto ${col}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
       } else if (col === 0) {
         doc.setFillColor(240, 240, 240);
         doc.rect(x, y, cellSize, cellSize, "F");
-        doc.text(`Prob ${matrixSize - row + 1}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
+        doc.setFontSize(7);
+        doc.text(`Prob. ${matrixSize - row + 1}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
       } else {
         // Data cells
         const likelihood = matrixSize - row + 1;
         const impact = col;
         const score = likelihood * impact;
         const color = getRiskColor(score);
+        const cellRisks = getRisksInCell(likelihood, impact);
 
         doc.setFillColor(color[0], color[1], color[2]);
         doc.rect(x, y, cellSize, cellSize, "F");
+        
+        // Draw score
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(8);
-        doc.text(`Puntaje: ${score}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
+        doc.setFontSize(6);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Puntaje: ${score}`, x + cellSize / 2, y + 4, { align: "center" });
+        
+        // Draw risks in the cell
+        if (cellRisks.length > 0) {
+          doc.setFontSize(5);
+          doc.setFont("helvetica", "normal");
+          let riskY = y + 8;
+          
+          cellRisks.forEach((risk, index) => {
+            if (index < 4) { // Limit to 4 risks per cell to avoid overflow
+              const riskText = risk.asset.substring(0, 18); // Truncate long names
+              doc.text(riskText, x + cellSize / 2, riskY, { align: "center" });
+              riskY += 4;
+            }
+          });
+          
+          if (cellRisks.length > 4) {
+            doc.text(`+${cellRisks.length - 4} más`, x + cellSize / 2, riskY, { align: "center" });
+          }
+        }
+        
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(10);
       }
 
       // Draw border
+      doc.setDrawColor(200, 200, 200);
       doc.rect(x, y, cellSize, cellSize);
     }
   }
