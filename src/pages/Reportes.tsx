@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle, Edit } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
@@ -168,6 +168,13 @@ const Reportes = () => {
   const viewResults = (assessmentId: string) => {
     console.log(`👁️ [Reportes] Navegando a resultados de evaluación ID: ${assessmentId}`);
     navigate(`/results?id=${assessmentId}`);
+  };
+
+  const editAssessment = (assessment: Assessment, e: React.MouseEvent) => {
+    console.log(`✏️ [Reportes] Editando evaluación ID: ${assessment.id}`);
+    e.stopPropagation();
+    const route = assessment.standard === "ISO27001" ? "/assessment/iso27001" : "/assessment/nist";
+    navigate(`${route}?edit=${assessment.id}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -422,6 +429,15 @@ const Reportes = () => {
                           )}
                           <Button variant="outline" size="sm">
                             Ver Detalles
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => editAssessment(assessment, e)}
+                            className="text-primary hover:text-primary hover:bg-primary/10"
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Editar
                           </Button>
                           {isAdmin && (
                             <Button

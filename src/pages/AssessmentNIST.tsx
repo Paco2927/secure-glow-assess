@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +37,8 @@ interface MaturityLevel {
 
 const AssessmentNIST = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editAssessmentId = searchParams.get("edit");
   const [user, setUser] = useState<any>(null);
   const [controls, setControls] = useState<Control[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
@@ -45,6 +47,7 @@ const AssessmentNIST = () => {
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Check if all controls have been answered and organization selected
   const allControlsAnswered =
@@ -92,10 +95,66 @@ const AssessmentNIST = () => {
     loadData();
   }, [navigate]);
 
-  // Load pending assessment when organization changes
+  // Load assessment when organization changes or edit mode
   useEffect(() => {
-    const loadPendingAssessment = async () => {
-      if (!selectedOrganization || !user) return;
+    const loadAssessment = async () => {
+      if (!user) return;
+
+      // If editing specific assessment
+      if (editAssessmentId) {
+        const { data: assessment, error } = await supabase
+          .from("assessments")
+          .select("id, organization_id")
+          .eq("id", editAssessmentId)
+          .eq("standard", "NIST")
+          .single();
+
+        if (error || !assessment) {
+          toast({
+            title: "Error",
+            description: "No se pudo cargar la evaluación",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setIsEditMode(true);
+        setSelectedOrganization(assessment.organization_id);
+        setCurrentAssessmentId(assessment.id);
+
+        // Load existing results
+        const { data: results } = await supabase
+          .from("assessment_results")
+          .select("control_id, maturity_level_id, conformity_status, comments, proof_image_url")
+          .eq("assessment_id", assessment.id);
+
+        if (results) {
+          const newSelectedLevels: Record<string, string> = {};
+          const newControlData: Record<string, ControlData> = {};
+          
+          results.forEach((result) => {
+            newSelectedLevels[result.control_id] = result.maturity_level_id;
+            newControlData[result.control_id] = {
+              conformityStatus: result.conformity_status,
+              comments: result.comments || "",
+              proofImage: null,
+              existingProofUrl: result.proof_image_url || undefined,
+            };
+          });
+          
+          setSelectedLevels(newSelectedLevels);
+          setControlData(newControlData);
+        }
+
+        toast({
+          title: "Modo edición",
+          description: "Editando evaluación existente. Los cambios se guardarán automáticamente.",
+        });
+        return;
+      }
+
+      // Otherwise load pending assessment for selected organization
+      if (!selectedOrganization) return;
 
       const { data: pendingAssessment } = await supabase
         .from("assessments")
@@ -144,8 +203,8 @@ const AssessmentNIST = () => {
       }
     };
 
-    loadPendingAssessment();
-  }, [selectedOrganization, user]);
+    loadAssessment();
+  }, [selectedOrganization, user, editAssessmentId]);
 
   // Auto-save progress when answering questions
   const saveProgress = async (controlId: string, levelId: string, data: ControlData, uploadFile?: File) => {
