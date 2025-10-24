@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
+import { Resend } from 'https://esm.sh/resend@2.0.0'
+
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,6 +89,46 @@ serve(async (req) => {
         ip_address: ipAddress,
         user_agent: userAgent,
       })
+
+    // Send welcome email with credentials
+    try {
+      await resend.emails.send({
+        from: 'TechSecure AI <onboarding@resend.dev>',
+        to: [email],
+        subject: 'Bienvenido a TechSecure AI - Credenciales de Acceso',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">¡Bienvenido a TechSecure AI!</h1>
+            
+            <p>Se ha creado una cuenta para usted en TechSecure AI. A continuación encontrará sus credenciales de acceso:</p>
+            
+            <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <p style="margin: 10px 0;"><strong>Correo electrónico:</strong> ${email}</p>
+              <p style="margin: 10px 0;"><strong>Contraseña:</strong> ${password}</p>
+            </div>
+            
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #856404;">
+                <strong>⚠️ Recomendación de Seguridad:</strong><br/>
+                Por su seguridad, le recomendamos encarecidamente que cambie su contraseña una vez que acceda a la plataforma por primera vez. 
+                Puede hacerlo desde su perfil de usuario.
+              </p>
+            </div>
+            
+            <p>Si tiene alguna pregunta o necesita ayuda, no dude en contactarnos.</p>
+            
+            <p style="color: #666; margin-top: 30px;">
+              Saludos,<br/>
+              El equipo de TechSecure AI
+            </p>
+          </div>
+        `,
+      })
+      console.log('Welcome email sent successfully to:', email)
+    } catch (emailError) {
+      console.error('Error sending welcome email:', emailError)
+      // Don't fail the user creation if email fails
+    }
 
     return new Response(
       JSON.stringify({ 
