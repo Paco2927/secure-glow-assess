@@ -719,6 +719,7 @@ export type Database = {
           colors: Json
           created_at: string | null
           dashboard_background_url: string | null
+          favicon_url: string | null
           id: string
           is_active: boolean
           logo_url: string | null
@@ -729,6 +730,7 @@ export type Database = {
           colors?: Json
           created_at?: string | null
           dashboard_background_url?: string | null
+          favicon_url?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -739,6 +741,7 @@ export type Database = {
           colors?: Json
           created_at?: string | null
           dashboard_background_url?: string | null
+          favicon_url?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null

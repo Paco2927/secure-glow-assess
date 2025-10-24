@@ -31,9 +31,11 @@ export const ThemeSettingsManager = () => {
   const [themeId, setThemeId] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBackground, setUploadingBackground] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
 
   useEffect(() => {
     loadThemeSettings();
@@ -54,6 +56,7 @@ export const ThemeSettingsManager = () => {
         setColors(data.colors as ThemeColors);
         setLogoUrl(data.logo_url);
         setDashboardBackgroundUrl(data.dashboard_background_url);
+        setFaviconUrl(data.favicon_url);
         setCompanyName(data.name || "");
       }
     } catch (error) {
@@ -218,6 +221,50 @@ export const ThemeSettingsManager = () => {
     }
   };
 
+  const handleUploadFavicon = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type and size (favicon: 1MB max)
+    const fileValidation = validateImageFile(file, 1);
+    if (!fileValidation.valid) {
+      toast.error(fileValidation.error);
+      return;
+    }
+
+    // Validate dimensions (favicon: 512x512px max)
+    const dimValidation = await validateImageDimensions(file, 512, 512);
+    if (!dimValidation.valid) {
+      toast.error(dimValidation.error);
+      return;
+    }
+
+    setUploadingFavicon(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `favicon-${Date.now()}.${fileExt}`;
+      const filePath = `theme/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("organization-logos")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("organization-logos")
+        .getPublicUrl(filePath);
+
+      setFaviconUrl(publicUrl);
+      toast.success("Favicon cargado correctamente");
+    } catch (error) {
+      console.error("Error uploading favicon:", error);
+      toast.error("Error al cargar el favicon");
+    } finally {
+      setUploadingFavicon(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -225,6 +272,7 @@ export const ThemeSettingsManager = () => {
         colors: colors as any,
         logo_url: logoUrl,
         dashboard_background_url: dashboardBackgroundUrl,
+        favicon_url: faviconUrl,
         name: companyName || "TechSecureAI",
         updated_at: new Date().toISOString()
       };
@@ -383,6 +431,37 @@ export const ThemeSettingsManager = () => {
                 />
                 {uploadingBackground && <p className="text-sm text-muted-foreground mt-2">Subiendo...</p>}
               </div>
+            </div>
+          </div>
+
+          {/* Favicon */}
+          <div className="space-y-3 pt-4 border-t">
+            <Label>Favicon (Icono de la Página)</Label>
+            <p className="text-sm text-muted-foreground">
+              Este icono aparecerá en la pestaña del navegador. Recomendado: 32x32px o 64x64px. Máximo 1MB, 512x512px.
+            </p>
+            {faviconUrl && (
+              <div className="relative w-16 h-16 border rounded-lg p-2 bg-muted/30">
+                <img src={faviconUrl} alt="Favicon" className="w-full h-full object-contain" />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-6 w-6"
+                  onClick={() => setFaviconUrl(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            <div>
+              <Input
+                type="file"
+                accept="image/png,image/x-icon,image/svg+xml,image/jpeg"
+                onChange={handleUploadFavicon}
+                disabled={uploadingFavicon}
+                className="cursor-pointer"
+              />
+              {uploadingFavicon && <p className="text-sm text-muted-foreground mt-2">Subiendo...</p>}
             </div>
           </div>
         </CardContent>

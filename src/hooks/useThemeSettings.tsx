@@ -20,6 +20,7 @@ export const useThemeSettings = () => {
   const [loaded, setLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("TechSecureAI");
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export const useThemeSettings = () => {
     try {
       const { data, error } = await supabase
         .from("theme_settings")
-        .select("colors, logo_url, dashboard_background_url, name")
+        .select("colors, logo_url, dashboard_background_url, favicon_url, name")
         .eq("is_active", true)
         .maybeSingle();
 
@@ -42,7 +43,13 @@ export const useThemeSettings = () => {
         }
         setLogoUrl(data.logo_url);
         setDashboardBackgroundUrl(data.dashboard_background_url);
+        setFaviconUrl(data.favicon_url);
         setCompanyName(data.name || "TechSecureAI");
+        
+        // Actualizar el favicon dinámicamente
+        if (data.favicon_url) {
+          updateFavicon(data.favicon_url);
+        }
       }
     } catch (error) {
       console.error("Error loading theme:", error);
@@ -60,5 +67,17 @@ export const useThemeSettings = () => {
     });
   };
 
-  return { loaded, logoUrl, dashboardBackgroundUrl, companyName };
+  const updateFavicon = (url: string) => {
+    // Eliminar favicons existentes
+    const existingLinks = document.querySelectorAll("link[rel*='icon']");
+    existingLinks.forEach(link => link.remove());
+
+    // Agregar nuevo favicon
+    const link = document.createElement("link");
+    link.rel = "icon";
+    link.href = url;
+    document.head.appendChild(link);
+  };
+
+  return { loaded, logoUrl, dashboardBackgroundUrl, faviconUrl, companyName };
 };
