@@ -20,6 +20,7 @@ export const useThemeSettings = () => {
   const [loaded, setLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState<string>("TechSecureAI");
 
   useEffect(() => {
     loadAndApplyTheme();
@@ -29,7 +30,7 @@ export const useThemeSettings = () => {
     try {
       const { data, error } = await supabase
         .from("theme_settings")
-        .select("colors, logo_url, dashboard_background_url")
+        .select("colors, logo_url, dashboard_background_url, name")
         .eq("is_active", true)
         .maybeSingle();
 
@@ -41,6 +42,7 @@ export const useThemeSettings = () => {
         }
         setLogoUrl(data.logo_url);
         setDashboardBackgroundUrl(data.dashboard_background_url);
+        setCompanyName(data.name || "TechSecureAI");
       }
     } catch (error) {
       console.error("Error loading theme:", error);
@@ -58,5 +60,5 @@ export const useThemeSettings = () => {
     });
   };
 
-  return { loaded, logoUrl, dashboardBackgroundUrl };
+  return { loaded, logoUrl, dashboardBackgroundUrl, companyName };
 };

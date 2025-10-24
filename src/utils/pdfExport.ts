@@ -24,6 +24,7 @@ interface ExportOptions {
   organizationLogo?: string;
   appLogo?: string;
   matrixSize: number;
+  companyName?: string;
 }
 
 const getRiskLevelText = (level?: string): string => {
@@ -54,7 +55,7 @@ const getRiskColor = (score: number): [number, number, number] => {
 };
 
 export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
-  const { risks, organizationName, organizationLogo, appLogo, matrixSize } = options;
+  const { risks, organizationName, organizationLogo, appLogo, matrixSize, companyName = "TechSecureAI" } = options;
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -199,13 +200,20 @@ export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
     margin: { left: 15, right: 15 }
   });
 
-  // Add date at bottom
+  // Add date and footer information
   const finalY = (doc as any).lastAutoTable.finalY || yPosition + 50;
-  if (finalY < pageHeight - 20) {
+  if (finalY < pageHeight - 30) {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     const currentDate = new Date().toLocaleDateString("es-ES");
     doc.text(`La última modificación de esta matriz de riesgos fue el día: ${currentDate}`, 15, finalY + 10);
+    
+    // Add company information footer
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    const footerText = `Para más información e información actualizada sobre esta matriz de riesgos, consulte la plataforma ${companyName}.`;
+    const footerLines = doc.splitTextToSize(footerText, pageWidth - 30);
+    doc.text(footerLines, 15, finalY + 20);
   }
 
   // Save PDF

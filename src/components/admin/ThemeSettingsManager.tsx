@@ -31,6 +31,7 @@ export const ThemeSettingsManager = () => {
   const [themeId, setThemeId] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState<string>("");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBackground, setUploadingBackground] = useState(false);
 
@@ -53,6 +54,7 @@ export const ThemeSettingsManager = () => {
         setColors(data.colors as ThemeColors);
         setLogoUrl(data.logo_url);
         setDashboardBackgroundUrl(data.dashboard_background_url);
+        setCompanyName(data.name || "");
       }
     } catch (error) {
       console.error("Error loading theme settings:", error);
@@ -223,6 +225,7 @@ export const ThemeSettingsManager = () => {
         colors: colors as any,
         logo_url: logoUrl,
         dashboard_background_url: dashboardBackgroundUrl,
+        name: companyName || "TechSecureAI",
         updated_at: new Date().toISOString()
       };
 
@@ -236,7 +239,7 @@ export const ThemeSettingsManager = () => {
       } else {
         const { error } = await supabase
           .from("theme_settings")
-          .insert({ name: "custom", ...updateData, is_active: true });
+          .insert({ ...updateData, is_active: true });
 
         if (error) throw error;
       }
@@ -286,6 +289,30 @@ export const ThemeSettingsManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* Nombre de la empresa */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Información de la Empresa</CardTitle>
+          <CardDescription>
+            Configura el nombre de tu empresa para documentos y reportes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <Label htmlFor="companyName">Nombre de la Empresa</Label>
+            <Input
+              id="companyName"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="TechSecureAI"
+            />
+            <p className="text-sm text-muted-foreground">
+              Este nombre aparecerá en los documentos PDF y reportes generados por la plataforma.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Imágenes personalizadas */}
       <Card>
         <CardHeader>

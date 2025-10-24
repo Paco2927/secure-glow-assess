@@ -27,7 +27,7 @@ export default function RiskMatrix() {
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(organizationIdParam);
   const [isExporting, setIsExporting] = useState(false);
-  const { logoUrl } = useThemeSettings();
+  const { logoUrl, companyName } = useThemeSettings();
 
   useEffect(() => {
     fetchOrganizations();
@@ -113,7 +113,8 @@ export default function RiskMatrix() {
         organizationName: organizationInfo.name,
         organizationLogo: organizationInfo.logo_url || undefined,
         appLogo: logoUrl || undefined,
-        matrixSize: 5
+        matrixSize: 5,
+        companyName: companyName
       });
 
       toast.success("PDF generado exitosamente");
