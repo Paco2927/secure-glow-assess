@@ -53,15 +53,29 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
   };
 
   const getFileType = (url: string): "image" | "pdf" | "video" | "document" => {
-    const extension = url.split(".").pop()?.toLowerCase() || "";
-    if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension)) return "image";
+    let extension = "";
+    try {
+      const u = new URL(url);
+      const pathname = u.pathname || "";
+      extension = pathname.split(".").pop()?.toLowerCase() || "";
+    } catch {
+      const clean = url.split("?")[0];
+      extension = clean.split(".").pop()?.toLowerCase() || "";
+    }
+    if (["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"].includes(extension)) return "image";
     if (extension === "pdf") return "pdf";
-    if (["mp4", "webm", "mov"].includes(extension)) return "video";
+    if (["mp4", "webm", "mov", "ogg"].includes(extension)) return "video";
     return "document";
   };
-
   const fileType = getFileType(evidenceUrl);
-  const fileName = evidenceUrl.split("/").pop() || "evidencia";
+  let fileName = "evidencia";
+  try {
+    const u = new URL(evidenceUrl);
+    fileName = u.pathname.split("/").pop() || fileName;
+  } catch {
+    const clean = evidenceUrl.split("?")[0];
+    fileName = clean.split("/").pop() || fileName;
+  }
 
   const renderPreview = () => {
     switch (fileType) {
