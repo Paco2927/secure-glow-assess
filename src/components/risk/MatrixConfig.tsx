@@ -123,34 +123,11 @@ export function MatrixConfig() {
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="scoring_formula">Fórmula de Puntuación</Label>
-          <Input
-            id="scoring_formula"
-            value={config.scoring_formula}
-            onChange={(e) => setConfig({ ...config, scoring_formula: e.target.value })}
-            placeholder="likelihood * impact"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Variables disponibles: likelihood, impact
-          </p>
-        </div>
-
         <div className="pt-4">
           <Button onClick={handleSave} disabled={loading} className="w-full">
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Guardar Configuración
           </Button>
-        </div>
-
-        <div className="mt-6 p-4 border rounded-lg bg-muted space-y-2">
-          <h4 className="font-semibold">Niveles de Riesgo</h4>
-          <div className="space-y-1 text-sm">
-            <p><span className="font-medium text-green-600">Bajo:</span> 1-6 puntos</p>
-            <p><span className="font-medium text-yellow-600">Medio:</span> 7-12 puntos</p>
-            <p><span className="font-medium text-orange-600">Alto:</span> 13-20 puntos</p>
-            <p><span className="font-medium text-red-600">Extremo:</span> 21-25 puntos</p>
-          </div>
         </div>
       </CardContent>
     </Card>

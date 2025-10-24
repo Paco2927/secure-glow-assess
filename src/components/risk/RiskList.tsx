@@ -130,6 +130,28 @@ export function RiskList({ onEditRisk, organizationId }: RiskListProps) {
 
   return (
     <>
+      <div className="mb-4 p-4 border rounded-lg bg-muted space-y-2">
+        <h4 className="font-semibold">Niveles de Riesgo</h4>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-600"></div>
+            <span><span className="font-medium">Bajo:</span> 1-6 puntos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-yellow-600"></div>
+            <span><span className="font-medium">Medio:</span> 7-12 puntos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-orange-600"></div>
+            <span><span className="font-medium">Alto:</span> 13-20 puntos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+            <span><span className="font-medium">Extremo:</span> 21-25 puntos</span>
+          </div>
+        </div>
+      </div>
+      
       <Card>
         <CardHeader>
           <CardTitle>Lista de Riesgos</CardTitle>

@@ -125,10 +125,10 @@ export default function RiskMatrix() {
         </div>
 
         <Tabs defaultValue="matrix" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin || isModerator ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="matrix">Matriz Visual</TabsTrigger>
             <TabsTrigger value="list">Lista de Riesgos</TabsTrigger>
-            {(isAdmin || isModerator) && (
+            {isAdmin && (
               <TabsTrigger value="config">Configuración</TabsTrigger>
             )}
           </TabsList>
@@ -141,7 +141,7 @@ export default function RiskMatrix() {
             <RiskList onEditRisk={handleEditRisk} organizationId={selectedOrgId} />
           </TabsContent>
 
-          {(isAdmin || isModerator) && (
+          {isAdmin && (
             <TabsContent value="config" className="space-y-4">
               <MatrixConfig />
             </TabsContent>
