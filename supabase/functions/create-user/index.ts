@@ -92,14 +92,16 @@ serve(async (req) => {
 
     // Send welcome email with credentials
     try {
+      const fromAddress = Deno.env.get('EMAIL_FROM_ADDRESS') || 'TechSecure AI <onboarding@resend.dev>'
+      
       console.log('=== RESEND EMAIL ATTEMPT ===')
       console.log('RESEND_API_KEY exists:', !!Deno.env.get('RESEND_API_KEY'))
       console.log('RESEND_API_KEY length:', Deno.env.get('RESEND_API_KEY')?.length || 0)
       console.log('Sending email to:', email)
-      console.log('From address:', 'TechSecure AI <onboarding@resend.dev>')
+      console.log('From address:', fromAddress)
       
       const emailResponse = await resend.emails.send({
-        from: 'TechSecure AI <onboarding@resend.dev>',
+        from: fromAddress,
         to: [email],
         subject: 'Bienvenido a TechSecure AI - Credenciales de Acceso',
         html: `
