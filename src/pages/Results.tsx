@@ -50,7 +50,7 @@ const Results = () => {
 
   const calculateResults = async () => {
     try {
-      // Fetch assessment results with related data including improvement plan templates
+      // Fetch assessment results with related data
       const { data: assessmentData, error } = await supabase
         .from("assessment_results")
         .select(
@@ -63,11 +63,6 @@ const Results = () => {
         .eq("assessment_id", assessmentId);
 
       if (error) throw error;
-
-      // Fetch all improvement plan templates
-      const { data: templates } = await supabase
-        .from("improvement_plan_templates")
-        .select("*");
 
       // Group by domain and calculate scores
       const domainScores: Record<string, { 
@@ -100,12 +95,6 @@ const Results = () => {
           };
         }
 
-        // Find improvement plan template for this control and maturity level
-        const template = templates?.find(
-          t => t.control_id === result.controls.id && 
-               t.maturity_level_id === result.maturity_levels.id
-        );
-
         domainScores[domainName].total += percentage;
         domainScores[domainName].count += 1;
         domainScores[domainName].controls.push({
@@ -117,7 +106,7 @@ const Results = () => {
           // No mostrar plan de mejora si el nivel es 5 (Siempre - perfecto)
           improvement_plan: result.maturity_levels.level === 5 
             ? "" 
-            : (result.improvement_action || template?.template_text || "No hay plan de mejora configurado para este control y nivel."),
+            : (result.improvement_action || ""),
           comments: result.comments,
           conformity_status: result.conformity_status,
           proof_image_url: result.proof_image_url,
