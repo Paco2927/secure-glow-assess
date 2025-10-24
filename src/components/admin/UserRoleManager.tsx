@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ShieldOff, Trash2, Search, UserPlus, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Shield, ShieldOff, Trash2, Search, UserPlus, Loader2, CheckCircle2, AlertCircle, Key, Copy, Check } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -75,6 +75,7 @@ export const UserRoleManager = () => {
   const [isDniValidated, setIsDniValidated] = useState(false);
   const dniTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [passwordCopied, setPasswordCopied] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -227,6 +228,63 @@ export const UserRoleManager = () => {
       dniTimeoutRef.current = setTimeout(() => {
         validateCedulaCR(newDni);
       }, 800);
+    }
+  };
+
+  const generateSecurePassword = () => {
+    const length = 12;
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*";
+    const allChars = uppercase + lowercase + numbers + symbols;
+    
+    let password = "";
+    // Asegurar al menos un carácter de cada tipo
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Rellenar el resto
+    for (let i = password.length; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // Mezclar la contraseña
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+    
+    setSignupData({ ...signupData, password });
+    toast({
+      title: "Contraseña generada",
+      description: "Se ha generado una contraseña segura de 12 caracteres",
+    });
+  };
+
+  const copyPasswordToClipboard = async () => {
+    if (!signupData.password) {
+      toast({
+        title: "No hay contraseña",
+        description: "Primero genera una contraseña",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(signupData.password);
+      setPasswordCopied(true);
+      toast({
+        title: "¡Copiado!",
+        description: "La contraseña se copió al portapapeles",
+      });
+      setTimeout(() => setPasswordCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo copiar la contraseña",
+        variant: "destructive",
+      });
     }
   };
 
@@ -464,14 +522,43 @@ export const UserRoleManager = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password">Contraseña</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={signupData.password}
-                  onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                  required
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={signupData.password}
+                    onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                    required
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={generateSecurePassword}
+                    title="Generar contraseña segura"
+                  >
+                    <Key className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={copyPasswordToClipboard}
+                    disabled={!signupData.password}
+                    title="Copiar contraseña"
+                  >
+                    {passwordCopied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Usa el botón 🔑 para generar una contraseña segura de 12 caracteres
+                </p>
               </div>
               <DialogFooter>
                 <Button
@@ -482,6 +569,7 @@ export const UserRoleManager = () => {
                     setSignupData({ email: "", password: "", name: "", dni: "" });
                     setDniValidationMessage("");
                     setIsDniValidated(false);
+                    setPasswordCopied(false);
                   }}
                 >
                   Cancelar
