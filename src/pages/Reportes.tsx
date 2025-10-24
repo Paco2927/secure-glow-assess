@@ -430,24 +430,26 @@ const Reportes = () => {
                           <Button variant="outline" size="sm">
                             Ver Detalles
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => editAssessment(assessment, e)}
-                            className="text-primary hover:text-primary hover:bg-primary/10"
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Editar
-                          </Button>
                           {isAdmin && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => handleDeleteClick(assessment.id, e)}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => editAssessment(assessment, e)}
+                                className="text-primary hover:text-primary hover:bg-primary/10"
+                              >
+                                <Edit className="w-4 h-4 mr-1" />
+                                Editar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => handleDeleteClick(assessment.id, e)}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>
