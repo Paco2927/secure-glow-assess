@@ -92,7 +92,13 @@ serve(async (req) => {
 
     // Send welcome email with credentials
     try {
-      await resend.emails.send({
+      console.log('=== RESEND EMAIL ATTEMPT ===')
+      console.log('RESEND_API_KEY exists:', !!Deno.env.get('RESEND_API_KEY'))
+      console.log('RESEND_API_KEY length:', Deno.env.get('RESEND_API_KEY')?.length || 0)
+      console.log('Sending email to:', email)
+      console.log('From address:', 'TechSecure AI <onboarding@resend.dev>')
+      
+      const emailResponse = await resend.emails.send({
         from: 'TechSecure AI <onboarding@resend.dev>',
         to: [email],
         subject: 'Bienvenido a TechSecure AI - Credenciales de Acceso',
@@ -124,9 +130,30 @@ serve(async (req) => {
           </div>
         `,
       })
-      console.log('Welcome email sent successfully to:', email)
+      
+      console.log('=== RESEND RESPONSE ===')
+      console.log('Full response:', JSON.stringify(emailResponse, null, 2))
+      console.log('Response data:', emailResponse.data)
+      console.log('Response error:', emailResponse.error)
+      
+      if (emailResponse.error) {
+        console.error('❌ Resend returned an error:', emailResponse.error)
+        throw new Error(`Resend error: ${JSON.stringify(emailResponse.error)}`)
+      }
+      
+      if (emailResponse.data) {
+        console.log('✅ Email sent successfully!')
+        console.log('Email ID:', emailResponse.data.id)
+      } else {
+        console.warn('⚠️ No data in response, but no error either')
+      }
+      
     } catch (emailError) {
-      console.error('Error sending welcome email:', emailError)
+      console.error('=== EMAIL ERROR ===')
+      console.error('Error type:', emailError?.constructor?.name)
+      console.error('Error message:', (emailError as Error)?.message)
+      console.error('Full error object:', JSON.stringify(emailError, null, 2))
+      console.error('Error stack:', (emailError as Error)?.stack)
       // Don't fail the user creation if email fails
     }
 
