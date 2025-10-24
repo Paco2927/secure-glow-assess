@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ShieldOff, Trash2, Search, UserPlus, Loader2, CheckCircle2, AlertCircle, Key, Copy, Check } from "lucide-react";
+import { Shield, ShieldOff, Trash2, Search, UserPlus, Loader2, CheckCircle2, AlertCircle, Key, Copy, Check, Eye, EyeOff } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -76,6 +76,7 @@ export const UserRoleManager = () => {
   const dniTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -523,15 +524,31 @@ export const UserRoleManager = () => {
               <div className="space-y-2">
                 <Label htmlFor="signup-password">Contraseña</Label>
                 <div className="flex gap-2">
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={signupData.password}
-                    onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                    required
-                    className="flex-1"
-                  />
+                  <div className="relative flex-1">
+                    <Input
+                      id="signup-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={signupData.password}
+                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                      required
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
