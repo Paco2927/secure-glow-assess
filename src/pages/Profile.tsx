@@ -25,7 +25,9 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [currentPasswordForEmail, setCurrentPasswordForEmail] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [sentCode, setSentCode] = useState("");
@@ -106,6 +108,28 @@ export default function Profile() {
 
   const updateEmail = async (newEmail: string) => {
     try {
+      if (!currentPasswordForEmail) {
+        toast({
+          title: "Error",
+          description: "Debes ingresar tu contraseña actual",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
+
+      // Reautenticar al usuario con su contraseña actual
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: profile.email,
+        password: currentPasswordForEmail,
+      });
+
+      if (signInError) {
+        throw new Error("Contraseña incorrecta");
+      }
+
+      // Actualizar el email
       const { error } = await supabase.auth.updateUser({ email: newEmail });
 
       if (error) throw error;
@@ -114,12 +138,16 @@ export default function Profile() {
         title: "Correo actualizado",
         description: "Se ha enviado un correo de confirmación a tu nuevo correo electrónico",
       });
+
+      setCurrentPasswordForEmail("");
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "No se pudo actualizar el correo",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -312,14 +340,44 @@ export default function Profile() {
 
             {/* Email Section */}
             <div className="space-y-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
+              <Label htmlFor="email">Nuevo Correo Electrónico</Label>
               <Input
                 id="email"
                 type="email"
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
               />
-              <Button onClick={() => updateEmail(profile.email)}>Actualizar Correo</Button>
+              <Label htmlFor="current-password-email">Contraseña Actual</Label>
+              <div className="relative">
+                <Input
+                  id="current-password-email"
+                  type={showCurrentPassword ? "text" : "password"}
+                  placeholder="Ingresa tu contraseña actual"
+                  value={currentPasswordForEmail}
+                  onChange={(e) => setCurrentPasswordForEmail(e.target.value)}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  tabIndex={-1}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              <Button 
+                onClick={() => updateEmail(profile.email)} 
+                disabled={!currentPasswordForEmail || loading}
+              >
+                Actualizar Correo
+              </Button>
               <p className="text-sm text-muted-foreground">
                 Se enviará un correo de confirmación al nuevo correo electrónico
               </p>
