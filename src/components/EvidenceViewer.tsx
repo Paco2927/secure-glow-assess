@@ -67,55 +67,67 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
     switch (fileType) {
       case "image":
         return (
-          <img
-            src={evidenceUrl}
-            alt={`Evidencia de ${controlName}`}
-            className="max-w-full h-auto rounded-lg"
-          />
+          <div className="w-full flex justify-center">
+            <img
+              src={evidenceUrl}
+              alt={`Evidencia de ${controlName}`}
+              className="max-w-full max-h-[70vh] h-auto rounded-lg shadow-lg border object-contain"
+            />
+          </div>
         );
       case "pdf":
         return (
-          <div className="flex flex-col items-center space-y-4">
+          <div className="flex flex-col items-center space-y-4 w-full">
             <Document
               file={evidenceUrl}
               onLoadSuccess={onDocumentLoadSuccess}
               loading={
-                <div className="flex items-center justify-center p-8">
-                  <div className="text-muted-foreground">Cargando PDF...</div>
+                <div className="flex items-center justify-center p-12">
+                  <div className="text-center space-y-2">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <div className="text-muted-foreground">Cargando PDF...</div>
+                  </div>
                 </div>
               }
               error={
                 <div className="text-center p-8 space-y-4">
                   <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    Error al cargar el PDF
+                    Error al cargar el PDF. El archivo puede estar dañado o el formato no es soportado.
                   </p>
-                  <Button onClick={() => window.open(evidenceUrl, '_blank')}>
-                    Abrir en nueva pestaña
-                  </Button>
+                  <div className="flex gap-2 justify-center">
+                    <Button variant="outline" onClick={() => window.open(evidenceUrl, '_blank')}>
+                      Abrir en nueva pestaña
+                    </Button>
+                    <Button variant="outline" onClick={handleDownload}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Descargar
+                    </Button>
+                  </div>
                 </div>
               }
-              className="max-w-full"
+              className="w-full flex justify-center"
             >
               <Page 
                 pageNumber={pageNumber}
-                className="shadow-lg"
+                className="shadow-lg border rounded"
                 renderTextLayer={true}
                 renderAnnotationLayer={true}
+                width={Math.min(800, window.innerWidth - 100)}
               />
             </Document>
             {numPages > 1 && (
-              <div className="flex items-center gap-4 bg-muted/50 px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-4 bg-muted px-6 py-3 rounded-lg shadow-sm">
                 <Button 
                   variant="outline"
                   size="sm"
                   disabled={pageNumber <= 1}
                   onClick={() => setPageNumber(p => p - 1)}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-4 w-4 mr-1" />
                   Anterior
                 </Button>
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium min-w-[120px] text-center">
                   Página {pageNumber} de {numPages}
                 </span>
                 <Button 
@@ -125,7 +137,7 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
                   onClick={() => setPageNumber(p => p + 1)}
                 >
                   Siguiente
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             )}
@@ -179,21 +191,22 @@ const EvidenceViewer = ({ evidenceUrl, controlName }: EvidenceViewerProps) => {
           Ver evidencia
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Evidencia: {controlName}</DialogTitle>
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="text-lg">Evidencia: {controlName}</DialogTitle>
+          <p className="text-sm text-muted-foreground">{fileName}</p>
         </DialogHeader>
-        <div className="mt-4">
+        <div className="flex-1 overflow-auto mt-4 flex flex-col items-center justify-center">
           {renderPreview()}
-          {fileType !== "document" && (
-            <div className="mt-4 flex justify-center">
-              <Button variant="outline" onClick={handleDownload} disabled={isDownloading}>
-                <Download className="h-4 w-4 mr-2" />
-                {isDownloading ? 'Descargando...' : 'Descargar'}
-              </Button>
-            </div>
-          )}
         </div>
+        {fileType !== "document" && (
+          <div className="flex-shrink-0 mt-4 flex justify-center border-t pt-4">
+            <Button variant="outline" onClick={handleDownload} disabled={isDownloading}>
+              <Download className="h-4 w-4 mr-2" />
+              {isDownloading ? 'Descargando...' : 'Descargar archivo'}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
