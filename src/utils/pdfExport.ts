@@ -114,17 +114,17 @@ export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
       if (row === 0 && col === 0) {
         doc.setFillColor(240, 240, 240);
         doc.rect(x, y, cellSize, cellSize, "F");
-        doc.setFontSize(8);
+        doc.setFontSize(9);
         doc.text("X", x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
       } else if (row === 0) {
         doc.setFillColor(240, 240, 240);
         doc.rect(x, y, cellSize, cellSize, "F");
-        doc.setFontSize(7);
+        doc.setFontSize(8);
         doc.text(`Impacto ${col}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
       } else if (col === 0) {
         doc.setFillColor(240, 240, 240);
         doc.rect(x, y, cellSize, cellSize, "F");
-        doc.setFontSize(7);
+        doc.setFontSize(8);
         doc.text(`Prob. ${matrixSize - row + 1}`, x + cellSize / 2, y + cellSize / 2 + 2, { align: "center" });
       } else {
         // Data cells
@@ -139,13 +139,13 @@ export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
         
         // Draw score
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(6);
+        doc.setFontSize(7);
         doc.setFont("helvetica", "bold");
         doc.text(`Puntaje: ${score}`, x + cellSize / 2, y + 4, { align: "center" });
         
         // Draw risks in the cell
         if (cellRisks.length > 0) {
-          doc.setFontSize(5);
+          doc.setFontSize(6);
           doc.setFont("helvetica", "normal");
           let riskY = y + 8;
           
