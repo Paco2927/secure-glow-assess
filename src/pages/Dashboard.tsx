@@ -32,7 +32,7 @@ import IsoIcon from "@/assets/IsoIcon.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logoUrl, dashboardBackgroundUrl } = useThemeSettings();
+  const { logoUrl, dashboardBackgroundUrl, backgroundFit } = useThemeSettings();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -165,7 +165,8 @@ const Dashboard = () => {
               "https://techsecureai.com/wp-content/uploads/2025/06/WhatsApp_Image_2025-06-05_at_3.01.53_PM-removebg-preview.png"
             }
             alt="Imagen a mostrar"
-            className="w-full h-full object-cover"
+            className="w-full h-full"
+            style={{ objectFit: backgroundFit as any }}
           />
         </div>
         <div className="relative container mx-auto px-4 py-20 text-center">

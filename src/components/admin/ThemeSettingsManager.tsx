@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { RefreshCw, Save, Pipette, Upload, X } from "lucide-react";
 import { HslColorPicker } from "react-colorful";
@@ -32,6 +33,7 @@ export const ThemeSettingsManager = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
   const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [backgroundFit, setBackgroundFit] = useState<string>("cover");
   const [companyName, setCompanyName] = useState<string>("");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBackground, setUploadingBackground] = useState(false);
@@ -57,6 +59,7 @@ export const ThemeSettingsManager = () => {
         setLogoUrl(data.logo_url);
         setDashboardBackgroundUrl(data.dashboard_background_url);
         setFaviconUrl(data.favicon_url);
+        setBackgroundFit(data.background_fit || "cover");
         setCompanyName(data.name || "");
       }
     } catch (error) {
@@ -273,6 +276,7 @@ export const ThemeSettingsManager = () => {
         logo_url: logoUrl,
         dashboard_background_url: dashboardBackgroundUrl,
         favicon_url: faviconUrl,
+        background_fit: backgroundFit,
         name: companyName || "TechSecureAI",
         updated_at: new Date().toISOString()
       };
@@ -410,7 +414,12 @@ export const ThemeSettingsManager = () => {
               </p>
               {dashboardBackgroundUrl && (
                 <div className="relative w-full h-32 border rounded-lg overflow-hidden bg-muted/30">
-                  <img src={dashboardBackgroundUrl} alt="Fondo" className="w-full h-full object-cover" />
+                  <img 
+                    src={dashboardBackgroundUrl} 
+                    alt="Fondo" 
+                    className="w-full h-full"
+                    style={{ objectFit: backgroundFit as any }}
+                  />
                   <Button
                     variant="destructive"
                     size="icon"
@@ -430,6 +439,28 @@ export const ThemeSettingsManager = () => {
                   className="cursor-pointer"
                 />
                 {uploadingBackground && <p className="text-sm text-muted-foreground mt-2">Subiendo...</p>}
+              </div>
+              <div className="space-y-2">
+                <Label>Ajuste de Imagen</Label>
+                <Select value={backgroundFit} onValueChange={setBackgroundFit}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cover">Cubrir (Cover) - Llena todo el espacio</SelectItem>
+                    <SelectItem value="contain">Contener (Contain) - Muestra toda la imagen sin recortar</SelectItem>
+                    <SelectItem value="fill">Rellenar (Fill) - Estira la imagen</SelectItem>
+                    <SelectItem value="scale-down">Reducir (Scale-down) - Reduce si es necesario</SelectItem>
+                    <SelectItem value="none">Ninguno (None) - Tamaño original</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {backgroundFit === "cover" && "La imagen cubrirá todo el espacio, puede recortarse"}
+                  {backgroundFit === "contain" && "La imagen completa será visible, puede haber espacios vacíos"}
+                  {backgroundFit === "fill" && "La imagen se estirará para llenar el espacio"}
+                  {backgroundFit === "scale-down" && "La imagen se reducirá si es más grande que el contenedor"}
+                  {backgroundFit === "none" && "La imagen se mostrará en su tamaño original"}
+                </p>
               </div>
             </div>
           </div>

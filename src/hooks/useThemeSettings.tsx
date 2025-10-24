@@ -21,6 +21,7 @@ export const useThemeSettings = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
   const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [backgroundFit, setBackgroundFit] = useState<string>("cover");
   const [companyName, setCompanyName] = useState<string>("TechSecureAI");
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export const useThemeSettings = () => {
     try {
       const { data, error } = await supabase
         .from("theme_settings")
-        .select("colors, logo_url, dashboard_background_url, favicon_url, name")
+        .select("colors, logo_url, dashboard_background_url, favicon_url, background_fit, name")
         .eq("is_active", true)
         .maybeSingle();
 
@@ -44,6 +45,7 @@ export const useThemeSettings = () => {
         setLogoUrl(data.logo_url);
         setDashboardBackgroundUrl(data.dashboard_background_url);
         setFaviconUrl(data.favicon_url);
+        setBackgroundFit(data.background_fit || "cover");
         setCompanyName(data.name || "TechSecureAI");
         
         // Actualizar el favicon dinámicamente
@@ -79,5 +81,5 @@ export const useThemeSettings = () => {
     document.head.appendChild(link);
   };
 
-  return { loaded, logoUrl, dashboardBackgroundUrl, faviconUrl, companyName };
+  return { loaded, logoUrl, dashboardBackgroundUrl, faviconUrl, backgroundFit, companyName };
 };

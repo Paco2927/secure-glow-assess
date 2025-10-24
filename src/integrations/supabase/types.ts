@@ -716,6 +716,7 @@ export type Database = {
       }
       theme_settings: {
         Row: {
+          background_fit: string | null
           colors: Json
           created_at: string | null
           dashboard_background_url: string | null
@@ -727,6 +728,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          background_fit?: string | null
           colors?: Json
           created_at?: string | null
           dashboard_background_url?: string | null
@@ -738,6 +740,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          background_fit?: string | null
           colors?: Json
           created_at?: string | null
           dashboard_background_url?: string | null
