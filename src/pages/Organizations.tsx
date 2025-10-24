@@ -248,6 +248,18 @@ const Organizations = () => {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Tipo de archivo no válido",
+          description: "Solo se permiten imágenes (JPG, PNG, GIF, WEBP)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Archivo muy grande",
@@ -256,6 +268,7 @@ const Organizations = () => {
         });
         return;
       }
+
       setLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {

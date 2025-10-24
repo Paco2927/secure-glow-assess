@@ -166,10 +166,28 @@ export default function Profile() {
 
   const sendPasswordChangeConfirmation = async () => {
     try {
-      if (!newPassword || newPassword.length < 6) {
+      // Validate password strength
+      const passwordRegex = {
+        minLength: newPassword.length >= 12,
+        hasUpper: /[A-Z]/.test(newPassword),
+        hasLower: /[a-z]/.test(newPassword),
+        hasNumber: /[0-9]/.test(newPassword),
+        hasSymbol: /[^A-Za-z0-9]/.test(newPassword),
+      };
+
+      if (!passwordRegex.minLength) {
         toast({
-          title: "Error",
-          description: "La contraseña debe tener al menos 6 caracteres",
+          title: "Contraseña débil",
+          description: "La contraseña debe tener al menos 12 caracteres",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!passwordRegex.hasUpper || !passwordRegex.hasLower || !passwordRegex.hasNumber || !passwordRegex.hasSymbol) {
+        toast({
+          title: "Contraseña débil",
+          description: "La contraseña debe incluir mayúsculas, minúsculas, números y símbolos",
           variant: "destructive",
         });
         return;
@@ -255,6 +273,28 @@ export default function Profile() {
       }
 
       const file = event.target.files[0];
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Tipo de archivo no válido",
+          description: "Solo se permiten imágenes (JPG, PNG, GIF, WEBP)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast({
+          title: "Archivo muy grande",
+          description: "El avatar no debe superar los 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();

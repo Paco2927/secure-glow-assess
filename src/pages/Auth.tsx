@@ -12,7 +12,12 @@ import { z } from "zod";
 // Schema for login (only email and password)
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Correo electrónico inválido" }),
-  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+  password: z.string()
+    .min(12, { message: "La contraseña debe tener al menos 12 caracteres" })
+    .regex(/[A-Z]/, { message: "La contraseña debe incluir al menos una mayúscula" })
+    .regex(/[a-z]/, { message: "La contraseña debe incluir al menos una minúscula" })
+    .regex(/[0-9]/, { message: "La contraseña debe incluir al menos un número" })
+    .regex(/[^A-Za-z0-9]/, { message: "La contraseña debe incluir al menos un símbolo" }),
 });
 
 const Auth = () => {

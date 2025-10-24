@@ -16,6 +16,21 @@ interface ContactRequest {
   message: string;
 }
 
+// HTML escaping function to prevent XSS
+const escapeHtml = (text: string): string => {
+  if (!text) return '';
+  return text.replace(/[&<>"']/g, (char) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return entities[char];
+  });
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -111,22 +126,22 @@ const handler = async (req: Request): Promise<Response> => {
           
           <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="color: #333; margin-top: 0;">Información de Contacto</h2>
-            <p><strong>Nombre:</strong> ${fullName}</p>
-            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-            ${phone ? `<p><strong>Teléfono:</strong> ${phone}</p>` : ""}
-            <p><strong>Empresa:</strong> ${companyName}</p>
+            <p><strong>Nombre:</strong> ${escapeHtml(fullName)}</p>
+            <p><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
+            ${phone ? `<p><strong>Teléfono:</strong> ${escapeHtml(phone)}</p>` : ""}
+            <p><strong>Empresa:</strong> ${escapeHtml(companyName)}</p>
           </div>
 
           <div style="margin: 20px 0;">
             <h2 style="color: #333;">Mensaje</h2>
             <div style="background-color: #fff; padding: 15px; border-left: 4px solid #e879a6; border-radius: 4px;">
-              <p style="white-space: pre-wrap;">${message}</p>
+              <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
             </div>
           </div>
 
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
             <p>Este mensaje fue enviado desde el formulario de contacto de TechSecureIA.</p>
-            <p>Para responder, usa el botón de responder en tu cliente de correo o escribe directamente a: ${email}</p>
+            <p>Para responder, usa el botón de responder en tu cliente de correo o escribe directamente a: ${escapeHtml(email)}</p>
           </div>
         </div>
       `,
