@@ -10,6 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 import EvidenceViewer from "@/components/EvidenceViewer";
 import NistIcon from "@/assets/NistShiel.png";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 interface Control {
   id: string;
   name: string;
@@ -54,6 +64,7 @@ const AssessmentNIST = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [evidenceToDelete, setEvidenceToDelete] = useState<{ controlId: string; evidenceIndex: number } | null>(null);
 
   // Check if all controls have been answered and organization selected
   const allControlsAnswered =
@@ -376,6 +387,13 @@ const AssessmentNIST = () => {
     }
   };
 
+  const confirmDeleteEvidence = () => {
+    if (evidenceToDelete) {
+      deleteEvidence(evidenceToDelete.controlId, evidenceToDelete.evidenceIndex);
+      setEvidenceToDelete(null);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedOrganization) {
       toast({
@@ -614,7 +632,7 @@ const AssessmentNIST = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => deleteEvidence(control.id, index)}
+                              onClick={() => setEvidenceToDelete({ controlId: control.id, evidenceIndex: index })}
                               className="h-8 w-8 p-0 hover:bg-destructive/10"
                             >
                               <X className="h-4 w-4 text-destructive" />
@@ -718,6 +736,23 @@ const AssessmentNIST = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={evidenceToDelete !== null} onOpenChange={(open) => !open && setEvidenceToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar evidencia?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La evidencia será eliminada permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteEvidence} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
