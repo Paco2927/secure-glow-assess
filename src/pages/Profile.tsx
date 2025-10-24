@@ -7,13 +7,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Eye, EyeOff } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Profile() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [sentCode, setSentCode] = useState("");
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -108,8 +123,64 @@ export default function Profile() {
     }
   };
 
-  const updatePassword = async (newPassword: string) => {
+  const sendPasswordChangeConfirmation = async () => {
     try {
+      if (!newPassword || newPassword.length < 6) {
+        toast({
+          title: "Error",
+          description: "La contraseña debe tener al menos 6 caracteres",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
+      
+      // Generar código de verificación de 6 dígitos
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setSentCode(code);
+
+      // Enviar correo con código de verificación
+      const { error } = await supabase.functions.invoke("send-password-change-confirmation", {
+        body: { 
+          email: profile.email,
+          name: profile.name,
+          verificationCode: code
+        },
+      });
+
+      if (error) throw error;
+
+      setConfirmDialogOpen(true);
+      
+      toast({
+        title: "Correo enviado",
+        description: "Se ha enviado un código de verificación a tu correo electrónico",
+      });
+    } catch (error: any) {
+      console.error("Error sending confirmation:", error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo enviar el correo de confirmación",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async () => {
+    try {
+      if (verificationCode !== sentCode) {
+        toast({
+          title: "Código incorrecto",
+          description: "El código de verificación no coincide",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLoading(true);
       const { error } = await supabase.auth.updateUser({ password: newPassword });
 
       if (error) throw error;
@@ -118,12 +189,19 @@ export default function Profile() {
         title: "Contraseña actualizada",
         description: "Tu contraseña ha sido cambiada exitosamente",
       });
+      
+      setNewPassword("");
+      setVerificationCode("");
+      setSentCode("");
+      setConfirmDialogOpen(false);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "No se pudo actualizar la contraseña",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -250,21 +328,82 @@ export default function Profile() {
             {/* Password Section */}
             <div className="space-y-2">
               <Label htmlFor="password">Nueva Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Ingresa tu nueva contraseña"
-                onBlur={(e) => {
-                  if (e.target.value) {
-                    updatePassword(e.target.value);
-                    e.target.value = "";
-                  }
-                }}
-              />
-              <p className="text-sm text-muted-foreground">Deja en blanco si no deseas cambiar tu contraseña</p>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Ingresa tu nueva contraseña"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              <Button 
+                onClick={sendPasswordChangeConfirmation} 
+                disabled={!newPassword || loading}
+              >
+                Cambiar Contraseña
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Se enviará un código de verificación a tu correo para confirmar el cambio
+              </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Diálogo de confirmación */}
+        <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Verificar cambio de contraseña</AlertDialogTitle>
+              <AlertDialogDescription>
+                Se ha enviado un código de verificación de 6 dígitos a {profile.email}. 
+                Por favor, ingresa el código para confirmar el cambio de contraseña.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <Label htmlFor="verification-code">Código de verificación</Label>
+              <Input
+                id="verification-code"
+                type="text"
+                placeholder="000000"
+                maxLength={6}
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ""))}
+                className="text-center text-2xl tracking-widest"
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setVerificationCode("");
+                setNewPassword("");
+                setSentCode("");
+              }}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={updatePassword}
+                disabled={verificationCode.length !== 6 || loading}
+              >
+                {loading ? "Verificando..." : "Confirmar"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
