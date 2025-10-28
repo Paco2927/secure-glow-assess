@@ -22,7 +22,7 @@ export const useThemeSettings = () => {
   const [dashboardBackgroundUrl, setDashboardBackgroundUrl] = useState<string | null>(null);
   const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
   const [backgroundFit, setBackgroundFit] = useState<string>("cover");
-  const [companyName, setCompanyName] = useState<string>("TechSecureAI");
+  const [companyName, setCompanyName] = useState<string>("");
 
   useEffect(() => {
     loadAndApplyTheme();
@@ -46,7 +46,7 @@ export const useThemeSettings = () => {
         setDashboardBackgroundUrl(data.dashboard_background_url);
         setFaviconUrl(data.favicon_url);
         setBackgroundFit(data.background_fit || "cover");
-        setCompanyName(data.name || "TechSecureAI");
+        setCompanyName(data.name || "");
         
         // Actualizar el favicon dinámicamente
         if (data.favicon_url) {

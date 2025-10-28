@@ -55,7 +55,7 @@ const getRiskColor = (score: number): [number, number, number] => {
 };
 
 export const exportRiskMatrixToPDF = async (options: ExportOptions) => {
-  const { risks, organizationName, organizationLogo, appLogo, matrixSize, companyName = "TechSecureAI" } = options;
+  const { risks, organizationName, organizationLogo, appLogo, matrixSize, companyName = "" } = options;
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();

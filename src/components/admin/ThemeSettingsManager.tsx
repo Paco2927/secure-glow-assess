@@ -277,7 +277,7 @@ export const ThemeSettingsManager = () => {
         dashboard_background_url: dashboardBackgroundUrl,
         favicon_url: faviconUrl,
         background_fit: backgroundFit,
-        name: companyName || "TechSecureAI",
+        name: companyName || "",
         updated_at: new Date().toISOString()
       };
 
@@ -356,7 +356,7 @@ export const ThemeSettingsManager = () => {
               id="companyName"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="TechSecureAI"
+              placeholder="Nombre de la empresa"
             />
             <p className="text-sm text-muted-foreground">
               Este nombre aparecerá en los documentos PDF y reportes generados por la plataforma.

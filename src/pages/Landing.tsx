@@ -83,7 +83,7 @@ const Landing = () => {
             <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
               <img
                 src={logoUrl || techSecureIcon}
-                alt="TechSecureIA"
+                alt={companyName || "Logo"}
                 className={logoUrl ? "w-10 h-10 object-contain" : "w-4.5 h-6"}
               />
             </div>

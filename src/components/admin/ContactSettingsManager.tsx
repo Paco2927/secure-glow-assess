@@ -118,7 +118,7 @@ const ContactSettingsManager = () => {
             onChange={(e) =>
               setSettings({ ...settings, destination_email: e.target.value })
             }
-            placeholder="info@techsecureai.com"
+            placeholder="correo@empresa.com"
           />
           <p className="text-xs text-muted-foreground">
             Los mensajes del formulario de contacto se enviarán a este correo electrónico.
