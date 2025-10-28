@@ -164,6 +164,7 @@ const Organizations = () => {
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [deleteOrgId, setDeleteOrgId] = useState<string | null>(null);
   const [selectedOrgForMembers, setSelectedOrgForMembers] = useState<string | null>(null);
+  const [selectedOrgIsOwner, setSelectedOrgIsOwner] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: "",
     sector: "",
@@ -425,10 +426,13 @@ const Organizations = () => {
                 <CardContent className="flex-1 flex flex-col justify-between pt-0">
                   {org.contact_email && <p className="text-sm text-muted-foreground mb-4">{org.contact_email}</p>}
                   <div className="flex flex-wrap gap-2 mt-auto">
-                    <Button
+                  <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setSelectedOrgForMembers(org.id)}
+                      onClick={() => {
+                        setSelectedOrgForMembers(org.id);
+                        setSelectedOrgIsOwner(isAdmin || (isAuditor && org.user_id === currentUserId));
+                      }}
                       className="flex-1 min-w-[100px]"
                     >
                       <Users className="h-4 w-4 mr-2" />
@@ -584,14 +588,14 @@ const Organizations = () => {
       </AlertDialog>
 
       {/* Gestor de miembros */}
-      <Dialog open={!!selectedOrgForMembers} onOpenChange={() => setSelectedOrgForMembers(null)}>
+      <Dialog open={!!selectedOrgForMembers} onOpenChange={() => { setSelectedOrgForMembers(null); setSelectedOrgIsOwner(false); }}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Gestionar Miembros</DialogTitle>
             <DialogDescription>Administra los miembros de esta organización</DialogDescription>
           </DialogHeader>
           {selectedOrgForMembers && (
-            <OrganizationMembersManager organizationId={selectedOrgForMembers} isOwner={isAdmin} />
+            <OrganizationMembersManager organizationId={selectedOrgForMembers} isOwner={isAdmin || selectedOrgIsOwner} />
           )}
         </DialogContent>
       </Dialog>
