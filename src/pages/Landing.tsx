@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Shield, FileCheck, Award, TrendingUp, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
-import techSecureIcon from "@/assets/techsecure_ai.png";
+import orionAuditLogo from "@/assets/orionaudit-logo.png";
 import NistIcon from "@/assets/NistShiel.png";
 import IsoIcon from "@/assets/IsoIcon.png";
 const Landing = () => {
@@ -80,11 +80,11 @@ const Landing = () => {
       <header className="bg-card/80 backdrop-blur-sm border-b shadow-soft sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
               <img
-                src={logoUrl || techSecureIcon}
-                alt={companyName || "Logo"}
-                className={logoUrl ? "w-10 h-10 object-contain" : "w-4.5 h-6"}
+                src={logoUrl || orionAuditLogo}
+                alt={companyName || "OrionAudit"}
+                className="w-10 h-10 object-contain"
               />
             </div>
             <div>
