@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import orionAuditLogo from "@/assets/orionaudit-logo.png";
 
 // Schema for login (only email and password)
 const loginSchema = z.object({
@@ -102,8 +103,8 @@ const Auth = () => {
       </Button>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-hero shadow-glow mb-4">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4 overflow-hidden">
+            <img src={orionAuditLogo} alt="OrionAudit" className="w-16 h-16 object-contain" />
           </div>
           <h1 className="text-3xl font-bold mb-2">{companyName}</h1>
           <p className="text-muted-foreground">Evaluación de Ciberseguridad</p>
