@@ -725,7 +725,7 @@ const AssessmentISO = () => {
                           {controlData[control.id].proofImages.map((file, index) => {
                             const isImage = file.type.startsWith("image/");
                             return (
-                              <div key={index} className="relative">
+                              <div key={index} className="relative group">
                                 {isImage ? (
                                   <div className="w-16 h-16 rounded-lg border border-primary/30 overflow-hidden bg-muted/30">
                                     <img
@@ -740,9 +740,23 @@ const AssessmentISO = () => {
                                   </div>
                                 )}
                                 <span className="block text-[9px] text-muted-foreground truncate max-w-[64px] mt-0.5 text-center">{file.name}</span>
-                                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
-                                  <span className="text-[8px] text-primary-foreground font-bold">↑</span>
-                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const updatedFiles = controlData[control.id].proofImages.filter((_, i) => i !== index);
+                                    setControlData({
+                                      ...controlData,
+                                      [control.id]: {
+                                        ...controlData[control.id],
+                                        proofImages: updatedFiles,
+                                      },
+                                    });
+                                  }}
+                                  className="absolute -top-1.5 -right-1.5 h-5 w-5 p-0 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
                               </div>
                             );
                           })}
