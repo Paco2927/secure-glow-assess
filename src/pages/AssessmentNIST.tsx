@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ArrowLeft, Save, FileText, X, Eye, CheckCircle2, XCircle, AlertOctagon, TrendingUp } from "lucide-react";
+import { Shield, ArrowLeft, Save, FileText, X, Eye, CheckCircle2, XCircle, AlertOctagon, TrendingUp, BookmarkCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
@@ -397,6 +397,24 @@ const AssessmentNIST = () => {
     }
   };
 
+  const handleSaveDraft = async () => {
+    if (!currentAssessmentId) {
+      toast({
+        title: "Sin evaluación activa",
+        description: "Selecciona una organización y responde al menos un control para guardar el borrador.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Borrador guardado",
+      description: "Tu progreso se ha guardado. Puedes continuar más tarde desde Reportes.",
+    });
+
+    navigate("/reportes");
+  };
+
   const handleSubmit = async () => {
     if (!selectedOrganization) {
       toast({
@@ -462,10 +480,16 @@ const AssessmentNIST = () => {
                 <p className="text-xs text-muted-foreground">Cybersecurity Framework</p>
               </div>
             </div>
-            <Button onClick={handleSubmit} disabled={isSubmitting || !allControlsAnswered} variant="secondary">
-              <Save className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleSaveDraft} disabled={!currentAssessmentId}>
+                <BookmarkCheck className="w-4 h-4 mr-2" />
+                Guardar Borrador
+              </Button>
+              <Button onClick={handleSubmit} disabled={isSubmitting || !allControlsAnswered} variant="secondary">
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Guardando..." : "Finalizar Evaluación"}
+              </Button>
+            </div>
           </div>
           {controls.length > 0 && (
             <div className="flex items-center gap-3 mt-2">
