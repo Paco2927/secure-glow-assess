@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, ArrowLeft, Save, AlertTriangle, FileText, X, Eye } from "lucide-react";
+import { Shield, ArrowLeft, Save, AlertTriangle, FileText, X, Eye, CheckCircle2, XCircle, AlertOctagon, TrendingUp } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -562,40 +563,46 @@ const AssessmentISO = () => {
                     </div>
 
                     <div>
-                      <Label className="mb-1.5 block text-xs">Estado de Conformidad *</Label>
-                      <div className="grid grid-cols-2 gap-1">
+                      <Label className="mb-1.5 block text-xs">Conformidad *</Label>
+                      <div className="flex gap-1">
                         {[
-                          { value: "conforme", label: "Conforme" },
-                          { value: "no_conformidad", label: "No Conformidad" },
-                          { value: "no_conformidad_menor", label: "NC Menor" },
-                          { value: "punto_de_mejora", label: "Pto. Mejora" },
-                        ].map((status) => (
-                          <Button
-                            key={status.value}
-                            variant={controlData[control.id]?.conformityStatus === status.value ? "default" : "outline"}
-                            size="sm"
-                            className="h-7 px-2 text-[11px] w-full"
-                            onClick={() => {
-                              const newData = {
-                                ...controlData[control.id],
-                                conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
-                                comments: controlData[control.id]?.comments || "",
-                                proofImages: controlData[control.id]?.proofImages || [],
-                                existingProofUrls: controlData[control.id]?.existingProofUrls || [],
-                              };
-                              setControlData({
-                                ...controlData,
-                                [control.id]: newData,
-                              });
-                              const levelId = selectedLevels[control.id] || maturityLevels[0]?.id;
-                              if (levelId) {
-                                saveProgress(control.id, levelId, newData);
-                              }
-                            }}
-                          >
-                            {status.label}
-                          </Button>
-                        ))}
+                          { value: "conforme", label: "Conforme", desc: "El control cumple con los requisitos establecidos", icon: CheckCircle2, color: "text-green-600" },
+                          { value: "no_conformidad", label: "No Conformidad", desc: "Incumplimiento grave que requiere acción correctiva inmediata", icon: XCircle, color: "text-red-600" },
+                          { value: "no_conformidad_menor", label: "No Conformidad Menor", desc: "Incumplimiento leve que necesita corrección pero no es crítico", icon: AlertOctagon, color: "text-amber-500" },
+                          { value: "punto_de_mejora", label: "Punto de Mejora", desc: "Oportunidad para mejorar el control actual", icon: TrendingUp, color: "text-blue-500" },
+                        ].map((status) => {
+                          const Icon = status.icon;
+                          const isSelected = controlData[control.id]?.conformityStatus === status.value;
+                          return (
+                            <Tooltip key={status.value}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant={isSelected ? "default" : "outline"}
+                                  size="sm"
+                                  className={`h-8 w-8 p-0 ${!isSelected ? status.color : ''}`}
+                                  onClick={() => {
+                                    const newData = {
+                                      ...controlData[control.id],
+                                      conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
+                                      comments: controlData[control.id]?.comments || "",
+                                      proofImages: controlData[control.id]?.proofImages || [],
+                                      existingProofUrls: controlData[control.id]?.existingProofUrls || [],
+                                    };
+                                    setControlData({ ...controlData, [control.id]: newData });
+                                    const levelId = selectedLevels[control.id] || maturityLevels[0]?.id;
+                                    if (levelId) saveProgress(control.id, levelId, newData);
+                                  }}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-[200px]">
+                                <p className="font-semibold text-xs">{status.label}</p>
+                                <p className="text-[10px] text-muted-foreground">{status.desc}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
