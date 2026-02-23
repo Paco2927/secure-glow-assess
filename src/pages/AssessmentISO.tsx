@@ -677,35 +677,75 @@ const AssessmentISO = () => {
                       <Label htmlFor={`proof-${control.id}`} className="text-xs">Evidencias (Opcional)</Label>
                       
                       {controlData[control.id]?.existingProofUrls && controlData[control.id].existingProofUrls.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {controlData[control.id].existingProofUrls.map((evidence, index) => (
-                            <div key={index} className="flex items-center gap-1 px-1.5 py-0.5 bg-muted/30 rounded border border-border text-[10px]">
-                              <EvidenceViewer 
-                                evidenceUrl={evidence.url}
-                                controlName={control.name}
-                              />
-                              <span className="truncate max-w-[80px]">{evidence.fileName}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setEvidenceToDelete({ controlId: control.id, evidenceIndex: index })}
-                                className="h-5 w-5 p-0 hover:bg-destructive/10"
-                              >
-                                <X className="h-3 w-3 text-destructive" />
-                              </Button>
-                            </div>
-                          ))}
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {controlData[control.id].existingProofUrls.map((evidence, index) => {
+                            const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(evidence.fileName);
+                            return (
+                              <div key={index} className="relative group">
+                                {isImage ? (
+                                  <div className="w-16 h-16 rounded-lg border border-border overflow-hidden bg-muted/30 relative">
+                                    <img
+                                      src={evidence.url}
+                                      alt={evidence.fileName}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                      <EvidenceViewer 
+                                        evidenceUrl={evidence.url}
+                                        controlName={control.name}
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="w-16 h-16 rounded-lg border border-border bg-muted/30 flex flex-col items-center justify-center gap-0.5">
+                                    <EvidenceViewer 
+                                      evidenceUrl={evidence.url}
+                                      controlName={control.name}
+                                    />
+                                    <FileText className="h-5 w-5 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <span className="block text-[9px] text-muted-foreground truncate max-w-[64px] mt-0.5 text-center">{evidence.fileName}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEvidenceToDelete({ controlId: control.id, evidenceIndex: index })}
+                                  className="absolute -top-1.5 -right-1.5 h-5 w-5 p-0 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                       
                       {controlData[control.id]?.proofImages && controlData[control.id].proofImages.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {controlData[control.id].proofImages.map((file, index) => (
-                            <div key={index} className="flex items-center gap-1 px-1.5 py-0.5 bg-muted/40 rounded border border-border text-[10px]">
-                              <FileText className="h-3 w-3" />
-                              <span className="truncate max-w-[80px]">{file.name}</span>
-                            </div>
-                          ))}
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {controlData[control.id].proofImages.map((file, index) => {
+                            const isImage = file.type.startsWith("image/");
+                            return (
+                              <div key={index} className="relative">
+                                {isImage ? (
+                                  <div className="w-16 h-16 rounded-lg border border-primary/30 overflow-hidden bg-muted/30">
+                                    <img
+                                      src={URL.createObjectURL(file)}
+                                      alt={file.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-16 h-16 rounded-lg border border-primary/30 bg-muted/30 flex flex-col items-center justify-center">
+                                    <FileText className="h-5 w-5 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <span className="block text-[9px] text-muted-foreground truncate max-w-[64px] mt-0.5 text-center">{file.name}</span>
+                                <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                                  <span className="text-[8px] text-primary-foreground font-bold">↑</span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                       
