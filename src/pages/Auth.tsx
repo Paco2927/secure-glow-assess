@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ParticlesBackground from "@/components/ParticlesBackground";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,8 @@ const Auth = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-subtle p-4 relative">
+    <div className="min-h-screen flex items-center justify-center gradient-subtle p-4 relative overflow-hidden">
+      <ParticlesBackground />
       <Button
         variant="ghost"
         size="icon"
@@ -101,7 +103,7 @@ const Auth = () => {
       >
         <ArrowLeft className="w-5 h-5" />
       </Button>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4 overflow-hidden">
             <img src={orionAuditLogo} alt="OrionAudit" className="w-16 h-16 object-contain" />
