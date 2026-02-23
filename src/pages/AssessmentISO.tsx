@@ -68,11 +68,11 @@ const AssessmentISO = () => {
   const [evidenceToDelete, setEvidenceToDelete] = useState<{ controlId: string; evidenceIndex: number } | null>(null);
 
   // Check if all controls have been answered and organization selected
+  const answeredCount = controls.filter((c) => selectedLevels[c.id] && controlData[c.id]?.conformityStatus).length;
+  const progressPercent = controls.length > 0 ? Math.round((answeredCount / controls.length) * 100) : 0;
   const allControlsAnswered =
     controls.length > 0 && 
-    controls.every((control) => 
-      selectedLevels[control.id] && controlData[control.id]?.conformityStatus
-    ) && 
+    answeredCount === controls.length && 
     selectedOrganization;
 
   useEffect(() => {
@@ -480,6 +480,20 @@ const AssessmentISO = () => {
               </Button>
             </div>
           </div>
+          {/* Progress bar */}
+          {controls.length > 0 && (
+            <div className="flex items-center gap-3 mt-2">
+              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                {answeredCount}/{controls.length} ({progressPercent}%)
+              </span>
+            </div>
+          )}
         </div>
       </header>
 
