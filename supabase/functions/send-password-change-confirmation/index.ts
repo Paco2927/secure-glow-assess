@@ -67,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
                 <p style="margin: 0; color: #92400e; font-size: 14px;">
-                  <strong>⚠️ Importante:</strong> Este código expirará en 10 minutos. Si no solicitaste este cambio, ignora este correo y tu contraseña permanecerá sin cambios.
+                  <strong>Importante:</strong> Este código expirará en 10 minutos. Si no solicitaste este cambio, ignora este correo y tu contraseña permanecerá sin cambios.
                 </p>
               </div>
               
