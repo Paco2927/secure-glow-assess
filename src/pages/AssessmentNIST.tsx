@@ -501,216 +501,186 @@ const AssessmentNIST = () => {
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
+          <div className="space-y-3">
             {controls.map((control) => (
               <Card key={control.id} className="shadow-medium">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">
+                <CardHeader className="px-4 py-3 pb-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-sm font-semibold leading-tight">
                         {control.code} - {control.name}
                       </CardTitle>
-                      <CardDescription className="mt-1">{control.description}</CardDescription>
+                      <CardDescription className="mt-0.5 text-xs line-clamp-2">{control.description}</CardDescription>
                     </div>
-                    <span className="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-md whitespace-nowrap">
+                    <span className="text-[10px] bg-secondary/10 text-secondary px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
                       {control.domains.name}
                     </span>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label className="mb-3 block">Frecuencia de Aplicación</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                      {maturityLevels.map((level) => (
-                        <Button
-                          key={level.id}
-                          variant={selectedLevels[control.id] === level.id ? "secondary" : "outline"}
-                          className="w-full text-xs sm:text-sm"
-                          onClick={() => {
-                            const newLevels = { ...selectedLevels, [control.id]: level.id };
-                            setSelectedLevels(newLevels);
-                            // Save immediately with existing data or defaults
-                            const dataToSave = controlData[control.id] || {
-                              conformityStatus: "conforme",
-                              comments: "",
-                              proofImages: [],
-                              existingProofUrls: [],
-                            };
-                            saveProgress(control.id, level.id, dataToSave);
-                          }}
-                        >
-                          {level.name}
-                        </Button>
-                      ))}
+                <CardContent className="px-4 py-3 space-y-3">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="mb-1.5 block text-xs">Frecuencia de Aplicación</Label>
+                      <div className="flex flex-wrap gap-1">
+                        {maturityLevels.map((level) => (
+                          <Button
+                            key={level.id}
+                            variant={selectedLevels[control.id] === level.id ? "secondary" : "outline"}
+                            size="sm"
+                            className="h-7 px-2 text-[11px] flex-1 min-w-0"
+                            onClick={() => {
+                              const newLevels = { ...selectedLevels, [control.id]: level.id };
+                              setSelectedLevels(newLevels);
+                              const dataToSave = controlData[control.id] || {
+                                conformityStatus: "conforme",
+                                comments: "",
+                                proofImages: [],
+                                existingProofUrls: [],
+                              };
+                              saveProgress(control.id, level.id, dataToSave);
+                            }}
+                          >
+                            {level.name}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="mb-1.5 block text-xs">Estado de Conformidad *</Label>
+                      <div className="grid grid-cols-2 gap-1">
+                        {[
+                          { value: "conforme", label: "Conforme" },
+                          { value: "no_conformidad", label: "No Conformidad" },
+                          { value: "no_conformidad_menor", label: "NC Menor" },
+                          { value: "punto_de_mejora", label: "Pto. Mejora" },
+                        ].map((status) => (
+                          <Button
+                            key={status.value}
+                            variant={controlData[control.id]?.conformityStatus === status.value ? "secondary" : "outline"}
+                            size="sm"
+                            className="h-7 px-2 text-[11px] w-full"
+                            onClick={() => {
+                              const newData = {
+                                ...controlData[control.id],
+                                conformityStatus: status.value as "conforme" | "no_conformidad" | "no_conformidad_menor" | "punto_de_mejora",
+                                comments: controlData[control.id]?.comments || "",
+                                proofImages: controlData[control.id]?.proofImages || [],
+                                existingProofUrls: controlData[control.id]?.existingProofUrls || [],
+                              };
+                              setControlData({
+                                ...controlData,
+                                [control.id]: newData,
+                              });
+                              const levelId = selectedLevels[control.id] || maturityLevels[0]?.id;
+                              if (levelId) {
+                                saveProgress(control.id, levelId, newData);
+                              }
+                            }}
+                          >
+                            {status.label}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <Label className="mb-3 block">Estado de Conformidad *</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {[
-                        { value: "conforme", label: "Conforme" },
-                        { value: "no_conformidad", label: "No Conformidad" },
-                        { value: "no_conformidad_menor", label: "No Conformidad Menor" },
-                        { value: "punto_de_mejora", label: "Punto de Mejora" },
-                      ].map((status) => (
-                        <Button
-                          key={status.value}
-                          variant={controlData[control.id]?.conformityStatus === status.value ? "secondary" : "outline"}
-                          className="w-full text-xs sm:text-sm"
-                          onClick={() => {
-                            const newData = {
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor={`comments-${control.id}`} className="text-xs">Comentarios (Opcional)</Label>
+                      <Textarea
+                        id={`comments-${control.id}`}
+                        placeholder="Comentarios..."
+                        value={controlData[control.id]?.comments || ""}
+                        rows={2}
+                        onChange={(e) =>
+                          setControlData({
+                            ...controlData,
+                            [control.id]: {
                               ...controlData[control.id],
-                              conformityStatus: status.value as
-                                | "conforme"
-                                | "no_conformidad"
-                                | "no_conformidad_menor"
-                                | "punto_de_mejora",
-                              comments: controlData[control.id]?.comments || "",
+                              conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
+                              comments: e.target.value,
                               proofImages: controlData[control.id]?.proofImages || [],
                               existingProofUrls: controlData[control.id]?.existingProofUrls || [],
-                            };
-                            setControlData({
-                              ...controlData,
-                              [control.id]: newData,
-                            });
-                            // Save immediately with selected level or first maturity level
-                            const levelId = selectedLevels[control.id] || maturityLevels[0]?.id;
-                            if (levelId) {
-                              saveProgress(control.id, levelId, newData);
-                            }
-                          }}
-                        >
-                          {status.label}
-                        </Button>
-                      ))}
+                            },
+                          })
+                        }
+                        onBlur={() => {
+                          if (selectedLevels[control.id] && controlData[control.id]) {
+                            saveProgress(control.id, selectedLevels[control.id], controlData[control.id]);
+                          }
+                        }}
+                        className="mt-1 text-xs min-h-[52px] resize-none"
+                      />
                     </div>
-                  </div>
 
-                  <div>
-                    <Label htmlFor={`comments-${control.id}`}>Comentarios (Opcional)</Label>
-                    <Textarea
-                      id={`comments-${control.id}`}
-                      placeholder="Agrega comentarios adicionales..."
-                      value={controlData[control.id]?.comments || ""}
-                      onChange={(e) =>
-                        setControlData({
-                          ...controlData,
-                          [control.id]: {
+                    <div>
+                      <Label htmlFor={`proof-${control.id}`} className="text-xs">Evidencias (Opcional)</Label>
+                      
+                      {controlData[control.id]?.existingProofUrls && controlData[control.id].existingProofUrls.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {controlData[control.id].existingProofUrls.map((evidence, index) => (
+                            <div key={index} className="flex items-center gap-1 px-1.5 py-0.5 bg-muted/30 rounded border border-border text-[10px]">
+                              <EvidenceViewer 
+                                evidenceUrl={evidence.url}
+                                controlName={control.name}
+                              />
+                              <span className="truncate max-w-[80px]">{evidence.fileName}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEvidenceToDelete({ controlId: control.id, evidenceIndex: index })}
+                                className="h-5 w-5 p-0 hover:bg-destructive/10"
+                              >
+                                <X className="h-3 w-3 text-destructive" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {controlData[control.id]?.proofImages && controlData[control.id].proofImages.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {controlData[control.id].proofImages.map((file, index) => (
+                            <div key={index} className="flex items-center gap-1 px-1.5 py-0.5 bg-muted/40 rounded border border-border text-[10px]">
+                              <FileText className="h-3 w-3" />
+                              <span className="truncate max-w-[80px]">{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <input
+                        id={`proof-${control.id}`}
+                        type="file"
+                        multiple
+                        accept="image/*,.pdf,.doc,.docx,video/mp4,video/webm,video/quicktime"
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (files.length === 0) return;
+
+                          const newData = {
                             ...controlData[control.id],
                             conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
-                            comments: e.target.value,
-                            proofImages: controlData[control.id]?.proofImages || [],
+                            comments: controlData[control.id]?.comments || "",
+                            proofImages: [...(controlData[control.id]?.proofImages || []), ...files],
                             existingProofUrls: controlData[control.id]?.existingProofUrls || [],
-                          },
-                        })
-                      }
-                      onBlur={() => {
-                        // Save when user finishes editing comments
-                        if (selectedLevels[control.id] && controlData[control.id]) {
-                          saveProgress(control.id, selectedLevels[control.id], controlData[control.id]);
-                        }
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor={`proof-${control.id}`}>Evidencias (Opcional)</Label>
-                    
-                    {/* Mostrar evidencias existentes */}
-                    {controlData[control.id]?.existingProofUrls && controlData[control.id].existingProofUrls.length > 0 && (
-                      <div className="mt-2 mb-3 space-y-2">
-                        <p className="text-xs font-medium">Evidencias guardadas:</p>
-                        {controlData[control.id].existingProofUrls.map((evidence, index) => (
-                          <div key={index} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border">
-                            <EvidenceViewer 
-                              evidenceUrl={evidence.url}
-                              controlName={control.name}
-                            />
-                            <span className="text-xs flex-1 truncate">{evidence.fileName}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEvidenceToDelete({ controlId: control.id, evidenceIndex: index })}
-                              className="h-8 w-8 p-0 hover:bg-destructive/10"
-                            >
-                              <X className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Mostrar vista previa de archivos pendientes de subir */}
-                    {controlData[control.id]?.proofImages && controlData[control.id].proofImages.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        <p className="text-xs font-medium text-foreground">Archivos pendientes de subir:</p>
-                        {controlData[control.id].proofImages.map((file, index) => (
-                          <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border">
-                            <p className="text-xs font-medium text-foreground mb-2">{file.name}</p>
-                            {file.type.startsWith('image/') && (
-                              <img
-                                src={URL.createObjectURL(file)}
-                                alt="Vista previa"
-                                className="max-w-full h-auto max-h-40 rounded border object-contain"
-                              />
-                            )}
-                            {file.type === 'application/pdf' && (
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <FileText className="h-6 w-6" />
-                                <span className="text-sm">Archivo PDF</span>
-                              </div>
-                            )}
-                            {file.type.startsWith('video/') && (
-                              <video
-                                src={URL.createObjectURL(file)}
-                                controls
-                                className="max-w-full h-auto max-h-40 rounded border"
-                              >
-                                Tu navegador no soporta la reproducción de videos.
-                              </video>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    <p className="text-xs text-muted-foreground mb-2 mt-2">
-                      Puedes adjuntar múltiples archivos (imágenes, PDFs, documentos Word o videos, máx. 20MB cada uno)
-                    </p>
-                    <input
-                      id={`proof-${control.id}`}
-                      type="file"
-                      multiple
-                      accept="image/*,.pdf,.doc,.docx,video/mp4,video/webm,video/quicktime"
-                      onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        if (files.length === 0) return;
-
-                        const newData = {
-                          ...controlData[control.id],
-                          conformityStatus: controlData[control.id]?.conformityStatus || "conforme",
-                          comments: controlData[control.id]?.comments || "",
-                          proofImages: [...(controlData[control.id]?.proofImages || []), ...files],
-                          existingProofUrls: controlData[control.id]?.existingProofUrls || [],
-                        };
-                        
-                        setControlData({
-                          ...controlData,
-                          [control.id]: newData,
-                        });
-                        
-                        // Auto-save with file upload
-                        if (selectedLevels[control.id]) {
-                          await saveProgress(control.id, selectedLevels[control.id], newData, files);
-                        }
-                        
-                        // Reset input
-                        e.target.value = '';
-                      }}
-                      className="mt-2 w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/90"
-                    />
+                          };
+                          
+                          setControlData({
+                            ...controlData,
+                            [control.id]: newData,
+                          });
+                          
+                          if (selectedLevels[control.id]) {
+                            await saveProgress(control.id, selectedLevels[control.id], newData, files);
+                          }
+                          
+                          e.target.value = '';
+                        }}
+                        className="mt-1.5 w-full text-xs text-muted-foreground file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/90"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
