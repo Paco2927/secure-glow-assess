@@ -13,6 +13,7 @@ import {
   User,
   AlertTriangle,
   ClipboardList,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -272,6 +273,23 @@ const Dashboard = () => {
                   </div>
                 </Card>
               )}
+
+              {/* KPIs - Indicadores de Gestión */}
+              <Card
+                className="p-6 cursor-pointer hover:shadow-lg transition-shadow shadow-medium border-amber-500/20"
+                onClick={() => navigate("/kpis")}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                    <BarChart3 className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold">Indicadores de Gestión</h2>
+                    <p className="text-sm text-muted-foreground">KPIs de cumplimiento y riesgos</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-amber-600" />
+                </div>
+              </Card>
 
               {/* Mis Reportes - Para todos los usuarios */}
               <Card

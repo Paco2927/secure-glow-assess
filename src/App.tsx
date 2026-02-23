@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
 import RiskMatrix from "./pages/RiskMatrix";
 import ImprovementPlans from "./pages/ImprovementPlans";
+import KPIDashboard from "./pages/KPIDashboard";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/risk-matrix" element={<RiskMatrix />} />
           <Route path="/improvement-plans" element={<ImprovementPlans />} />
+          <Route path="/kpis" element={<KPIDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
