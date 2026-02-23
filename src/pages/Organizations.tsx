@@ -31,7 +31,7 @@ import {
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// 🌎 Lista completa de países
+// Lista completa de países
 const countries = [
   "Afganistán",
   "Albania",
@@ -117,7 +117,7 @@ const countries = [
   "Venezuela",
 ];
 
-// 🏭 Lista de sectores predefinidos
+// Lista de sectores predefinidos
 const sectors = [
   "Agricultura, ganadería, silvicultura y pesca",
   "Explotación de minas y canteras",

@@ -324,7 +324,7 @@ const Results = () => {
                             : "text-green-500"
                       }`}
                     >
-                      {result.score <= 50 ? "🔴" : result.score <= 75 ? "🟡" : "🟢"}
+                      
                       {result.score <= 50
                         ? "Mejora Crítica Necesaria (0-50%)"
                         : result.score <= 75

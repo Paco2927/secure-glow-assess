@@ -593,7 +593,7 @@ export const UserRoleManager = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Usa el botón 🔑 para generar una contraseña segura de 12 caracteres
+                  Usa el botón de llave para generar una contraseña segura de 12 caracteres
                 </p>
               </div>
               <DialogFooter>

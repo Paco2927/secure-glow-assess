@@ -117,7 +117,7 @@ serve(async (req) => {
             
             <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
               <p style="margin: 0; color: #856404;">
-                <strong>⚠️ Recomendación de Seguridad:</strong><br/>
+                <strong>Recomendación de Seguridad:</strong><br/>
                 Por su seguridad, le recomendamos encarecidamente que cambie su contraseña una vez que acceda a la plataforma por primera vez. 
                 Puede hacerlo desde su perfil de usuario.
               </p>
