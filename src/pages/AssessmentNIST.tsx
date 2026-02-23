@@ -590,10 +590,10 @@ const AssessmentNIST = () => {
                       <Label className="mb-1.5 block text-xs">Conformidad *</Label>
                       <div className="flex gap-1">
                         {[
-                          { value: "conforme", label: "Conforme", desc: "El control cumple con los requisitos establecidos", icon: CheckCircle2, color: "text-green-600" },
-                          { value: "no_conformidad", label: "No Conformidad", desc: "Incumplimiento grave que requiere acción correctiva inmediata", icon: XCircle, color: "text-red-600" },
-                          { value: "no_conformidad_menor", label: "No Conformidad Menor", desc: "Incumplimiento leve que necesita corrección pero no es crítico", icon: AlertOctagon, color: "text-amber-500" },
-                          { value: "punto_de_mejora", label: "Punto de Mejora", desc: "Oportunidad para mejorar el control actual", icon: TrendingUp, color: "text-blue-500" },
+                          { value: "conforme", label: "Conforme", desc: "El control cumple con los requisitos establecidos", icon: CheckCircle2, color: "text-green-600", selectedBg: "bg-green-600 hover:bg-green-700 text-white" },
+                          { value: "no_conformidad", label: "No Conformidad", desc: "Incumplimiento grave que requiere acción correctiva inmediata", icon: XCircle, color: "text-red-600", selectedBg: "bg-red-600 hover:bg-red-700 text-white" },
+                          { value: "no_conformidad_menor", label: "No Conformidad Menor", desc: "Incumplimiento leve que necesita corrección pero no es crítico", icon: AlertOctagon, color: "text-amber-500", selectedBg: "bg-amber-500 hover:bg-amber-600 text-white" },
+                          { value: "punto_de_mejora", label: "Punto de Mejora", desc: "Oportunidad para mejorar el control actual", icon: TrendingUp, color: "text-blue-500", selectedBg: "bg-blue-500 hover:bg-blue-600 text-white" },
                         ].map((status) => {
                           const Icon = status.icon;
                           const isSelected = controlData[control.id]?.conformityStatus === status.value;
@@ -601,9 +601,9 @@ const AssessmentNIST = () => {
                             <Tooltip key={status.value}>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant={isSelected ? "secondary" : "outline"}
+                                  variant={isSelected ? "default" : "outline"}
                                   size="sm"
-                                  className={`h-8 w-8 p-0 ${!isSelected ? status.color : ''}`}
+                                  className={`h-8 w-8 p-0 ${isSelected ? status.selectedBg : status.color}`}
                                   onClick={() => {
                                     const newData = {
                                       ...controlData[control.id],
