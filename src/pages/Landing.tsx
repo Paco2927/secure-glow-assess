@@ -80,13 +80,11 @@ const Landing = () => {
       <header className="bg-card/80 backdrop-blur-sm border-b shadow-soft sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-              <img
-                src={logoUrl || orionAuditLogo}
-                alt={companyName || "OrionAudit"}
-                className="w-10 h-10 object-contain"
-              />
-            </div>
+            <img
+              src={logoUrl || orionAuditLogo}
+              alt={companyName || "OrionAudit"}
+              className="w-10 h-10 object-contain"
+            />
             <div>
               <h1 className="text-xl font-bold">{companyName}</h1>
               <p className="text-xs text-muted-foreground">Cybersecurity Assessment Platform</p>
