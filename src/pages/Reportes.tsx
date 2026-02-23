@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle, Edit } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, Trash2, AlertTriangle, Edit, LayoutGrid, LayoutList, Shield } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "@/hooks/use-toast";
@@ -45,6 +45,7 @@ const Reportes = () => {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assessmentToDelete, setAssessmentToDelete] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -360,113 +361,219 @@ const Reportes = () => {
                 </CardContent>
               </Card>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Evaluaciones Realizadas</h2>
-                {assessments.map((assessment) => (
-                  <Card
-                    key={assessment.id}
-                    className="shadow-medium hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => viewResults(assessment.id)}
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="flex items-center gap-2">
-                            <FileText className="w-5 h-5" />
-                            Evaluación {assessment.standard}
-                          </CardTitle>
-                          <CardDescription className="space-y-1 mt-1">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">Evaluaciones Realizadas</h2>
+                  <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                    <Button
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => setViewMode("list")}
+                    >
+                      <LayoutList className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => setViewMode("grid")}
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-3"}>
+                  {assessments.map((assessment) => (
+                    viewMode === "grid" ? (
+                      /* ── GRID CARD ── */
+                      <Card
+                        key={assessment.id}
+                        className="shadow-medium hover:shadow-lg transition-all cursor-pointer group overflow-hidden"
+                        onClick={() => viewResults(assessment.id)}
+                      >
+                        {/* Top color bar */}
+                        <div
+                          className="h-1.5"
+                          style={{
+                            backgroundColor: assessment.status === "pending"
+                              ? "#eab308"
+                              : getScoreColor(assessment.average_score || 0),
+                          }}
+                        />
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(assessment.assessment_date)}
+                              <Shield className="w-4 h-4 text-primary" />
+                              <CardTitle className="text-base">{assessment.standard}</CardTitle>
                             </div>
-                            <div className="flex items-center gap-2 font-medium text-foreground">
-                              {assessment.organization_logo_url && (
-                                <Avatar className="w-5 h-5">
-                                  <AvatarImage src={assessment.organization_logo_url} alt={assessment.organization_name} />
-                                  <AvatarFallback>{assessment.organization_name?.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                              )}
-                              <span>Organización: {assessment.organization_name}</span>
-                            </div>
-                          </CardDescription>
-                        </div>
-                        <div className="text-right">
-                          {assessment.status === "pending" ? (
-                            <div>
-                              <div className="text-2xl font-bold mb-1 text-yellow-600">Pendiente</div>
-                              <span className="text-sm font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-600">
+                            {assessment.status === "pending" ? (
+                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
                                 En Progreso
                               </span>
-                            </div>
-                          ) : (
-                            <div>
-                              <div
-                                className="text-3xl font-bold mb-1"
+                            ) : (
+                              <span
+                                className="text-lg font-bold"
                                 style={{ color: getScoreColor(assessment.average_score || 0) }}
                               >
                                 {assessment.average_score}%
-                              </div>
-                              <span
-                                className="text-sm font-semibold px-3 py-1 rounded-full"
-                                style={{
-                                  backgroundColor: `${getScoreColor(assessment.average_score || 0)}20`,
-                                  color: getScoreColor(assessment.average_score || 0),
-                                }}
-                              >
-                                {getScoreLabel(assessment.average_score || 0)}
                               </span>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0 space-y-3">
+                          <div className="space-y-1.5 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span className="text-xs">{formatDate(assessment.assessment_date)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {assessment.organization_logo_url ? (
+                                <Avatar className="w-4 h-4">
+                                  <AvatarImage src={assessment.organization_logo_url} alt={assessment.organization_name} />
+                                  <AvatarFallback className="text-[8px]">{assessment.organization_name?.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              ) : null}
+                              <span className="text-xs font-medium truncate">{assessment.organization_name}</span>
+                            </div>
+                          </div>
+
+                          {assessment.status !== "pending" && (
+                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${assessment.average_score}%`,
+                                  backgroundColor: getScoreColor(assessment.average_score || 0),
+                                }}
+                              />
                             </div>
                           )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">Evaluador: {assessment.assessor_display || assessment.assessor_name}</p>
-                        <div className="flex gap-2">
-                          {assessment.organization_id && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/risk-matrix?organization=${assessment.organization_id}&from=reportes`);
-                              }}
-                            >
-                              <AlertTriangle className="w-4 h-4 mr-1" />
-                              Riesgos
+
+                          <div className="flex items-center gap-1 pt-1 border-t">
+                            {assessment.organization_id && (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={(e) => { e.stopPropagation(); navigate(`/risk-matrix?organization=${assessment.organization_id}&from=reportes`); }}>
+                                <AlertTriangle className="w-3 h-3 mr-1" />
+                                Riesgos
+                              </Button>
+                            )}
+                            <div className="flex-1" />
+                            {canManageOrganizations && (
+                              <>
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-primary" onClick={(e) => editAssessment(assessment, e)}>
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={(e) => handleDeleteClick(assessment.id, e)}>
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      /* ── LIST ROW ── */
+                      <Card
+                        key={assessment.id}
+                        className="shadow-sm hover:shadow-md transition-all cursor-pointer group border-l-4"
+                        style={{
+                          borderLeftColor: assessment.status === "pending"
+                            ? "#eab308"
+                            : getScoreColor(assessment.average_score || 0),
+                        }}
+                        onClick={() => viewResults(assessment.id)}
+                      >
+                        <div className="flex items-center gap-4 p-4">
+                          {/* Score badge */}
+                          <div className="hidden sm:flex w-14 h-14 rounded-xl items-center justify-center shrink-0"
+                            style={{
+                              backgroundColor: assessment.status === "pending"
+                                ? "#fef9c320"
+                                : `${getScoreColor(assessment.average_score || 0)}15`,
+                            }}
+                          >
+                            {assessment.status === "pending" ? (
+                              <span className="text-xs font-bold text-yellow-600">⏳</span>
+                            ) : (
+                              <span
+                                className="text-lg font-bold"
+                                style={{ color: getScoreColor(assessment.average_score || 0) }}
+                              >
+                                {assessment.average_score}%
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="font-semibold text-sm">Evaluación {assessment.standard}</span>
+                              {assessment.status === "pending" && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+                                  En Progreso
+                                </span>
+                              )}
+                              {assessment.status !== "pending" && (
+                                <span
+                                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                  style={{
+                                    backgroundColor: `${getScoreColor(assessment.average_score || 0)}15`,
+                                    color: getScoreColor(assessment.average_score || 0),
+                                  }}
+                                >
+                                  {getScoreLabel(assessment.average_score || 0)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {formatDate(assessment.assessment_date)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                {assessment.organization_logo_url && (
+                                  <Avatar className="w-4 h-4">
+                                    <AvatarImage src={assessment.organization_logo_url} alt={assessment.organization_name} />
+                                    <AvatarFallback className="text-[8px]">{assessment.organization_name?.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                )}
+                                {assessment.organization_name}
+                              </span>
+                              <span className="hidden md:inline">
+                                Evaluador: {assessment.assessor_display || assessment.assessor_name}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            {assessment.organization_id && (
+                              <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={(e) => { e.stopPropagation(); navigate(`/risk-matrix?organization=${assessment.organization_id}&from=reportes`); }}>
+                                <AlertTriangle className="w-3.5 h-3.5 mr-1" />
+                                <span className="hidden lg:inline">Riesgos</span>
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" className="h-8 text-xs">
+                              <FileText className="w-3.5 h-3.5 mr-1" />
+                              <span className="hidden lg:inline">Detalles</span>
                             </Button>
-                          )}
-                          <Button variant="outline" size="sm">
-                            Ver Detalles
-                          </Button>
-                          {canManageOrganizations && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => editAssessment(assessment, e)}
-                                className="text-primary hover:text-primary hover:bg-primary/10"
-                              >
-                                <Edit className="w-4 h-4 mr-1" />
-                                Editar
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => handleDeleteClick(assessment.id, e)}
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
+                            {canManageOrganizations && (
+                              <>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-primary" onClick={(e) => editAssessment(assessment, e)}>
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive" onClick={(e) => handleDeleteClick(assessment.id, e)}>
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </Card>
+                    )
+                  ))}
+                </div>
               </div>
             </>
           )}
