@@ -22,12 +22,17 @@ import KPIDashboard from "./pages/KPIDashboard";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
+const ActivityTracker = () => {
+  useActivityTracker();
+  return null;
+};
+
 const AppContent = () => {
   useThemeSettings();
-  useActivityTracker();
   
   return (
     <BrowserRouter>
+      <ActivityTracker />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
