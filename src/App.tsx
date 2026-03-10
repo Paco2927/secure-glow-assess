@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { useActivityTracker } from "@/hooks/useActivityTracker";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -21,11 +22,17 @@ import KPIDashboard from "./pages/KPIDashboard";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
+const ActivityTracker = () => {
+  useActivityTracker();
+  return null;
+};
+
 const AppContent = () => {
   useThemeSettings();
   
   return (
     <BrowserRouter>
+      <ActivityTracker />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />

@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, FileText, List, ClipboardCheck, Shield, Palette } from "lucide-react";
+import { ArrowLeft, Users, FileText, List, ClipboardCheck, Shield, Palette, Activity } from "lucide-react";
 import { UserRoleManager } from "@/components/admin/UserRoleManager";
+import { ActivityLogViewer } from "@/components/admin/ActivityLogViewer";
 import { DomainManager } from "@/components/admin/DomainManager";
 import { ControlManager } from "@/components/admin/ControlManager";
 import ImprovementPlanManager from "@/components/admin/ImprovementPlanManager";
@@ -105,7 +106,7 @@ const Admin = () => {
 
         <Card className="p-6">
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="users">
                 <Users className="h-4 w-4 mr-2" />
                 Usuarios y Roles
@@ -135,6 +136,11 @@ const Admin = () => {
                 <Palette className="h-4 w-4 mr-2" />
                 Personalización
               </TabsTrigger>
+
+              <TabsTrigger value="activity">
+                <Activity className="h-4 w-4 mr-2" />
+                Actividad
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="mt-6">
@@ -159,6 +165,10 @@ const Admin = () => {
 
             <TabsContent value="theme" className="mt-6">
               <ThemeSettingsManager />
+            </TabsContent>
+
+            <TabsContent value="activity" className="mt-6">
+              <ActivityLogViewer />
             </TabsContent>
           </Tabs>
         </Card>
