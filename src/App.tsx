@@ -32,25 +32,32 @@ const AppContent = () => {
   
   return (
     <BrowserRouter>
-      <ActivityTracker />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/assessment/iso27001" element={<AssessmentISO />} />
-          <Route path="/assessment/nist" element={<AssessmentNIST />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/results" element={<Results />} />
-          <Route path="/reportes" element={<Reportes />} />
-          <Route path="/organizations" element={<Organizations />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/risk-matrix" element={<RiskMatrix />} />
-          <Route path="/improvement-plans" element={<ImprovementPlans />} />
-          <Route path="/kpis" element={<KPIDashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+};
+
+const AppRoutes = () => {
+  useActivityTracker();
+  
+  return (
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/assessment/iso27001" element={<AssessmentISO />} />
+      <Route path="/assessment/nist" element={<AssessmentNIST />} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="/results" element={<Results />} />
+      <Route path="/reportes" element={<Reportes />} />
+      <Route path="/organizations" element={<Organizations />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/risk-matrix" element={<RiskMatrix />} />
+      <Route path="/improvement-plans" element={<ImprovementPlans />} />
+      <Route path="/kpis" element={<KPIDashboard />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
