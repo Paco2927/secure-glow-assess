@@ -135,6 +135,11 @@ const Admin = () => {
                 <Palette className="h-4 w-4 mr-2" />
                 Personalización
               </TabsTrigger>
+
+              <TabsTrigger value="activity">
+                <Activity className="h-4 w-4 mr-2" />
+                Actividad
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="mt-6">
