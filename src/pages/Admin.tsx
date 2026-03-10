@@ -105,7 +105,7 @@ const Admin = () => {
 
         <Card className="p-6">
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="users">
                 <Users className="h-4 w-4 mr-2" />
                 Usuarios y Roles
