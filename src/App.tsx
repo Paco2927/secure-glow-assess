@@ -23,6 +23,7 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   useThemeSettings();
+  useActivityTracker();
   
   return (
     <BrowserRouter>

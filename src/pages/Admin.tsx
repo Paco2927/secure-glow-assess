@@ -165,6 +165,10 @@ const Admin = () => {
             <TabsContent value="theme" className="mt-6">
               <ThemeSettingsManager />
             </TabsContent>
+
+            <TabsContent value="activity" className="mt-6">
+              <ActivityLogViewer />
+            </TabsContent>
           </Tabs>
         </Card>
       </div>
