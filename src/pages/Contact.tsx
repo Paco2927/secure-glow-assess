@@ -26,7 +26,7 @@ const Contact = () => {
   const { companyName } = useThemeSettings();
   const [loading, setLoading] = useState(false);
   const [contactSettings, setContactSettings] = useState({
-    email: "tester7531yt@gmail.com",
+    email: "info@techsecureai.com",
     phone: "+(506) 62979402",
     location: "San José, Costa Rica",
   });
