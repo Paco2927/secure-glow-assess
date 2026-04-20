@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { useAuthReady } from "@/hooks/useAuthReady";
 import heroImage from "@/assets/hero-security.jpg";
 import techSecureIcon from "@/assets/techsecure_ai.png";
 import NistIcon from "@/assets/NistShiel.png";
@@ -34,105 +35,86 @@ import IsoIcon from "@/assets/IsoIcon.png";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { logoUrl, dashboardBackgroundUrl, backgroundFit, companyName } = useThemeSettings();
-  const [user, setUser] = useState<any>(null);
+  const { user, isReady: isAuthReady } = useAuthReady();
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuditor, setIsAuditor] = useState(false);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
-
-  const loadDashboardData = async (currentUser: any) => {
-    setUser(currentUser);
-    setIsDashboardLoading(true);
-
-    const [profileResponse, adminResponse, auditorResponse] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", currentUser.id).single(),
-      supabase.rpc("has_role", {
-        _user_id: currentUser.id,
-        _role: "admin",
-      }),
-      supabase.rpc("has_role", {
-        _user_id: currentUser.id,
-        _role: "auditor",
-      }),
-    ]);
-
-    setProfile(profileResponse.data ?? null);
-    setIsAdmin(adminResponse.data || false);
-    setIsAuditor(auditorResponse.data || false);
-    setIsDashboardLoading(false);
-  };
+  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    let cancelled = false;
 
     const clearDashboardState = () => {
-      setUser(null);
       setProfile(null);
       setIsAdmin(false);
       setIsAuditor(false);
       setIsDashboardLoading(false);
-      setIsAuthReady(true);
     };
 
-    const initializeDashboard = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    const loadDashboardData = async () => {
+      if (!isAuthReady) return;
 
-      if (!isMounted) return;
-
-      if (!session) {
+      if (!user) {
         clearDashboardState();
-        navigate("/auth", { replace: true });
         return;
       }
 
-      setIsAuthReady(true);
-      await loadDashboardData(session.user);
+      setIsDashboardLoading(true);
+
+      try {
+        const [profileResponse, adminResponse, auditorResponse] = await Promise.all([
+          supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+          supabase.rpc("has_role", {
+            _user_id: user.id,
+            _role: "admin",
+          }),
+          supabase.rpc("has_role", {
+            _user_id: user.id,
+            _role: "auditor",
+          }),
+        ]);
+
+        if (cancelled) return;
+
+        setProfile(profileResponse.data ?? null);
+        setIsAdmin(Boolean(adminResponse.data));
+        setIsAuditor(Boolean(auditorResponse.data));
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error("Error loading dashboard:", error);
+        setProfile(null);
+        setIsAdmin(false);
+        setIsAuditor(false);
+      } finally {
+        if (!cancelled) {
+          setIsDashboardLoading(false);
+        }
+      }
     };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!isMounted) return;
-
-      if (event === "SIGNED_OUT" || !session) {
-        clearDashboardState();
-        navigate("/auth", { replace: true });
-        return;
-      }
-
-      setIsAuthReady(true);
-      setUser(session.user);
-      void loadDashboardData(session.user);
-    });
-
-    void initializeDashboard();
+    void loadDashboardData();
 
     return () => {
-      isMounted = false;
-      subscription.unsubscribe();
+      cancelled = true;
     };
-  }, [navigate]);
+  }, [isAuthReady, user]);
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut({ scope: "local" });
     } catch (e) {
       console.error("signOut error", e);
+    } finally {
+      window.location.assign("/auth");
     }
-    // Always clear local state and redirect, even if signOut fails
-    setUser(null);
-    setProfile(null);
     toast({
       title: "Sesión cerrada",
       description: "Has cerrado sesión exitosamente.",
     });
-    window.location.href = "/auth";
   };
 
-  if (!isAuthReady || isDashboardLoading) {
+  if (!isAuthReady || (user && isDashboardLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -144,11 +126,7 @@ const Dashboard = () => {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Redirigiendo...</p>
-      </div>
-    );
+    return <Navigate to="/auth" replace />;
   }
 
   return (
