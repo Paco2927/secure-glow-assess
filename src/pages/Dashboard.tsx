@@ -84,22 +84,19 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut({ scope: "local" });
-
-    if (error) {
-      toast({
-        title: "Error al cerrar sesión",
-        description: "No se pudo cerrar la sesión. Inténtalo de nuevo.",
-        variant: "destructive",
-      });
-      return;
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (e) {
+      console.error("signOut error", e);
     }
-
+    // Always clear local state and redirect, even if signOut fails
+    setUser(null);
+    setProfile(null);
     toast({
       title: "Sesión cerrada",
       description: "Has cerrado sesión exitosamente.",
     });
-    navigate("/auth", { replace: true });
+    window.location.href = "/auth";
   };
 
   if (!user) return null;
