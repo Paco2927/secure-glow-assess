@@ -1,0 +1,1 @@
+UPDATE public.contact_settings SET destination_email = 'info@techsecureai.com';
