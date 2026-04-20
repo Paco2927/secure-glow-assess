@@ -38,49 +38,82 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuditor, setIsAuditor] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+
+  const loadDashboardData = async (currentUser: any) => {
+    setUser(currentUser);
+    setIsDashboardLoading(true);
+
+    const [profileResponse, adminResponse, auditorResponse] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", currentUser.id).single(),
+      supabase.rpc("has_role", {
+        _user_id: currentUser.id,
+        _role: "admin",
+      }),
+      supabase.rpc("has_role", {
+        _user_id: currentUser.id,
+        _role: "auditor",
+      }),
+    ]);
+
+    setProfile(profileResponse.data ?? null);
+    setIsAdmin(adminResponse.data || false);
+    setIsAuditor(auditorResponse.data || false);
+    setIsDashboardLoading(false);
+  };
 
   useEffect(() => {
-    const checkUser = async () => {
+    let isMounted = true;
+
+    const clearDashboardState = () => {
+      setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      setIsAuditor(false);
+      setIsDashboardLoading(false);
+      setIsAuthReady(true);
+    };
+
+    const initializeDashboard = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+
+      if (!isMounted) return;
+
       if (!session) {
-        navigate("/");
+        clearDashboardState();
+        navigate("/auth", { replace: true });
         return;
       }
-      setUser(session.user);
 
-      // Fetch user profile
-      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
-      setProfile(profileData);
-
-      // Check admin statusokk
-      const { data: adminCheck } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "admin",
-      });
-      setIsAdmin(adminCheck || false);
-
-      // Check auditor status
-      const { data: auditorCheck } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "auditor",
-      });
-      setIsAuditor(auditorCheck || false);
+      setIsAuthReady(true);
+      await loadDashboardData(session.user);
     };
-
-    checkUser();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/auth");
+      if (!isMounted) return;
+
+      if (event === "SIGNED_OUT" || !session) {
+        clearDashboardState();
+        navigate("/auth", { replace: true });
+        return;
       }
-      setUser(session?.user ?? null);
+
+      setIsAuthReady(true);
+      setUser(session.user);
+      void loadDashboardData(session.user);
     });
 
-    return () => subscription.unsubscribe();
+    void initializeDashboard();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -99,7 +132,24 @@ const Dashboard = () => {
     window.location.href = "/auth";
   };
 
-  if (!user) return null;
+  if (!isAuthReady || isDashboardLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Redirigiendo...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-subtle">
