@@ -24,6 +24,28 @@ export const useActivityTracker = () => {
   const lastPage = useRef<string>("");
   const sessionLogged = useRef(false);
 
+  const logSignInActivity = useCallback(async (sessionUser: any, currentPath: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name, email")
+        .eq("id", sessionUser.id)
+        .maybeSingle();
+
+      await supabase.from("user_activity_log").insert({
+        user_id: sessionUser.id,
+        user_email: profile?.email || sessionUser.email,
+        user_name: profile?.name || "Usuario",
+        action: "Inicio de Sesión",
+        page: currentPath,
+        details: { method: sessionUser.app_metadata?.provider || "email" },
+        user_agent: navigator.userAgent,
+      });
+    } catch (error) {
+      console.error("Activity tracking error:", error);
+    }
+  }, []);
+
   const logActivity = useCallback(async (action: string, page?: string, details?: Record<string, any>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -69,24 +91,10 @@ export const useActivityTracker = () => {
 
   // Track login/logout
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user && !sessionLogged.current) {
         sessionLogged.current = true;
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("name, email")
-          .eq("id", session.user.id)
-          .single();
-
-        await supabase.from("user_activity_log").insert({
-          user_id: session.user.id,
-          user_email: profile?.email || session.user.email,
-          user_name: profile?.name || "Usuario",
-          action: "Inicio de Sesión",
-          page: location.pathname,
-          details: { method: session.user.app_metadata?.provider || "email" },
-          user_agent: navigator.userAgent,
-        });
+        void logSignInActivity(session.user, location.pathname);
       }
 
       if (event === "SIGNED_OUT") {
@@ -95,7 +103,7 @@ export const useActivityTracker = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [location.pathname, logSignInActivity]);
 
   return { logActivity };
 };
