@@ -78,7 +78,7 @@ export const UserRoleManager = () => {
   const [isValidatingDni, setIsValidatingDni] = useState(false);
   const [dniValidationMessage, setDniValidationMessage] = useState("");
   const [isDniValidated, setIsDniValidated] = useState(false);
-  const dniTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dniTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [passwordCopied, setPasswordCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
