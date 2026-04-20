@@ -45,7 +45,6 @@ const Dashboard = () => {
     let cancelled = false;
 
     const clearDashboardState = () => {
-      setUser(null);
       setProfile(null);
       setIsAdmin(false);
       setIsAuditor(false);
